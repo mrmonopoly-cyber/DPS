@@ -1,53 +1,56 @@
-#ifndef __DPS__
-#define __DPS__
+#ifndef __DPS_SLAVE__
+#define __DPS_SLAVE__
 
 #include <stdint.h>
 
 typedef struct can_message can_message;
 typedef uint8_t (*can_send) (can_message* mex);
 
-#define CAN_MAX_DATA_SIZE 8 //INFO:MAX SIZE CAN MESSAGE DATA
-#define ID_TYPE uint8_t
-#define NAME_VAR_BUFF_SIZE CAN_MAX_DATA_SIZE - sizeof(uint8_t) - sizeof(ID_TYPE)
-#define NAME_COM_BUFF_SIZE CAN_MAX_DATA_SIZE - 2*sizeof(uint8_t) - sizeof(uint16_t)
+#define CAN_MAX_DATA_SIZE 8 
+
+enum DPS_ID{
+    VARS = 0x131, 
+    INFO = 0x132,
+    RESP = 0x133,
+};
+
+typedef union can_id{
+    enum DPS_ID full_id;
+    uint8_t id_block[2];
+}can_id;
 
 typedef struct dps_command{
-    uint16_t id_can;
+    can_id id_can;
     uint8_t min;
     uint8_t max;
-    char name[NAME_COM_BUFF_SIZE];
+    char name[2];
 }dps_command;
 
 typedef struct dps_var{
-    ID_TYPE id_data;
     void* var_ptr;
     uint8_t size;
-    char name[NAME_VAR_BUFF_SIZE];
+    char name[5];
 }dps_var;
 
 struct can_message{
-    uint16_t id;
+    can_id id;
     uint8_t mex_size;
     uint8_t data[CAN_MAX_DATA_SIZE];
 };
 
 
-enum DPS_ID{
-    VARS = 0x131, //INFO: change if need
-    INFO = 0x132,//INFO: change if need
-};
 
 //INFO: create dps manager
 //send_f : function to send through CAN the data to the external controller
-void dps_init(can_send send_f);
+void dps_init(can_send send_f, uint8_t board_id);
 
 //INFO: tell to dps to monitor a variable
 void dps_monitor_var(dps_var* var);
 
 //INFO: tell to dps a dps_command the board can receive 
-void dps_board_command(dps_command* comm);
+void dps_monitor_command(dps_command* comm);
 
 //INFO: check if a can message is for the dps and if it's the case it executes the message
 uint8_t check_can_command_recv(can_message* mex);
 
-#endif // !__DPS__
+#endif // !__DPS_SLAVE__
