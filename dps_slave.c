@@ -107,11 +107,11 @@ uint8_t check_can_command_recv(can_message* mex)
 
     uint16_t var_vec_size = c_vector_length(monitor.vars);
     uint16_t com_vec_size = c_vector_length(monitor.comm);
-    dps_var_int data_var;
-    dps_command data_com;
+    dps_var_int* data_var_ptr = NULL;
+    dps_command* data_com_ptr = NULL;
     dps_var_int data_stack;
     can_message can_mex = {
-        .id = RESP,
+        .id = {RESP},
         .data[0] = monitor.board_id,
         .mex_size = CAN_MAX_DATA_SIZE,
     };
@@ -119,17 +119,17 @@ uint8_t check_can_command_recv(can_message* mex)
     switch (mex->id.full_id) {
         case INFO:
             for (int i=0; i<var_vec_size; i++) {
-                c_vector_get_at_index(monitor.vars, i, &data_var);
+                c_vector_get_at_index(monitor.vars, i, data_var_ptr);
                 can_mex.data[1] = VAR;
-                can_mex.data[2] = data_var.id_data;
-                memcpy(&can_mex.data[3], data_var.var.name, 5);
+                can_mex.data[2] = data_var_ptr->id_data;
+                memcpy(&can_mex.data[3], data_var_ptr->var.name, 5);
                 monitor.send_f(&can_mex);
             }
 
             for (int i=0; i<com_vec_size; i++) {
-                c_vector_get_at_index(monitor.comm, i,&data_com);
+                c_vector_get_at_index(monitor.comm, i,data_com_ptr);
                 can_mex.data[1] = COM;
-                memcpy(&can_mex.data[2], &data_com, 6);
+                memcpy(&can_mex.data[2], data_com_ptr, 6);
                 monitor.send_f(&can_mex);
             }
             return 1;
