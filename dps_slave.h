@@ -9,13 +9,13 @@ typedef uint8_t (*can_send) (can_message* mex);
 #define CAN_MAX_DATA_SIZE 8 
 
 enum DPS_ID{
-    VARS = 0x131, 
+    VARS = 0x131,
     INFO = 0x132,
     RESP = 0x133,
 };
 
 typedef union can_id{
-    enum DPS_ID full_id;
+    uint16_t full_id;
     uint8_t id_block[2];
 }can_id;
 
