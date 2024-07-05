@@ -98,13 +98,11 @@ void dps_monitor_command(dps_command* comm)
     c_vector_push(&monitor.comm, comm);
 }
 
-//BUFFER_DATA_VAR[8]:   BUFFER_DATA_COM[8]:     BUFFER_DATA_VARS[]:
+//BUFFER_DATA_VAR[8]:   BUFFER_DATA_COM[8]:     BUFFER_DATA_VARS[8](recv):
 //[0] = board_id        [0] = board_id          [0] = board_id 
 //[1] = mex_type        [1] = mex_type          [1] = id_data
 //[2] = id_data         [2,3] = id_can_com      [2,7] = data
-//[3,7] = name          [4] = min               
-//                      [5] = max
-//                      [6,7] = name
+//[3,7] = name          [4,7] = name
 //INFO: check if a can message is for the dps and if it's the case it executes the message
 uint8_t dps_check_can_command_recv(can_message* mex)
 {

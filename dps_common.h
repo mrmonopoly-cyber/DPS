@@ -27,16 +27,7 @@ struct can_message{
 
 typedef struct dps_command{
     can_id id_can;
-    uint8_t min;
-    uint8_t max;
-    char name[2];
+    char name[6];
 }dps_command;
-
-typedef struct dps_var{
-    void* var_ptr;
-    uint8_t size;
-    char name[5];
-}dps_var;
-
 
 #endif // !__PDS_COMMON__

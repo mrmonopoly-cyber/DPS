@@ -18,8 +18,6 @@ uint8_t send(can_message* mex){
         case 1:
             c = (dps_command *) &mex->data[2];
             printf("sending mex: id can: %d\n", c->id_can.full_id);
-            printf("sending mex: min: %d\n", c->min);
-            printf("sending mex: max: %d\n", c->max);
             printf("sending mex: nam: %s\n", c->name);
             break;
     }
@@ -42,8 +40,6 @@ int main(void)
 
     dps_command new_com = {
         .id_can = {5},
-        .min = 0,
-        .max = 10,
         .name = "CM",
     };
 

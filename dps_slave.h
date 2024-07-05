@@ -3,6 +3,13 @@
 
 #include "dps_common.h"
 
+
+typedef struct dps_var{
+    void* var_ptr;
+    uint8_t size;
+    char name[5];
+}dps_var;
+
 //INFO: create dps manager
 //send_f : function to send through CAN the data to the external controller
 void dps_init(can_send send_f, uint8_t board_id);
