@@ -33,6 +33,7 @@ uint8_t d = 0;
 
 int main(void)
 {
+    uint8_t board_id = 15;
     dps_var new_var = {
         .name = "aa",
         .size = sizeof(a),
@@ -49,12 +50,12 @@ int main(void)
     can_message can_mex = {
         .id = {VARS},
         .mex_size = 8,
-        .data[0] = 0,
+        .data[0] = board_id,
         .data[1] = 0,
         .data[2] = 3,
     };
 
-    dps_init(send,15);
+    dps_init(send,board_id);
     dps_monitor_var(&new_var);
     new_var.var_ptr = &b;
     new_var.name[0] = 'b';
