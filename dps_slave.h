@@ -51,6 +51,7 @@ void dps_monitor_var(dps_var* var);
 void dps_monitor_command(dps_command* comm);
 
 //INFO: check if a can message is for the dps and if it's the case it executes the message
-uint8_t check_can_command_recv(can_message* mex);
+uint8_t dps_check_can_command_recv(can_message* mex);
 
+void dps_print_var();
 #endif // !__DPS_SLAVE__
