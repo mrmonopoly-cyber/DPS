@@ -1,4 +1,5 @@
 #include "dps_slave.h"
+#include "dps_common.h"
 #include "lib/c_vector/c_vector.h"
 
 #include <stddef.h>
@@ -10,10 +11,6 @@
 
 static ID_TYPE id_generator = 0;
 
-enum MEX_TYPE{
-    VAR,
-    COM,
-};
 
 typedef struct dps_var_int {
     ID_TYPE id_data;
@@ -25,6 +22,7 @@ typedef struct dps{
     c_vector* comm;
     can_send send_f;
     uint8_t board_id;
+    char board_name[BOARD_NAME_SIZE];
 }dps;
 
 static dps monitor;
@@ -48,7 +46,7 @@ static void dummy_print(const void* ele){}
 //INFO: create dps manager
 //send_f : function to send through CAN the data to the external controller
 //board_id: unique id of the board in the network
-void dps_init(can_send send_f, uint8_t board_id)
+void dps_init(can_send send_f, uint8_t board_id, char board_name[BOARD_NAME_SIZE])
 {
     if (send_f == NULL) {
         return;
@@ -74,6 +72,7 @@ void dps_init(can_send send_f, uint8_t board_id)
     monitor.comm = c_vector_init(&args_comm);
     monitor.send_f = send_f;
     monitor.board_id = board_id;
+    memcpy(monitor.board_name, board_name, sizeof(monitor.board_name));
 }
 
 //INFO: tell to dps to monitor a variable
@@ -98,11 +97,6 @@ void dps_monitor_command(dps_command* comm)
     c_vector_push(&monitor.comm, comm);
 }
 
-//BUFFER_DATA_VAR[8]:   BUFFER_DATA_COM[8]:     BUFFER_DATA_VARS[8](recv):
-//[0] = board_id        [0] = board_id          [0] = board_id 
-//[1] = mex_type        [1] = mex_type          [1] = id_data
-//[2] = id_data         [2,3] = id_can_com      [2,7] = data
-//[3,7] = name          [4,7] = name
 //INFO: check if a can message is for the dps and if it's the case it executes the message
 uint8_t dps_check_can_command_recv(can_message* mex)
 {
@@ -114,30 +108,37 @@ uint8_t dps_check_can_command_recv(can_message* mex)
     dps_command* data_com_ptr = NULL;
     can_message can_mex = {
         .id = {RESP},
-        .data[0] = monitor.board_id,
         .mex_size = CAN_MAX_DATA_SIZE,
     };
 
     switch (mex->id.full_id) {
         case INFO:
+            can_mex.board_slave.mex_type = BRD;
+            can_mex.board_slave.board_id = monitor.board_id;
+            memcpy(can_mex.board_slave.name, monitor.board_name, sizeof(can_mex.board_slave.name));
+            monitor.send_f(&can_mex);
+
             for (int i=0; i<var_vec_size; i++) {
                 data_var_ptr = c_vector_get_at_index(monitor.vars, i);
-                can_mex.data[1] = VAR;
-                can_mex.data[2] = data_var_ptr->id_data;
-                memcpy(&can_mex.data[3], data_var_ptr->var.name, 5);
+                can_mex.var_slave.board_id = monitor.board_id;
+                can_mex.var_slave.mex_type = VAR;
+                can_mex.var_slave.id_data = data_var_ptr->id_data;
+                memcpy(can_mex.var_slave.name, data_var_ptr->var.name, sizeof(can_mex.var_slave.name));
                 monitor.send_f(&can_mex);
             }
 
             for (int i=0; i<com_vec_size; i++) {
                 data_com_ptr =  c_vector_get_at_index(monitor.comm, i);
-                can_mex.data[1] = COM;
-                memcpy(&can_mex.data[2], data_com_ptr, 6);
+                can_mex.com_slave.board_id = monitor.board_id;
+                can_mex.com_slave.id_can_com = data_com_ptr->id_can.full_id;
+                can_mex.com_slave.mex_type = COM;
+                memcpy(can_mex.com_slave.name, data_com_ptr->name, sizeof(can_mex.com_slave.name));
                 monitor.send_f(&can_mex);
             }
             return 1;
         case VARS:
-            if(mex->data[0] == monitor.board_id && 
-                    (data_var_ptr = c_vector_find(monitor.vars, &mex->data[1]))){
+            if(mex->upd_master.board_id == monitor.board_id && 
+                    (data_var_ptr = c_vector_find(monitor.vars, &mex->upd_master.id_data))){
                 memcpy(data_var_ptr->var.var_ptr, &mex->data[2], data_var_ptr->var.size);
             }
             return 1;

@@ -11,14 +11,17 @@ uint8_t send(can_message* mex){
     printf("sending mex: board id: %d\n", mex->data[0]);
     printf("sending mex: data type: %d\n", mex->data[1]);
     switch (mex->data[1]) {
-        case 0:
+        case VAR:
             printf("sending mex: id data: %d\n", mex->data[2]);
             printf("sending mex: name: %s\n", &mex->data[3]);
             break;
-        case 1:
+        case COM:
             c = (dps_command *) &mex->data[2];
             printf("sending mex: id can: %d\n", c->id_can.full_id);
             printf("sending mex: nam: %s\n", c->name);
+            break;
+        case BRD:
+            printf("sending mex: board name: %s\n",mex->board_slave.name);
             break;
     }
     return 0;
@@ -50,8 +53,9 @@ int main(void)
         .data[1] = 0,
         .data[2] = 3,
     };
+    char board_name[6] = "ATC";
 
-    dps_init(send,board_id);
+    dps_init(send,board_id,board_name);
     dps_monitor_var(&new_var);
     new_var.var_ptr = &b;
     new_var.name[0] = 'b';
@@ -67,7 +71,8 @@ int main(void)
     dps_print_var();
 
     dps_check_can_command_recv(&can_mex);
-    can_mex.data[1] = 1,
+    can_mex.upd_master.board_id = board_id;
+    can_mex.upd_master.id_data = 1;
     can_mex.data[2] = 4,
     dps_check_can_command_recv(&can_mex);
     can_mex.data[1] = 2,

@@ -15,7 +15,7 @@ void dps_master_refresh();
 //INFO: get a vector with all the BOARDS and their VARIABLES and COMMANDS
 //DO NOT FREE THE POINTER
 const c_vector* dps_master_board_list();
- 
+
 //INFO: send a mex to a specific board to updated a variable of the board
 void dps_master_update(const uint8_t board_id, const uint8_t data_id, const char* var_name);
 

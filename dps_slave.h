@@ -12,7 +12,7 @@ typedef struct dps_var{
 
 //INFO: create dps manager
 //send_f : function to send through CAN the data to the external controller
-void dps_init(can_send send_f, uint8_t board_id);
+void dps_init(can_send send_f, uint8_t board_id, char board_name[BOARD_NAME_SIZE]);
 
 //INFO: tell to dps to monitor a variable
 void dps_monitor_var(dps_var* var);
