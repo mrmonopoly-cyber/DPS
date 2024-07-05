@@ -2,7 +2,6 @@
 #include "lib/c_vector/c_vector.h"
 
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 
 //private
@@ -43,14 +42,6 @@ static int found_dps_com(const void* list_ele,const void* out_ele){
 
 static void dummy_free(void* ele){}
 static void dummy_print(const void* ele){}
-static void print_var(const void* ele){
-    dps_var_int* var = (dps_var_int *)ele;
-    printf("------------------------------\n");
-    printf("name: %s\n",var->var.name);
-    printf("id_data: %d\n",var->id_data);
-    printf("size: %d\n",var->var.size);
-    printf("ptr : %ld\n",(long) var->var.var_ptr);
-}
 
 
 //public
@@ -64,7 +55,7 @@ void dps_init(can_send send_f, uint8_t board_id)
     }
 
     struct c_vector_input_init args_vars = {
-        .print_fun = print_var,
+        .print_fun = dummy_print,
         .free_fun = dummy_free,
         .ele_size = sizeof(dps_var_int),
         .capacity = 8,
@@ -95,9 +86,8 @@ void dps_monitor_var(dps_var* var)
         .id_data = id_generator,
     };
     id_generator++;
-    if(!c_vector_push(&monitor.vars, &new_var)){
-        printf("failed push var\n");
-    }
+    c_vector_push(&monitor.vars, &new_var);
+    
 }
 
 //INFO: tell to dps a dps_command the board can receive 
