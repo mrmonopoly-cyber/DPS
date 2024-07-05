@@ -3,8 +3,26 @@
 #include <stdint.h>
 
 uint8_t send(can_message* mex){
-    printf("sending mex: id: %d\t data:%s\n",
-            mex->id.full_id,mex->data );
+    dps_command* c;
+
+    printf("----------------------------------------\n");
+    printf("sending mex: id: %d\n", mex->id.full_id);
+    printf("sending mex: mex size: %d\n", mex->mex_size);
+    printf("sending mex: board id: %d\n", mex->data[0]);
+    printf("sending mex: data type: %d\n", mex->data[1]);
+    switch (mex->data[1]) {
+        case 0:
+            printf("sending mex: id data: %d\n", mex->data[2]);
+            printf("sending mex: name: %s\n", &mex->data[3]);
+            break;
+        case 1:
+            c = (dps_command *) &mex->data[2];
+            printf("sending mex: id can: %d\n", c->id_can.full_id);
+            printf("sending mex: min: %d\n", c->min);
+            printf("sending mex: max: %d\n", c->max);
+            printf("sending mex: nam: %s\n", c->name);
+            break;
+    }
     return 0;
 }
 
@@ -16,27 +34,38 @@ uint8_t d = 0;
 int main(void)
 {
     dps_var new_var = {
-        .name = "a",
+        .name = "aa",
         .size = sizeof(a),
         .var_ptr = &a,
     };
 
+    dps_command new_com = {
+        .id_can = {5},
+        .min = 0,
+        .max = 10,
+        .name = "CM",
+    };
+
     can_message can_mex = {
-        .id = {0x131},
+        .id = {VARS},
         .mex_size = 8,
         .data[0] = 0,
         .data[1] = 0,
         .data[2] = 3,
     };
 
-    dps_init(send,0);
+    dps_init(send,15);
     dps_monitor_var(&new_var);
     new_var.var_ptr = &b;
     new_var.name[0] = 'b';
+    new_var.name[1] = 'b';
     dps_monitor_var(&new_var);
     new_var.var_ptr = &c;
     new_var.name[0] = 'c';
+    new_var.name[1] = 'c';
     dps_monitor_var(&new_var);
+
+    dps_monitor_command(&new_com);
 
     dps_print_var();
 
@@ -47,11 +76,15 @@ int main(void)
     can_mex.data[1] = 2,
     can_mex.data[2] = 5,
     dps_check_can_command_recv(&can_mex);
+    can_mex.id.full_id = INFO;
+    dps_check_can_command_recv(&can_mex);
 
 
+    printf("----------------------------------------\n");
     printf("updated var a: %d\n", a);
     printf("updated var b: %d\n", b);
     printf("updated var c: %d\n", c);
+    printf("id comm c: %d\n", new_com.id_can.full_id);
 
     return 0;
 }
