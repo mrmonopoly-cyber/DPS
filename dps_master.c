@@ -27,6 +27,20 @@ static int found_board(const void* l_ele, const void* key){
     return board->board_id == board_id;
 }
 
+static int found_var(const void* l_ele, const void* key){
+    const struct var_info_slave* var= (struct var_info_slave *) l_ele;
+    const uint8_t var_id= *(uint8_t *) key;
+
+    return var->id_data == var_id;
+}
+
+static int found_com(const void* l_ele, const void* key){
+    const struct com_info_slave* com= (struct com_info_slave*) l_ele;
+    const uint16_t com_id = *(uint16_t *) key;
+
+    return com->id_can_com == com_id;
+}
+
 static void dummy_free(void* e){}
 static void dummy_print(const void* e){}
 
@@ -108,7 +122,7 @@ void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void
     }
 
     var_update_mex.id.full_id = VARS;
-    var_update_mex.upd_master.board_id = board_id;
+    var_update_mex.board_id = board_id;
     var_update_mex.upd_master.id_data = data_id;
     memcpy(var_update_mex.upd_master.value, value, var_info->data_size);
 
@@ -152,6 +166,41 @@ uint8_t dps_master_send_command(const can_id id_comm,const uint8_t board_id,
 uint8_t dps_master_check_can_mex_recv(const can_message* mex)
 {
     CHECK_INIT(0);
+    board_data board_info;
+    struct c_vector_input_init var_args = {
+        .capacity = 8,
+        .ele_size = sizeof(struct var_info_slave),
+        .free_fun = dummy_free,
+        .print_fun = dummy_print,
+        .found_f = found_var,
+    };
+
+    struct c_vector_input_init com_args = {
+        .capacity = 8,
+        .ele_size = sizeof(struct com_info_slave),
+        .free_fun = dummy_free,
+        .print_fun = dummy_print,
+        .found_f = found_com,
+    };
+
+    switch (mex->id.full_id) {
+        case RESP:
+            switch (mex->var_slave.mex_type) {
+                case BRD:
+                    board_info.board_id = mex->board_id;
+                    memcpy(board_info.board_name, mex->board_slave.name, sizeof(board_info.board_name));
+                    board_info.vars = c_vector_init(&var_args);
+                    board_info.coms = c_vector_init(&com_args);
+                    c_vector_push(&monitor.board_vector, &board_info);
+                    return 1;
+                case VAR:
+                    return 1;
+                case COM:
+                    return 1;
+            }
+
+            break;
+    }
 
     return 0;
 }
