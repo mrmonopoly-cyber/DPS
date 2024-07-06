@@ -1,6 +1,7 @@
 #include "../dps_slave.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 uint8_t send(can_message* mex){
     dps_command* c;
@@ -28,8 +29,8 @@ uint8_t send(can_message* mex){
 }
 
 uint8_t a = 0;
-uint8_t b = 0;
-uint8_t c = 0;
+uint16_t b = 0;
+uint32_t c = 0;
 uint8_t d = 0;
 
 int main(void)
@@ -49,14 +50,17 @@ int main(void)
     can_message can_mex = {
         .id = {VARS},
         .mex_size = 8,
-        .data[0] = board_id,
-        .data[1] = 0,
-        .data[2] = 3,
+        .upd_master = {
+            .board_id = board_id,
+            .id_data = 0,
+            .short_value = 3,
+        },
     };
     char board_name[6] = "ATC";
 
     dps_init(send,board_id,board_name);
     dps_monitor_var(&new_var);
+    new_var.size = sizeof(b);
     new_var.var_ptr = &b;
     new_var.name[0] = 'b';
     new_var.name[1] = 'b';
@@ -71,13 +75,17 @@ int main(void)
     dps_print_var();
 
     dps_check_can_command_recv(&can_mex);
+    memset(can_mex.upd_master.value,0,sizeof(can_mex.upd_master.value));
     can_mex.upd_master.board_id = board_id;
     can_mex.upd_master.id_data = 1;
-    can_mex.data[2] = 4,
+    can_mex.upd_master.int_value = 4;
     dps_check_can_command_recv(&can_mex);
-    can_mex.data[1] = 2,
-    can_mex.data[2] = 5,
+    memset(can_mex.upd_master.value,0,sizeof(can_mex.upd_master.value));
+    can_mex.upd_master.board_id = board_id;
+    can_mex.upd_master.id_data = 2;
+    can_mex.upd_master.int_value = 5;
     dps_check_can_command_recv(&can_mex);
+    memset(can_mex.upd_master.value,0,sizeof(can_mex.upd_master.value));
     can_mex.id.full_id = INFO;
     dps_check_can_command_recv(&can_mex);
 

@@ -139,7 +139,7 @@ uint8_t dps_check_can_command_recv(can_message* mex)
         case VARS:
             if(mex->upd_master.board_id == monitor.board_id && 
                     (data_var_ptr = c_vector_find(monitor.vars, &mex->upd_master.id_data))){
-                memcpy(data_var_ptr->var.var_ptr, &mex->data[2], data_var_ptr->var.size);
+                memcpy(data_var_ptr->var.var_ptr, mex->upd_master.value, data_var_ptr->var.size);
             }
             return 1;
         default:

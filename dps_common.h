@@ -51,7 +51,12 @@ struct com_info_slave{
 struct var_update_master{
     uint8_t board_id;
     uint8_t id_data;
-    uint8_t value[6];
+    union{
+        uint8_t char_value;
+        uint16_t short_value;
+        uint32_t int_value;
+        uint8_t value[6];
+    };
 };
 
 struct can_message{
