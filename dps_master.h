@@ -4,6 +4,16 @@
 #include "dps_common.h"
 #include "lib/c_vector/c_vector.h"
 
+typedef struct board_info{
+    uint8_t board_id;
+    const char* board_name;
+}board_info;
+
+enum DATA_BOARD{
+    BOARD_VAR,
+    BOARD_COM,
+};
+
 //INFO: init the master
 //send_f : function needed to send a can message
 void dps_master_init(can_send send_f);
@@ -12,9 +22,12 @@ void dps_master_init(can_send send_f);
 //in the network
 void dps_master_refresh();
 
-//INFO: get a vector with all the BOARDS and their VARIABLES and COMMANDS
-//DO NOT FREE THE POINTER
-const c_vector* dps_master_board_list();
+//INFO: get a vector with all the BOARDS and their id
+//pointer to free when no more needed
+const board_info* dps_master_board_list();
+
+//INFO: fetch the data of a specific board
+const c_vector* dps_master_board_info(const uint8_t board_id,const enum DATA_BOARD ty_data);
 
 //INFO: send a mex to a specific board to updated a variable of the board
 void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void* value);

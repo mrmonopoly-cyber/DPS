@@ -2,11 +2,13 @@
 #include "lib/c_vector/c_vector.h"
 
 #include <stddef.h>
+#include <stdlib.h>
 
 typedef struct board_data {
     uint8_t board_id;
     c_vector* vars;
     c_vector* coms;
+    char board_name[BOARD_NAME_SIZE];
 }board_data;
 
 typedef struct dps {
@@ -17,7 +19,10 @@ typedef struct dps {
 static dps monitor;
 
 static int found_board(const void* l_ele, const void* key){
-    return 0;
+    const board_data* board = (board_data *) l_ele;
+    const uint8_t board_id = *(uint8_t *) key;
+
+    return board->board_id == board_id;
 }
 
 static void dummy_free(void* e){}
@@ -45,13 +50,43 @@ void dps_master_refresh(){
     CHECK_INIT();
 }
 
-//INFO: get a vector with all the BOARDS and their VARIABLES and COMMANDS
-//DO NOT FREE THE POINTER
-const c_vector* dps_master_board_list()
+//INFO: get a vector with all the BOARDS and their id
+//pointer to free when no more needed
+const board_info* dps_master_board_list()
 {
     CHECK_INIT(NULL);
 
-    return NULL;
+    uint8_t board_num = c_vector_length(monitor.board_vector);
+    board_info* b_inf = calloc(board_num,sizeof(*b_inf));
+    board_data* board = NULL;
+
+    for (int i =0; i<board_num; i++) {
+        board = c_vector_get_at_index(monitor.board_vector, i);
+        b_inf[i].board_id = board->board_id;
+        b_inf[i].board_name = board->board_name;
+    }
+
+    return b_inf;
+}
+
+//INFO: fetch the data of a specific board
+//DO NOT FREE THE POINTER
+const c_vector* dps_master_board_info(const uint8_t board_id,const enum DATA_BOARD ty_data)
+{
+    CHECK_INIT(NULL);
+
+    const board_data* board = c_vector_find(monitor.board_vector, &board_id);
+
+    switch (ty_data) {
+        case BOARD_VAR:
+            return board->vars;
+            break;
+        case BOARD_COM:
+            return board->coms;
+            break;
+        default:
+            return NULL;
+    }
 }
  
 //INFO: send a mex to a specific board to updated a variable of the board
