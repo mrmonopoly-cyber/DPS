@@ -14,7 +14,9 @@ uint8_t send(can_message* mex){
     switch (mex->data[1]) {
         case VAR:
             printf("sending mex: id data: %d\n", mex->data[2]);
+            printf("sending mex: size: %d\n", mex->var_slave.data_size);
             printf("sending mex: name: %s\n", &mex->data[3]);
+
             break;
         case COM:
             c = (dps_command *) &mex->data[2];

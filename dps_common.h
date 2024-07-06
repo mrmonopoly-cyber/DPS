@@ -8,7 +8,7 @@ typedef uint8_t (*can_send) (can_message* mex);
 
 #define CAN_MAX_DATA_SIZE 8 
 #define BOARD_NAME_SIZE 6
-#define VAR_NAME_SIZE 5
+#define VAR_NAME_SIZE 4
 #define COM_NAME_SIZE 4
 
 enum MEX_TYPE{
@@ -38,6 +38,7 @@ struct var_info_slave{
     uint8_t board_id;
     uint8_t mex_type;
     uint8_t id_data;
+    uint8_t data_size;
     char name[VAR_NAME_SIZE];
 };
 

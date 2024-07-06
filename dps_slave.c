@@ -123,6 +123,7 @@ uint8_t dps_check_can_command_recv(can_message* mex)
                 can_mex.var_slave.board_id = monitor.board_id;
                 can_mex.var_slave.mex_type = VAR;
                 can_mex.var_slave.id_data = data_var_ptr->id_data;
+                can_mex.var_slave.data_size = data_var_ptr->var.size;
                 memcpy(can_mex.var_slave.name, data_var_ptr->var.name, sizeof(can_mex.var_slave.name));
                 monitor.send_f(&can_mex);
             }
