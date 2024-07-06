@@ -64,6 +64,13 @@ void dps_master_init(can_send send_f)
 //in the network
 void dps_master_refresh(){
     CHECK_INIT();
+
+    can_message can_mex ={
+        .id = INFO,
+        .data = {0},
+    };
+
+    monitor.send_f(&can_mex);
 }
 
 //INFO: get a vector with all the BOARDS and their id
@@ -167,6 +174,10 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
 {
     CHECK_INIT(0);
     board_data board_info;
+    board_data* board_info_ptr = NULL;
+    struct var_info_slave new_var;
+    struct com_info_slave new_com;
+
     struct c_vector_input_init var_args = {
         .capacity = 8,
         .ele_size = sizeof(struct var_info_slave),
@@ -194,11 +205,20 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
                     c_vector_push(&monitor.board_vector, &board_info);
                     return 1;
                 case VAR:
-                    return 1;
+                    if ((board_info_ptr = c_vector_find(monitor.board_vector, &mex->board_id))){
+                        new_var = mex->var_slave;
+                        c_vector_push(&board_info.vars, &new_var);
+                        return 1;
+                    }
+                    return 0;
                 case COM:
-                    return 1;
+                    if ( (board_info_ptr = c_vector_find(monitor.board_vector, &mex->board_id)) ){
+                        new_com = mex->com_slave;
+                        c_vector_push(&board_info.coms, &new_var);
+                        return 1;
+                    }
+                    return 0;
             }
-
             break;
     }
 
