@@ -33,7 +33,8 @@ const c_vector* dps_master_board_info(const uint8_t board_id,const enum DATA_BOA
 void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void* value);
 
 //INFO: send a command in the system with a given value
-void dps_master_send_command(const can_id id_comm, const void* value);
+ uint8_t dps_master_send_command(const can_id id_comm,const uint8_t board_id, 
+                             const void* value, const uint8_t value_size);
 
 //INFO: check if a given can message is of the belong to the library
 //if it's the case it use it and return 1
