@@ -29,24 +29,23 @@ typedef union can_id{
 }can_id;
 
 struct board_info_slave{
-    uint8_t mex_type;
     char name[BOARD_NAME_SIZE];
 };
 
 struct var_info_slave{
-    uint8_t mex_type;
     uint8_t id_data;
+    uint8_t mex_type;
     uint8_t data_size;
     char name[VAR_NAME_SIZE];
 };
 
 struct com_info_slave{
-    uint8_t mex_type;
     uint16_t id_can_com;
     char name[COM_NAME_SIZE];
 };
 
 struct var_update_master{
+    uint8_t board_id;
     uint8_t id_data;
     union{
         uint8_t char_value;
@@ -56,20 +55,23 @@ struct var_update_master{
     };
 };
 
+struct info_mex{
+    uint8_t board_id;
+    enum MEX_TYPE mex_type;
+    union{
+        struct board_info_slave board_slave;
+        struct var_info_slave var_slave;
+        struct com_info_slave com_slave;
+    };
+};
+
 struct can_message{
     can_id id;
     uint8_t mex_size;
     union{
         uint8_t data[CAN_MAX_DATA_SIZE];
-        struct{
-            uint8_t board_id;
-            union{
-                struct board_info_slave board_slave;
-                struct var_info_slave var_slave;
-                struct com_info_slave com_slave;
-                struct var_update_master upd_master;
-            };
-        };
+        struct info_mex info;
+        struct var_update_master upd_master;
     };
 };
 

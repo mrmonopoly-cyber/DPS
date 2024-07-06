@@ -66,7 +66,7 @@ void dps_master_refresh(){
     CHECK_INIT();
 
     can_message can_mex ={
-        .id = INFO,
+        .id = {INFO},
         .data = {0},
     };
 
@@ -129,7 +129,7 @@ void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void
     }
 
     var_update_mex.id.full_id = VARS;
-    var_update_mex.board_id = board_id;
+    var_update_mex.upd_master.board_id = board_id;
     var_update_mex.upd_master.id_data = data_id;
     memcpy(var_update_mex.upd_master.value, value, var_info->data_size);
 
@@ -196,25 +196,27 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
 
     switch (mex->id.full_id) {
         case RESP:
-            switch (mex->var_slave.mex_type) {
+            switch (mex->info.mex_type) {
                 case BRD:
-                    board_info.board_id = mex->board_id;
-                    memcpy(board_info.board_name, mex->board_slave.name, sizeof(board_info.board_name));
+                    board_info.board_id = mex->info.board_id;
+                    memcpy(board_info.board_name, mex->info.board_slave.name, sizeof(board_info.board_name));
                     board_info.vars = c_vector_init(&var_args);
                     board_info.coms = c_vector_init(&com_args);
                     c_vector_push(&monitor.board_vector, &board_info);
                     return 1;
                 case VAR:
-                    if ((board_info_ptr = c_vector_find(monitor.board_vector, &mex->board_id))){
-                        new_var = mex->var_slave;
+                    if ((board_info_ptr = c_vector_find(monitor.board_vector, 
+                                    &mex->info.board_id))){
+                        new_var = mex->info.var_slave;
                         c_vector_push(&board_info.vars, &new_var);
                         return 1;
                     }
                     return 0;
                 case COM:
-                    if ( (board_info_ptr = c_vector_find(monitor.board_vector, &mex->board_id)) ){
-                        new_com = mex->com_slave;
-                        c_vector_push(&board_info.coms, &new_var);
+                    if ( (board_info_ptr = c_vector_find(monitor.board_vector, 
+                                    &mex->info.board_id)) ){
+                        new_com = mex->info.com_slave;
+                        c_vector_push(&board_info.coms, &new_com);
                         return 1;
                     }
                     return 0;

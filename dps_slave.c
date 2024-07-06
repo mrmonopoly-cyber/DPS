@@ -113,30 +113,33 @@ uint8_t dps_check_can_command_recv(can_message* mex)
 
     switch (mex->id.full_id) {
         case INFO:
-            can_mex.board_slave.mex_type = BRD;
-            can_mex.board_id = monitor.board_id;
-            memcpy(can_mex.board_slave.name, monitor.board_name, sizeof(can_mex.board_slave.name));
+            can_mex.info.mex_type = BRD;
+            can_mex.info.board_id = monitor.board_id;
+            memcpy(can_mex.info.board_slave.name, monitor.board_name, 
+                    sizeof(can_mex.info.board_slave.name));
             monitor.send_f(&can_mex);
 
             for (int i=0; i<var_vec_size; i++) {
                 data_var_ptr = c_vector_get_at_index(monitor.vars, i);
-                can_mex.var_slave.mex_type = VAR;
-                can_mex.var_slave.id_data = data_var_ptr->id_data;
-                can_mex.var_slave.data_size = data_var_ptr->var.size;
-                memcpy(can_mex.var_slave.name, data_var_ptr->var.name, sizeof(can_mex.var_slave.name));
+                can_mex.info.mex_type = VAR;
+                can_mex.info.var_slave.id_data = data_var_ptr->id_data;
+                can_mex.info.var_slave.data_size = data_var_ptr->var.size;
+                memcpy(can_mex.info.var_slave.name, data_var_ptr->var.name, 
+                        sizeof(can_mex.info.var_slave.name));
                 monitor.send_f(&can_mex);
             }
 
             for (int i=0; i<com_vec_size; i++) {
                 data_com_ptr =  c_vector_get_at_index(monitor.comm, i);
-                can_mex.com_slave.id_can_com = data_com_ptr->id_can.full_id;
-                can_mex.com_slave.mex_type = COM;
-                memcpy(can_mex.com_slave.name, data_com_ptr->name, sizeof(can_mex.com_slave.name));
+                can_mex.info.com_slave.id_can_com = data_com_ptr->id_can.full_id;
+                can_mex.info.mex_type = COM;
+                memcpy(can_mex.info.com_slave.name, data_com_ptr->name, 
+                        sizeof(can_mex.info.com_slave.name));
                 monitor.send_f(&can_mex);
             }
             return 1;
         case VARS:
-            if(mex->board_id == monitor.board_id && 
+            if(mex->upd_master.board_id == monitor.board_id && 
                     (data_var_ptr = c_vector_find(monitor.vars, &mex->upd_master.id_data))){
                 memcpy(data_var_ptr->var.var_ptr, mex->upd_master.value, data_var_ptr->var.size);
             }

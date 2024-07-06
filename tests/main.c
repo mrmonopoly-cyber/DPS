@@ -4,28 +4,33 @@
 #include <string.h>
 
 uint8_t send(can_message* mex){
-    dps_command* c;
-
     printf("----------------------------------------\n");
     printf("sending mex: id: %d\n", mex->id.full_id);
     printf("sending mex: mex size: %d\n", mex->mex_size);
-    printf("sending mex: board id: %d\n", mex->data[0]);
-    printf("sending mex: data type: %d\n", mex->data[1]);
-    switch (mex->data[1]) {
-        case VAR:
-            printf("sending mex: id data: %d\n", mex->data[2]);
-            printf("sending mex: size: %d\n", mex->var_slave.data_size);
-            printf("sending mex: name: %s\n", &mex->data[3]);
+    switch (mex->id.full_id) {
+        case RESP:
+            printf("sending mex: board id: %d\n", mex->info.board_id);
+            switch (mex->info.mex_type) {
+                case VAR:
+                    printf("sending mex: mex type: VAR\n");
+                    printf("sending mex: id data: %d\n", mex->info.var_slave.id_data);
+                    printf("sending mex: size: %d\n", mex->info.var_slave.data_size);
+                    printf("sending mex: name: %s\n", mex->info.var_slave.name);
 
+                    break;
+                case COM:
+                    printf("sending mex: mex type: COM\n");
+                    printf("sending mex: id can: %d\n", mex->info.com_slave.id_can_com);
+                    printf("sending mex: nam: %s\n", mex->info.com_slave.name);
+                    break;
+                case BRD:
+                    printf("sending mex: mex type: BRD\n");
+                    printf("sending mex: board name: %s\n",mex->info.board_slave.name);
+                    break;
+            
+            }
             break;
-        case COM:
-            c = (dps_command *) &mex->data[2];
-            printf("sending mex: id can: %d\n", c->id_can.full_id);
-            printf("sending mex: nam: %s\n", c->name);
-            break;
-        case BRD:
-            printf("sending mex: board name: %s\n",mex->board_slave.name);
-            break;
+    
     }
     return 0;
 }
