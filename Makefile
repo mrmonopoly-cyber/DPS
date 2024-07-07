@@ -9,7 +9,10 @@ C_VECTOR_ROOT := $(dps_src_path)/lib/c_vector
 include $(C_VECTOR_ROOT)/Makefile
 endif
 
-all: dps_slave.o dps_master.o
+all: master slave
+
+master: dps_master.o
+slave : dps_slave.o
 
 dps_master.o: $(dps_master.c)
 	gcc $(C_FLAGS) $(dps_master.c) -c

@@ -1,6 +1,6 @@
 C_FLAGS= -Wall -Wextra -g -fsanitize=address
 
-DPS_ROOT = ..
+DPS_ROOT = ../..
 
 include $(DPS_ROOT)/Makefile
 
