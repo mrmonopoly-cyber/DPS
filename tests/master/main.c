@@ -77,6 +77,11 @@ int main(void)
         dps_master_check_can_mex_recv(&recv_mex);
     }
 
+    char wrong_board[6] = "ERROR";
+    recv_mex.info.board_id = board_ids[0];
+    memcpy(recv_mex.info.board_slave.name, wrong_board, sizeof(wrong_board));
+    dps_master_check_can_mex_recv(&recv_mex);
+
 
     //SEDING BOARD VARS (board id, data id, name, data_size)
     char name_var_zero_zero[4] = "aaaa";
@@ -88,6 +93,9 @@ int main(void)
     char name_com_zero[4] = "CAL";
     can_id id_com = {87};
     save_com(name_com_zero, &id_com);
+
+    char err_name_com_zero[4] = "EC";
+    save_com(err_name_com_zero, &id_com);
 
     uint8_t new_value = 8;
     dps_master_update(board_ids[0], 0, &new_value);

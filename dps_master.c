@@ -204,6 +204,7 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
     board_data* board_info_ptr = NULL;
     struct var_info_slave new_var;
     struct com_info_slave new_com;
+    struct com_info_slave* new_com_ptr;
 
     struct c_vector_input_init var_args = {
         .capacity = 8,
@@ -218,6 +219,16 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
         case RESP:
             switch (mex->info.mex_type) {
                 case BRD:
+                    if((board_info_ptr =  c_vector_find(monitor.board_vector, &mex->info.board_id))){
+                        printf("board with id %d already present:\n \
+                                saved: %s\n \
+                                given: %s\n", 
+                                mex->info.board_id, 
+                                board_info_ptr->board_name,
+                                mex->info.board_slave.name);
+                        return -1;
+                    }
+
                     board_info.board_id = mex->info.board_id;
                     memcpy(board_info.board_name, mex->info.board_slave.name, 
                             sizeof(board_info.board_name));
@@ -241,6 +252,15 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
                     return 0;
                 case COM:
                     new_com = mex->info.com_slave;
+                    if((new_com_ptr =  c_vector_find(monitor.coms, &mex->info.com_slave.id_can_com))){
+                        printf("com with id %d already present:\n \
+                                saved: %s\n \
+                                given: %s\n", 
+                                new_com.id_can_com,
+                                new_com_ptr->name,
+                                new_com.name);
+                        return -1;
+                    }
                     if(!c_vector_push(&monitor.coms, &new_com)){
                         printf("failed ");
                     }
