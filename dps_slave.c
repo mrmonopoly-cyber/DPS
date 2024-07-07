@@ -88,6 +88,7 @@ void dps_monitor_var(dps_var* var)
         .var = *var,
         .id_data = id_generator,
     };
+    new_var.var.name[VAR_MAX_NAME_SIZE_SLAVE-1] = '\0';
     id_generator++;
     c_vector_push(&monitor.vars, &new_var);
     

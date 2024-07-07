@@ -10,12 +10,12 @@
 typedef struct board_data {
     uint8_t board_id;
     c_vector* vars;
-    c_vector* coms;
     char board_name[BOARD_NAME_SIZE];
 }board_data;
 
 typedef struct dps {
     c_vector* board_vector;
+    c_vector* coms;
     can_send send_f;
 }dps;
 
@@ -26,6 +26,27 @@ static int found_board(const void* l_ele, const void* key){
     const uint8_t board_id = *(uint8_t *) key;
 
     return board->board_id == board_id;
+}
+
+static void print_var(const void* l_ele){
+    const struct var_info_slave* var = (struct var_info_slave*) l_ele;
+    printf("var info: data id %d\n",var->id_data);
+    printf("var info: data size %d\n",var->data_size);
+    printf("var info: data name %s\n",var->name);
+}
+
+static void print_com(const void* l_ele){
+    const struct com_info_slave* com = (struct com_info_slave*) l_ele;
+    printf("com info: com id %d\n",com->id_can_com);
+    printf("com info: data name %s\n",com->name);
+}
+
+static void print_board(const void* l_ele){
+    const board_data* board = (board_data *) l_ele;
+    printf("board info: board id %d\n",board->board_id);
+    printf("board info: board name %s\n",board->board_name);
+    c_vector_to_string(board->vars);
+    c_vector_to_string(monitor.coms);
 }
 
 static int found_var(const void* l_ele, const void* key){
@@ -59,9 +80,19 @@ void dps_master_init(can_send send_f)
         .capacity = 8,
         .ele_size = sizeof(board_data),
         .free_fun = dummy_free,
-        .print_fun = dummy_print,
+        .print_fun = print_board,
     };
+
+    struct c_vector_input_init com_args = {
+        .capacity = 8,
+        .ele_size = sizeof(struct com_info_slave),
+        .free_fun = dummy_free,
+        .print_fun = print_com,
+        .found_f = found_com,
+    };
+
     monitor.board_vector = c_vector_init(&args);
+    monitor.coms = c_vector_init(&com_args);
     monitor.send_f = send_f;
 }
 
@@ -102,15 +133,15 @@ const board_info* dps_master_board_list()
 const c_vector* dps_master_board_info(const uint8_t board_id,const enum DATA_BOARD ty_data)
 {
     CHECK_INIT(NULL);
-
-    const board_data* board = c_vector_find(monitor.board_vector, &board_id);
+    const board_data* board = NULL;
 
     switch (ty_data) {
         case BOARD_VAR:
+            board = c_vector_find(monitor.board_vector, &board_id);
             return board->vars;
             break;
         case BOARD_COM:
-            return board->coms;
+            return monitor.coms;
             break;
         default:
             return NULL;
@@ -143,8 +174,7 @@ void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void
 }
 
 //INFO: send a command in the system with a given value
-uint8_t dps_master_send_command(const can_id id_comm,const uint8_t board_id, 
-                             const void* value, const uint8_t value_size)
+uint8_t dps_master_send_command(const can_id id_comm,const uint8_t value[CAN_MAX_DATA_SIZE])
 {
     CHECK_INIT(1);
 
@@ -152,20 +182,12 @@ uint8_t dps_master_send_command(const can_id id_comm,const uint8_t board_id,
     board_data* board_info= NULL;
     struct com_info_slave* com_info= NULL;
 
-    if (!(board_info = c_vector_find(monitor.board_vector, &board_id))){
-        return 2;
-    }
-
-    if( !(com_info = c_vector_find(board_info->coms, &id_comm))){
+    if( !(com_info = c_vector_find(monitor.coms, &id_comm))){
         return 3;
     }
 
-    if(value_size > 8){
-        return 4;
-    }
-
     com_mex.id = id_comm;
-    memcpy(com_mex.data, value, value_size);
+    memcpy(com_mex.data, value, CAN_MAX_DATA_SIZE);
 
     monitor.send_f(&com_mex);
 
@@ -187,47 +209,51 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
         .capacity = 8,
         .ele_size = sizeof(struct var_info_slave),
         .free_fun = dummy_free,
-        .print_fun = dummy_print,
+        .print_fun = print_var,
         .found_f = found_var,
     };
 
-    struct c_vector_input_init com_args = {
-        .capacity = 8,
-        .ele_size = sizeof(struct com_info_slave),
-        .free_fun = dummy_free,
-        .print_fun = dummy_print,
-        .found_f = found_com,
-    };
 
     switch (mex->id.full_id) {
         case RESP:
             switch (mex->info.mex_type) {
                 case BRD:
                     board_info.board_id = mex->info.board_id;
-                    memcpy(board_info.board_name, mex->info.board_slave.name, sizeof(board_info.board_name));
+                    memcpy(board_info.board_name, mex->info.board_slave.name, 
+                            sizeof(board_info.board_name));
                     board_info.vars = c_vector_init(&var_args);
-                    board_info.coms = c_vector_init(&com_args);
                     c_vector_push(&monitor.board_vector, &board_info);
+                    printf("saving board %s\t%d\n",
+                            mex->info.board_slave.name,
+                            mex->info.board_id);
                     return 1;
                 case VAR:
                     if ((board_info_ptr = c_vector_find(monitor.board_vector, 
                                     &mex->info.board_id))){
                         new_var = mex->info.var_slave;
-                        c_vector_push(&board_info.vars, &new_var);
+                        new_var.name[VAR_NAME_SIZE-1] = '\0';
+                        if (!c_vector_push(&board_info_ptr->vars, &new_var)){
+                            printf("failed ");
+                        };
+                        printf("saving var %s\n",mex->info.var_slave.name);
                         return 1;
                     }
                     return 0;
                 case COM:
-                    if ( (board_info_ptr = c_vector_find(monitor.board_vector, 
-                                    &mex->info.board_id)) ){
-                        new_com = mex->info.com_slave;
-                        c_vector_push(&board_info.coms, &new_com);
-                        return 1;
+                    new_com = mex->info.com_slave;
+                    if(!c_vector_push(&monitor.coms, &new_com)){
+                        printf("failed ");
                     }
-                    return 0;
+                    printf("saving com %s\n",mex->info.com_slave.name);
+                    return 1;
             }
             break;
     }
 
     return 0;
+}
+
+void dps_master_print_board()
+{
+    c_vector_to_string(monitor.board_vector);
 }

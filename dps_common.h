@@ -34,7 +34,6 @@ struct board_info_slave{
 
 struct var_info_slave{
     uint8_t id_data;
-    uint8_t mex_type;
     uint8_t data_size;
     char name[VAR_NAME_SIZE];
 };

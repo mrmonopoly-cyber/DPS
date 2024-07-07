@@ -3,11 +3,12 @@
 
 #include "dps_common.h"
 
+#define VAR_MAX_NAME_SIZE_SLAVE 5
 
 typedef struct dps_var{
     void* var_ptr;
     uint8_t size;
-    char name[5];
+    char name[VAR_MAX_NAME_SIZE_SLAVE];
 }dps_var;
 
 //INFO: create dps manager
