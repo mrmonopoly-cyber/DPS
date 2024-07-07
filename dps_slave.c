@@ -3,10 +3,14 @@
 #include "lib/c_vector/c_vector.h"
 
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 
 //private
-#define CHEK_INIT(r)   if (!monitor.vars || !monitor.comm){return r;}
+#define CHEK_INIT(r)   if (!monitor.vars || !monitor.comm){\
+    printf("failed init slave\n");\
+    return r;\
+}
 #define ID_TYPE uint8_t
 
 static ID_TYPE id_generator = 0;

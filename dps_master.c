@@ -3,6 +3,7 @@
 #include "lib/c_vector/c_vector.h"
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -44,7 +45,10 @@ static int found_com(const void* l_ele, const void* key){
 static void dummy_free(void* e){}
 static void dummy_print(const void* e){}
 
-#define CHECK_INIT(r) if(!monitor.board_vector || !monitor.send_f) {return r;}
+#define CHECK_INIT(r) if(!monitor.board_vector || !monitor.send_f) {\
+    printf("failed init master\n"); \
+    return r;\
+}
 
 //INFO: init the master
 //send_f : function needed to send a can message
@@ -58,6 +62,7 @@ void dps_master_init(can_send send_f)
         .print_fun = dummy_print,
     };
     monitor.board_vector = c_vector_init(&args);
+    monitor.send_f = send_f;
 }
 
 //INFO: refresh the current set of variable sending a message to all the board 
