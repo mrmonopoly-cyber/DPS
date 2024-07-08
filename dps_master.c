@@ -188,6 +188,7 @@ uint8_t dps_master_send_command(const can_id id_comm,const uint8_t value[CAN_MAX
     }
 
     com_mex.id = id_comm;
+    com_mex.mex_size = CAN_MAX_DATA_SIZE;   //FIX: add size of data of command in info
     memcpy(com_mex.data, value, CAN_MAX_DATA_SIZE);
 
     monitor.send_f(&com_mex);

@@ -48,16 +48,26 @@ void* check_incomming_message(void* args){
             mex.id.full_id = mex_lib.can_id;
             memcpy(mex.data, mex_lib.data, mex_lib.can_dlc);
             if(dps_check_can_command_recv(&mex)){
-
                 switch (mex.id.full_id) {
                     case VARS:
                         printf("receved update var board id: %d\n", mex.upd_master.board_id);
                         printf("receved data id: %d\n", mex.upd_master.id_data);
                         printf("receved data value: %d\n", mex.upd_master.char_value);
                         printf("-----------------------------------------------\n");
+                        break;
                 }
+            }else {
+                printf("receved command with id: %d\n", mex.id.full_id);
+                printf("command data[0]: %d\n", mex.data[0]);
+                printf("command data[1]: %d\n", mex.data[1]);
+                printf("command data[2]: %d\n", mex.data[2]);
+                printf("command data[3]: %d\n", mex.data[3]);
+                printf("command data[4]: %d\n", mex.data[4]);
+                printf("command data[5]: %d\n", mex.data[5]);
+                printf("command data[6]: %d\n", mex.data[6]);
+                printf("command data[7]: %d\n", mex.data[7]);
+                printf("-----------------------------------------------\n");
             }
-            fprintf(stderr,"receive a message\n");
         }
     };
     return NULL;

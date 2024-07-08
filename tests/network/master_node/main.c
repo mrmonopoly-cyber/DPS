@@ -12,30 +12,25 @@ uint8_t send_f_can(can_message* mex){
         .can_dlc = mex->mex_size,
         .can_id = mex->id.full_id,
     };
-    printf("mex->data[0] = %d\n",mex->data[0]);
-    printf("mex->data[1] = %d\n",mex->data[1]);
-    printf("mex->data[2] = %d\n",mex->data[2]);
-    printf("mex->data[3] = %d\n",mex->data[3]);
-    printf("mex->data[4] = %d\n",mex->data[4]);
-    printf("mex->data[5] = %d\n",mex->data[5]);
-    printf("mex->data[6] = %d\n",mex->data[6]);
-    printf("mex->data[7] = %d\n",mex->data[7]);
-    printf("mex->mex_size = %d\n",mex->mex_size);
     memcpy(f.data, mex->data,mex->mex_size);
-    printf("f.data[0] = %d\n",f.data[0]);
-    printf("f.data[1] = %d\n",f.data[1]);
-    printf("f.data[2] = %d\n",f.data[2]);
-    printf("f.data[3] = %d\n",f.data[3]);
-    printf("f.data[4] = %d\n",f.data[4]);
-    printf("f.data[5] = %d\n",f.data[5]);
-    printf("f.data[6] = %d\n",f.data[6]);
-    printf("f.data[7] = %d\n",f.data[7]);
     switch (mex->id.full_id) {
         case VARS:
             printf("sending update var\n");
             printf("sending board id: %d\n",mex->upd_master.board_id);
             printf("sending data id: %d\n",mex->upd_master.id_data);
             printf("sending data value: %d\n",mex->upd_master.char_value);
+            break;
+        default:
+            printf("sending command\n");
+            printf("sending board id: %d\n",mex->id.full_id);
+            printf("sending command data[0]: %d\n",f.data[0]);
+            printf("sending command data[1]: %d\n",f.data[1]);
+            printf("sending command data[2]: %d\n",f.data[2]);
+            printf("sending command data[3]: %d\n",f.data[3]);
+            printf("sending command data[4]: %d\n",f.data[4]);
+            printf("sending command data[5]: %d\n",f.data[5]);
+            printf("sending command data[6]: %d\n",f.data[6]);
+            printf("sending command data[7]: %d\n",f.data[7]);
             break;
     }
     return can_send_frame(can_socket, &f);
@@ -107,6 +102,10 @@ int main(void)
 
     uint8_t new_value = 20;
     dps_master_update(1, 0, &new_value);
+
+    can_id com = {52};
+    uint8_t com_value[CAN_MAX_DATA_SIZE] = {16};
+    dps_master_send_command(com, com_value);
 
     pthread_join(new_thread, NULL);
     return 0;
