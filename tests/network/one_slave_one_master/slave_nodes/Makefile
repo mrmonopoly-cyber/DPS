@@ -1,12 +1,12 @@
 C_FLAGS= -Wall -Wextra -g -fsanitize=address
 
-DPS_ROOT = ../../../
-CANLIB_ROOT = ../can_lib
+DPS_ROOT = ../../../../
+CANLIB_ROOT = ../../can_lib
 
 include $(DPS_ROOT)/Makefile
 include $(CANLIB_ROOT)/Makefile
 
-OBJ_FILE = dps_master.o c_vector.o c_check_input.o canlib.o
+OBJ_FILE = dps_slave.o c_vector.o c_check_input.o canlib.o
 
 all: main
 

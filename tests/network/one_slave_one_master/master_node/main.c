@@ -1,5 +1,5 @@
-#include "../../../dps_master.h"
-#include "../can_lib/canlib.h"
+#include "../../../../dps_master.h"
+#include "../../can_lib/canlib.h"
 #include <stdio.h>
 #include <string.h>
 

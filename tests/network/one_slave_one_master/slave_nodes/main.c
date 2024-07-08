@@ -1,5 +1,5 @@
-#include "../../../dps_slave.h"
-#include "../can_lib/canlib.h"
+#include "../../../../dps_slave.h"
+#include "../../can_lib/canlib.h"
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
