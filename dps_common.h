@@ -56,7 +56,7 @@ struct var_update_master{
 
 struct info_mex{
     uint8_t board_id;
-    enum MEX_TYPE mex_type;
+    uint8_t mex_type;
     union{
         struct board_info_slave board_slave;
         struct var_info_slave var_slave;

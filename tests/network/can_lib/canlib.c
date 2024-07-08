@@ -49,10 +49,7 @@ int can_send_frame(int socket, struct can_frame *frame) {
 int can_recv_frame(int socket, struct can_frame *frame) {
     int nbytes;
 
-    printf("waiting message\n");
-    char buf[15];
-    nbytes = recv(socket, &buf, sizeof(buf),0);
-    printf("%s\n",buf);
+    nbytes = read(socket, frame, sizeof(*frame));
     if (nbytes != sizeof(struct can_frame)) {
         perror("Read");
         return -1;

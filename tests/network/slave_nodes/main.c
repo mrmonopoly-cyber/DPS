@@ -7,6 +7,30 @@
 int can_socket = -1;
 
 uint8_t send_f_can(can_message* mex){
+
+    switch (mex->id.full_id) {
+        case RESP:
+            printf("sending info board id: %d\n", mex->info.board_id);
+            switch (mex->info.mex_type) {
+                case BRD:
+                    printf("sending info board mex\n");
+                    printf("sending info board name: %s\n", mex->info.board_slave.name);
+                    break;
+                case VAR:
+                    printf("sending info var mex\n");
+                    printf("sending info var data id: %d\n", mex->info.var_slave.id_data);
+                    printf("sending info var data size: %d\n", mex->info.var_slave.data_size);
+                    printf("sending info var data name: %s\n", mex->info.var_slave.name);
+                    break;
+                case COM:
+                    printf("sending info com mex\n");
+                    printf("sending info com data id: %d\n", mex->info.com_slave.id_can_com);
+                    printf("sending info com data name: %s\n", mex->info.com_slave.name);
+                    break;
+            }
+            printf("-----------------------------------------------\n");
+    }
+
     struct can_frame f = {
         .can_dlc = mex->mex_size,
         .can_id = mex->id.full_id,
@@ -17,17 +41,16 @@ uint8_t send_f_can(can_message* mex){
 
 void* check_incomming_message(void* args){
     struct can_frame mex_lib = {0};
-    struct can_frame* mex_lib_ptr = &mex_lib;
     can_message mex = {0};
     while(1){
-        if(can_recv_frame(can_socket, &mex_lib_ptr)){
+        if(!can_recv_frame(can_socket, &mex_lib)){
             mex.mex_size = mex_lib.can_dlc;
             mex.id.full_id = mex_lib.can_id;
             memcpy(mex.data, mex_lib.data, mex_lib.can_dlc);
             if(dps_check_can_command_recv(&mex)){
-                printf("dps slave receive a message\n");
+                fprintf(stderr,"dps slave receive a message\n");
             }
-            printf("receive a message\n");
+            fprintf(stderr,"receive a message\n");
         }
     };
     return NULL;
@@ -41,7 +64,7 @@ int main(void)
         return -1;
     }
 
-    uint8_t board_id = 0;
+    uint8_t board_id = 1;
     char board_name[6] = "SLAVE1";
     dps_init(send_f_can, board_id,board_name);
 
@@ -65,7 +88,13 @@ int main(void)
     memcpy(mon_var.name, brk_name, sizeof(brk_name));
     dps_monitor_var(&mon_var);
 
-    printf("var saved init completed\n");
+    dps_command mon_com = {0};
+    mon_com.id_can.full_id = 52;
+    char com_name[] = "CAL";
+    memcpy(mon_com.name, &com_name, sizeof(com_name));
+    dps_monitor_command(&mon_com);
+
+    printf("init/conf completed\n");
 
 
     pthread_join(new_thread, NULL);
