@@ -1,4 +1,5 @@
 #include "canlib.h"
+#include <stdio.h>
 
 // Initialize CAN interface
 int can_init(const char *ifname) {
@@ -48,7 +49,10 @@ int can_send_frame(int socket, struct can_frame *frame) {
 int can_recv_frame(int socket, struct can_frame *frame) {
     int nbytes;
 
-    nbytes = read(socket, frame, sizeof(struct can_frame));
+    printf("waiting message\n");
+    char buf[15];
+    nbytes = recv(socket, &buf, sizeof(buf),0);
+    printf("%s\n",buf);
     if (nbytes != sizeof(struct can_frame)) {
         perror("Read");
         return -1;
