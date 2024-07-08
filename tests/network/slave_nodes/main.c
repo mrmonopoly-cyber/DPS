@@ -1,8 +1,7 @@
-#include "../../../dps_master.h"
+#include "../../../dps_slave.h"
 #include "../can_lib/canlib.h"
 #include <stdio.h>
 #include <string.h>
-
 #include <pthread.h>
 
 int can_socket = -1;
@@ -24,7 +23,7 @@ void *check_incomming_message(void *args){
             mex.mex_size = mex_lib.can_dlc;
             mex.id.full_id = mex_lib.can_id;
             memcpy(mex.data, mex_lib.data, mex_lib.can_dlc);
-            if(dps_master_check_can_mex_recv(&mex)){
+            if(dps_check_can_command_recv(&mex)){
                 printf("dps master receive a message\n");
             }
         }
@@ -39,12 +38,14 @@ int main(void)
         printf("error init can\n");
         return -1;
     }
-    dps_master_init(send_f_can);
+
+    uint8_t board_id = 0;
+    char board_name[6] = "SLAVE1";
+    dps_init(send_f_can, board_id,board_name);
 
     pthread_t new_thread = 1;
     pthread_create(&new_thread, NULL, check_incomming_message, NULL);
 
     pthread_join(new_thread, NULL);
-
     return 0;
 }
