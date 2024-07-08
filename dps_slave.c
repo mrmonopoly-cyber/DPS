@@ -122,6 +122,11 @@ uint8_t dps_check_can_command_recv(can_message* mex)
             can_mex.info.board_id = monitor.board_id;
             memcpy(can_mex.info.board_slave.name, monitor.board_name, 
                     sizeof(can_mex.info.board_slave.name));
+            if (can_mex.info.board_slave.name[BOARD_NAME_SIZE-1] != '\0') {
+                printf("WARNING, board name too long, setting last bit to \
+                        the terminator\n");
+                can_mex.info.board_slave.name[BOARD_NAME_SIZE-1] = '\0';
+            }
             monitor.send_f(&can_mex);
 
             for (int i=0; i<var_vec_size; i++) {
@@ -131,6 +136,12 @@ uint8_t dps_check_can_command_recv(can_message* mex)
                 can_mex.info.var_slave.data_size = data_var_ptr->var.size;
                 memcpy(can_mex.info.var_slave.name, data_var_ptr->var.name, 
                         sizeof(can_mex.info.var_slave.name));
+
+                if (can_mex.info.var_slave.name[VAR_NAME_SIZE-1] != '\0') {
+                    printf("WARNING, var name too long, setting last bit to \
+                            the terminator\n");
+                    can_mex.info.board_slave.name[BOARD_NAME_SIZE-1] = '\0';
+                }
                 monitor.send_f(&can_mex);
             }
 
@@ -140,6 +151,11 @@ uint8_t dps_check_can_command_recv(can_message* mex)
                 can_mex.info.mex_type = COM;
                 memcpy(can_mex.info.com_slave.name, data_com_ptr->name, 
                         sizeof(can_mex.info.com_slave.name));
+                if (can_mex.info.com_slave.name[COM_NAME_SIZE-1] != '\0') {
+                    printf("WARNING, com name too long, setting last bit to \
+                            the terminator\n");
+                    can_mex.info.board_slave.name[BOARD_NAME_SIZE-1] = '\0';
+                }
                 monitor.send_f(&can_mex);
             }
             return 1;

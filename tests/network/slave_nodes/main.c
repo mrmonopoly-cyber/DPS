@@ -48,7 +48,14 @@ void* check_incomming_message(void* args){
             mex.id.full_id = mex_lib.can_id;
             memcpy(mex.data, mex_lib.data, mex_lib.can_dlc);
             if(dps_check_can_command_recv(&mex)){
-                fprintf(stderr,"dps slave receive a message\n");
+
+                switch (mex.id.full_id) {
+                    case VARS:
+                        printf("receved update var board id: %d\n", mex.upd_master.board_id);
+                        printf("receved data id: %d\n", mex.upd_master.id_data);
+                        printf("receved data value: %d\n", mex.upd_master.char_value);
+                        printf("-----------------------------------------------\n");
+                }
             }
             fprintf(stderr,"receive a message\n");
         }
@@ -95,6 +102,12 @@ int main(void)
     dps_monitor_command(&mon_com);
 
     printf("init/conf completed\n");
+
+
+    uint8_t old_gas = gas;
+    while(old_gas == gas){}
+    printf("gas updated: %d\n",gas);
+
 
 
     pthread_join(new_thread, NULL);

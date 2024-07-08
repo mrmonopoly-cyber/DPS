@@ -50,7 +50,7 @@ struct var_update_master{
         uint8_t char_value;
         uint16_t short_value;
         uint32_t int_value;
-        uint8_t value[6];
+        uint8_t value[4];
     };
 };
 

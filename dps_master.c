@@ -167,6 +167,7 @@ void dps_master_update(const uint8_t board_id, const uint8_t data_id, const void
     var_update_mex.id.full_id = VARS;
     var_update_mex.upd_master.board_id = board_id;
     var_update_mex.upd_master.id_data = data_id;
+    var_update_mex.mex_size = CAN_MAX_DATA_SIZE;
     memcpy(var_update_mex.upd_master.value, value, var_info->data_size);
 
     monitor.send_f(&var_update_mex);
