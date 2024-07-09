@@ -25,5 +25,4 @@ void dps_monitor_command(dps_command* comm);
 uint8_t dps_check_can_command_recv(can_message* mex);
 
 void dps_print_slave();
-void dps_print_com();
 #endif // !__DPS_SLAVE__
