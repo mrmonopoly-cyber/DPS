@@ -236,9 +236,6 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
                             sizeof(board_info.board_name));
                     board_info.vars = c_vector_init(&var_args);
                     c_vector_push(&monitor.board_vector, &board_info);
-                    printf("saving board %s\t%d\n",
-                            mex->info.board_slave.name,
-                            mex->info.board_id);
                     return 1;
                 case VAR:
                     if ((board_info_ptr = c_vector_find(monitor.board_vector, 
@@ -248,7 +245,6 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
                         if (!c_vector_push(&board_info_ptr->vars, &new_var)){
                             printf("failed ");
                         };
-                        printf("saving var %s\n",mex->info.var_slave.name);
                         return 1;
                     }
                     return 0;
@@ -266,7 +262,6 @@ uint8_t dps_master_check_can_mex_recv(const can_message* mex)
                     if(!c_vector_push(&monitor.coms, &new_com)){
                         printf("failed ");
                     }
-                    printf("saving com %s\n",mex->info.com_slave.name);
                     return 1;
             }
             break;
