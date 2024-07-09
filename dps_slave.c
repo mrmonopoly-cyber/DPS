@@ -41,9 +41,23 @@ static int found_dps_com(const void* list_ele,const void* out_ele){
 
     return l_ele->id_can.full_id == f_id->full_id;
 }
+static void var_print(const void* ele){
+    dps_var_int* var = (dps_var_int *)ele;
+    printf("var id: %d\n\
+            var name: %s\n\
+            var size: %d\n\
+            var ptr: %ld\n",var->id_data,var->var.name,var->var.size,(long) var->var.var_ptr);
+}
+
+static void com_print(const void* ele){
+    dps_command* com = (dps_command*)ele;
+    printf("com id: %d\n\
+            com name: %s\n",com->id_can.full_id,com->name);
+}
 
 static void dummy_free(void* ele){}
 static void dummy_print(const void* ele){}
+
 
 
 //public
@@ -57,7 +71,7 @@ void dps_init(can_send send_f, uint8_t board_id, char board_name[BOARD_NAME_SIZE
     }
 
     struct c_vector_input_init args_vars = {
-        .print_fun = dummy_print,
+        .print_fun = var_print,
         .free_fun = dummy_free,
         .ele_size = sizeof(dps_var_int),
         .capacity = 8,
@@ -65,7 +79,7 @@ void dps_init(can_send send_f, uint8_t board_id, char board_name[BOARD_NAME_SIZE
     };
 
     struct c_vector_input_init args_comm = {
-        .print_fun = dummy_print,
+        .print_fun = com_print,
         .free_fun = dummy_free,
         .ele_size = sizeof(dps_command),
         .capacity = 8,
@@ -91,7 +105,6 @@ void dps_monitor_var(dps_var* var)
     new_var.var.name[VAR_MAX_NAME_SIZE_SLAVE-1] = '\0';
     id_generator++;
     c_vector_push(&monitor.vars, &new_var);
-    
 }
 
 //INFO: tell to dps a dps_command the board can receive 
@@ -172,6 +185,10 @@ uint8_t dps_check_can_command_recv(can_message* mex)
     return 0;
 }
 
-void dps_print_var(){
+void dps_print_slave(){
+    CHEK_INIT();
+
+    printf("board id: %d\nboard name: %s\n",monitor.board_id,monitor.board_name);
     c_vector_to_string(monitor.vars);
+    c_vector_to_string(monitor.comm);
 }
