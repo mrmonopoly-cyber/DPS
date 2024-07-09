@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 
 
 
-    // pthread_join(new_thread, NULL);
+    pthread_join(new_thread, NULL);
     free(vars);
     free(coms);
     return 0;
