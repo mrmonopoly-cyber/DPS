@@ -79,7 +79,7 @@ int main(void)
 
     dps_monitor_command(&new_com);
 
-    dps_print_var();
+    dps_print_slave();
 
     dps_check_can_command_recv(&can_mex);
     memset(can_mex.upd_master.value,0,sizeof(can_mex.upd_master.value));
