@@ -73,6 +73,7 @@ int main(void)
     new_var.name[1] = 'b';
     dps_monitor_var(&new_var);
     new_var.var_ptr = &c;
+    new_var.size = sizeof(c);
     new_var.name[0] = 'c';
     new_var.name[1] = 'c';
     dps_monitor_var(&new_var);
