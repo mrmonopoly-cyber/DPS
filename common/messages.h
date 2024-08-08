@@ -7,12 +7,12 @@
 
 typedef struct CanMessage{
     uint16_t id;
-    uint8_t mex_size;
+    uint8_t dlc;
     union{
         struct{
-            MEX_TYPE mext_type_dps;
-            DpsPayload dps_payload;
-        };
+            mex_type_u8_t mext_type;
+            DpsPayload data;
+        }dps_payload;
         RawPayloadCanMex rawMex;
     }payload;
     uint8_t padding_byte;

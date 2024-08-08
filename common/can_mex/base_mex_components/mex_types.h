@@ -15,4 +15,8 @@ enum MEX_TYPE{
     DUMMY_TYPE,
 };
 
+typedef struct{
+    uint8_t type;
+}mex_type_u8_t;
+
 #endif // !__DPS_MEX_TYPES__
