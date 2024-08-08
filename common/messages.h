@@ -4,6 +4,7 @@
 #include "can_mex/base_mex_components/base_payload.h"
 #include "can_mex/base_mex_components/mex_types.h"
 
+#define DPS_CAN_MESSAGE_ID 0x512
 
 
 typedef struct CanMessage{

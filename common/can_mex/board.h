@@ -6,10 +6,10 @@
 #include "object.h"
 
 DPS_TYPEDEF(
-        struct AssignBoardName{
+        struct {
         ObjectId obj_id;
         char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
-        },AssignBoardName);
+        },AssignBoarId);
 
 DPS_TYPEDEF(
         struct{

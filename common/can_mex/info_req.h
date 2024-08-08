@@ -5,6 +5,7 @@ enum INFO_TYPES{
     VAR,
     BOARD,
     COMMAND,
+    NEW_CONNECTION,
 };
 
 #include "base_mex_components/base_payload.h"
