@@ -8,8 +8,7 @@ enum INFO_TYPES{
 };
 
 #include "base_mex_components/base_payload.h"
-DPS_TYPEDEF(
-typedef struct ReqInfo{
+DPS_TYPEDEF(struct {
     enum INFO_TYPES info_t;
 },ReqInfo);
 

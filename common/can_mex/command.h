@@ -8,7 +8,7 @@ typedef ObjName CommandInfoName;
 typedef ObjMetadata CommandInfoMetadata;
 
 DPS_TYPEDEF( 
-        struct SendCommandPayload{
+        struct{
         uint8_t data[CAN_MAX_SIZE_MEX];
         },SendCommandPayload);
 

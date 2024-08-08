@@ -10,7 +10,7 @@
 DPS_TYPEDEF(
         struct{
         ObjectId obj_id;
-        char name[CAN_MAX_SIZE_MEX - sizeof(obj_id)];
+        char name[CAN_MAX_SIZE_MEX];
         }, ObjName);
 
 DPS_TYPEDEF(

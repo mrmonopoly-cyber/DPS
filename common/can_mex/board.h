@@ -2,16 +2,17 @@
 #define __DPS_CAN_BOARD__
 
 #include "base_mex_components/base_payload.h"
+#include "base_mex_components/obj_id.h"
 #include "object.h"
 
 DPS_TYPEDEF(
         struct AssignBoardName{
         ObjectId obj_id;
-        char name[CAN_MAX_SIZE_MEX - sizeof(obj_id)];
+        char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
         },AssignBoardName);
 
 DPS_TYPEDEF(
-        typedef struct BoardName{
+        struct{
         char name[CAN_MAX_SIZE_MEX];
         },BoardName);
 

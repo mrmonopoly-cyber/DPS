@@ -2,12 +2,13 @@
 #define __DPS_CAN_VARIABLE__
 
 #include "base_mex_components/base_payload.h"
+#include "base_mex_components/obj_id.h"
 #include "object.h"
 
 DPS_TYPEDEF(
-        struct VariableValue{
+        struct {
         ObjectId obj_id;
-        uint8_t value[CAN_MAX_SIZE_MEX - sizeof(obj_id)];
+        uint8_t value[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
         },VariableValue);
 
 typedef VariableValue VariableModify;
