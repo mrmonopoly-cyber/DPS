@@ -1,7 +1,7 @@
 #ifndef __DPS_OBJECT__
 #define __DPS_OBJECT__
 
-#include <cstdint>
+#include <stdint.h>
 
 #include "base_mex_components/mex_types.h"
 #include "base_mex_components/base_payload.h"

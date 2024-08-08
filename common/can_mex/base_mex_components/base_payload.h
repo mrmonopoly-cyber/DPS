@@ -1,7 +1,7 @@
 #ifndef __DPS_RAW_PAYLOAD__
 #define __DPS_RAW_PAYLOAD__
 
-#include <cstdint>
+#include <stdint.h>
 
 #include "mex_types.h"
 #include "obj_id.h"

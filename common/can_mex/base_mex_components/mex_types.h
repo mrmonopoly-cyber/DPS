@@ -1,7 +1,7 @@
 #ifndef __DPS_MEX_TYPES__
 #define __DPS_MEX_TYPES__
 
-#include <cstdint>
+#include <stdint.h>
 
 enum MEX_TYPE{
     GET_BOARD_NAME,

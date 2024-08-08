@@ -14,15 +14,15 @@ typedef struct CanMessage{
             DpsPayload data;
         }dps_payload;
         RawPayloadCanMex rawMex;
-    }payload;
+    };
     uint8_t padding_byte;
 }CanMessage;
 
 uint8_t t = sizeof(CanMessage);
 
-void init_new_mex(CanMessage* mex, MEX_TYPE dps_type, DpsPayload* dps_payload);
-void init_new_raw_mex(CanMessage* mex, RawPayloadCanMex* raw_payload);
+void init_new_mex_payload_dps(CanMessage* mex, enum MEX_TYPE dps_type, DpsPayload* dps_payload);
+void init_new_mex_payload_raw(CanMessage* mex, RawPayloadCanMex* raw_payload);
 
-MEX_TYPE extract_message_type(CanMessage* mex);
+enum MEX_TYPE extract_message_type(CanMessage* mex);
 
 #endif // !__DPS_MESSAGES__
