@@ -12,7 +12,6 @@ enum MEX_TYPE{
 
     GET_INFO,
 
-KK,
     DUMMY_TYPE,
 };
 
