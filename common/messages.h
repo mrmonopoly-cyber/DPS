@@ -20,6 +20,6 @@ typedef struct CanMessage{
     uint8_t padding_byte;
 }CanMessage;
 
-typedef uint8_t (*can_send) (CanMessage* mex);
+typedef int (*can_send) (CanMessage* mex);
 
 #endif // !__DPS_MESSAGES__

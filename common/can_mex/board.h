@@ -5,10 +5,12 @@
 #include "base_mex_components/obj_id.h"
 #include "object.h"
 
+#define BOARD_NAME_LENGTH CAN_MAX_SIZE_MEX - sizeof(ObjectId)
+
 DPS_TYPEDEF(
         struct {
         ObjectId obj_id;
-        char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+        char name[BOARD_NAME_LENGTH];
         },AssignBoarId);
 
 DPS_TYPEDEF(

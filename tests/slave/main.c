@@ -11,8 +11,8 @@
 #define Color_Green "\33[32m" 
 #define Color_end "\33[0m" // To flush out prev settings
 
-#define PASSED(str) printf(Color_Green str Color_end "\n");
-#define FAILED(str) printf(Color_Red str Color_end "\n");
+#define PASSED(str) printf(Color_Green str Color_end "\n"); passed++;
+#define FAILED(str) printf(Color_Red str Color_end "\n"); failed++;
 
 uint8_t passed = 0;
 uint8_t failed = 0;
@@ -47,12 +47,10 @@ int check_monitor_var()
             .var_ptr = macro_ptr\
         };\
         if (fun (&var_info)){\
-            FAILED("error saving var" #n); \
-            failed++;\
+            FAILED("error saving var " #n); \
             return -2;\
         }\
-        PASSED("check ok var" #n);\
-        passed++;\
+        PASSED("check ok var " #n);\
     }\
 
     monitor_var(u8, dps_monitor_var_uint8_t, &u8);
@@ -78,11 +76,9 @@ int check_monitor_var()
 
     if(dps_monitor_var_general(&gen)){
             FAILED("error saving var gen_t");
-            failed++;
             return -2;
     }
     PASSED("check ok save var gen_t");
-    passed++;
 
     return 0;
 }
@@ -131,16 +127,15 @@ int check_link_req(){
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload.mext_type = {GET_INFO},
         .dps_payload.data = new_connection.raw_data,
     };
 
     if(dps_check_can_command_recv(&mex)){
         FAILED("new connection message not recognized");
-        failed++;
         return -1;
     }
     PASSED("new connection message recognized");
-    passed++;
     return 0;
 }
 
@@ -156,51 +151,45 @@ int check_id_assign(){
     };
     {
         CanMessage mex = {
-            .id = SET_BOARD_ID,
+            .id = DPS_CAN_MESSAGE_ID,
             .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload.mext_type = {SET_BOARD_ID},
             .dps_payload.data = correct_assign.raw_data,
         };
         if (dps_check_can_command_recv(&mex)){
             FAILED("can message for id assignment not recognized");
-            failed++;
             return -1;
         }
         PASSED("can message for id assignment correct recognized");
-        passed++;
         if (dps_get_id() != correct_assign.full_data.obj_id.board_id){
             FAILED("correct id to board not assigned");
-            failed++;
             return -2;
         }
         PASSED("correct id to board assigned");
-        passed++;
     }
 
     {
         CanMessage mex = {
-            .id = SET_BOARD_ID,
+            .id = DPS_CAN_MESSAGE_ID,
             .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload.mext_type = {SET_BOARD_ID},
             .dps_payload.data = wrong_assign.raw_data,
         };
         if (dps_check_can_command_recv(&mex)){
             FAILED("can message for id assignment not recognized");
-            failed++;
             return -1;
         }
         PASSED("can message for id assignment wrong recognized");
-        passed++;
         if (dps_get_id() == wrong_assign.full_data.obj_id.board_id){
             FAILED("wrong id to board assigned");
-            failed++;
             return -2;
         }
         PASSED("wrong id to board not assigned");
-        passed++;
     }
     return 0;
 }
 
-uint8_t send(CanMessage* mex){
+int send(CanMessage* mex){
     return 0;
 }
 
@@ -211,11 +200,9 @@ int run_test(){
 
     if (dps_init(send,&board_name)){
         FAILED("failed init of slave");
-        failed++;
         return -1;
     }
     PASSED("init completed");
-    passed++;
 
     if(check_link_req()){
         FAILED("failed to receive link request");
