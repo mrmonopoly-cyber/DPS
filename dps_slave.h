@@ -36,15 +36,12 @@ int dps_init(can_send send_f, BoardName* board_name);
 int dps_monitor_var_uint8_t(VariableInfoPrimitiveType* var_info);
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType* var_info);
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType* var_info);
-int dps_monitor_var_uint64_t(VariableInfoPrimitiveType* var_info);
 
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType* var_info);
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType* var_info);
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType* var_info);
-int dps_monitor_var_int64_t(VariableInfoPrimitiveType* var_info);
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType* var_info);
-int dps_monitor_var_double_t(VariableInfoPrimitiveType* var_info);
 
 //INFO: tell to dps to monitor a variable
 int dps_monitor_var_general(VariableInfoGericType* var_info);
@@ -57,6 +54,7 @@ int dps_check_can_command_recv(CanMessage* mex);
 
 #ifdef DEBUG
 int dps_get_id();
+void dps_print_var();
 
 #endif // DEBUG
 #endif // !__DPS_SLAVE__

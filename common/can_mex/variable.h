@@ -8,7 +8,9 @@
 DPS_TYPEDEF(
         struct {
         ObjectId obj_id;
-        uint8_t value[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+        union{
+            uint8_t value[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+        };
         },VariableValue);
 
 typedef VariableValue VariableModify;

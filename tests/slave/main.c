@@ -1,3 +1,4 @@
+#include <string.h>
 #define DEBUG
 
 #include "../../dps_slave.h"
@@ -30,7 +31,6 @@ int32_t s32= 0;
 int64_t s64= 0;
 
 float fdata= 0;
-double ddata= 0;
 
 typedef struct{
     uint8_t buffer[24];
@@ -56,15 +56,12 @@ int check_monitor_var()
     monitor_var(u8, dps_monitor_var_uint8_t, &u8);
     monitor_var(u16, dps_monitor_var_uint16_t, &u16);
     monitor_var(u32, dps_monitor_var_uint32_t, &u32);
-    monitor_var(u64, dps_monitor_var_uint64_t, &u64);
 
     monitor_var(s8, dps_monitor_var_int8_t, &s8);
     monitor_var(s16, dps_monitor_var_int16_t, &s16);
     monitor_var(s32, dps_monitor_var_int32_t, &s32);
-    monitor_var(s64, dps_monitor_var_int64_t, &s64);
 
     monitor_var(fdata, dps_monitor_var_float_t, &fdata);
-    monitor_var(ddata, dps_monitor_var_double_t, &ddata);
 
     VariableInfoGericType gen = {
         .name = "gen_t",
@@ -91,16 +88,18 @@ int check_monitor_com()
 }
 
 int check_update_var(){
-#define update_var(VID,VALUE)  \
+#define update_var(VID,VALUE_T, VALUE_D)  \
     {\
+        VALUE_T mod = VALUE_D;\
         VariableModify var ={\
-            .full_data.value[0] = VALUE,\
             .full_data.obj_id.data_id= VID,\
             .full_data.obj_id.board_id= BOARD_ID,\
         };\
+        memcpy(var.full_data.value, &mod, sizeof(mod));\
         CanMessage mex ={\
             .id = DPS_CAN_MESSAGE_ID,\
             .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,\
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
             .dps_payload.data = var.raw_data,\
         };\
         if (dps_check_can_command_recv(&mex)){\
@@ -110,12 +109,50 @@ int check_update_var(){
         PASSED("update mex recognized");\
     }
 
-    update_var(0, 1);
-    update_var(1, 6);
-    update_var(2, 3);
-    update_var(3, 3);
-    update_var(4, 5);
+    update_var(0, uint8_t, 1);
+    update_var(1, uint16_t,2);
+    update_var(2, uint32_t,3);
 
+    update_var(3, int8_t,-1);
+    update_var(4, int16_t,-2);
+    update_var(5, int32_t,-3);
+
+    {
+        float new_value = 2.5f;
+        VariableModify var ={
+            .full_data.obj_id.data_id= 6,
+            .full_data.obj_id.board_id= BOARD_ID,
+        };
+        mempcpy(var.full_data.value, &new_value, sizeof(new_value));
+        CanMessage mex ={
+            .id = DPS_CAN_MESSAGE_ID,
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
+            .dps_payload.data = var.raw_data,
+        };
+        if (dps_check_can_command_recv(&mex)){
+            FAILED("update mex not recognized");
+            return -1;
+        }
+        PASSED("update mex recognized");
+    }
+    
+#define check_variable(var,value_expected) \
+    if( var == value_expected) {\
+        PASSED(#var " updated correctly");\
+    }else{\
+        FAILED(#var " updated wrong") \
+    }
+
+    check_variable(u8, 1);
+    check_variable(u16, 2);
+    check_variable(u32, 3);
+
+    check_variable(s8, -1);
+    check_variable(s16, -2);
+    check_variable(s32, -3);
+
+    check_variable(fdata, 2.5f);
     return 0;
 }
 
@@ -141,7 +178,7 @@ int check_link_req(){
 
 int check_id_assign(){
     AssignBoarId correct_assign = {
-        .full_data.obj_id.board_id = 1,
+        .full_data.obj_id.board_id = BOARD_ID,
         .full_data.name = "TSLAVE",
     };
 
@@ -239,6 +276,5 @@ int main(void)
     printf("passed %d\n",passed);
     printf("failed %d\n",failed);
     printf("========================================\n");
-
     return 0;
 }
