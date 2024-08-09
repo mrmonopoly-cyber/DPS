@@ -2,19 +2,22 @@
 
 #include "../../dps_slave.h"
 #include "../../common/can_mex/info_req.h"
+#include "../../common/can_mex/variable.h"
 
 #include <stdint.h>
 #include <stdio.h>
 
-#define Color_Red "\33[0:31m\\]" 
-#define Color_Green "\33[0:32m\\]" 
-#define Color_end "\33[0m\\]" // To flush out prev settings
+#define Color_Red "\33[31m" 
+#define Color_Green "\33[32m" 
+#define Color_end "\33[0m" // To flush out prev settings
 
 #define PASSED(str) printf(Color_Green str Color_end "\n");
 #define FAILED(str) printf(Color_Red str Color_end "\n");
 
 uint8_t passed = 0;
 uint8_t failed = 0;
+
+#define BOARD_ID 5
 
 uint8_t u8 =0;
 uint16_t u16 = 0;
@@ -92,8 +95,31 @@ int check_monitor_com()
 }
 
 int check_update_var(){
-    //TODO: unimplemented
-    printf("to implement\n");
+#define update_var(VID,VALUE)  \
+    {\
+        VariableModify var ={\
+            .full_data.value[0] = VALUE,\
+            .full_data.obj_id.data_id= VID,\
+            .full_data.obj_id.board_id= BOARD_ID,\
+        };\
+        CanMessage mex ={\
+            .id = DPS_CAN_MESSAGE_ID,\
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,\
+            .dps_payload.data = var.raw_data,\
+        };\
+        if (dps_check_can_command_recv(&mex)){\
+            FAILED("update mex not recognized");\
+            return -1;\
+        }\
+        PASSED("update mex recognized");\
+    }
+
+    update_var(0, 1);
+    update_var(1, 6);
+    update_var(2, 3);
+    update_var(3, 3);
+    update_var(4, 5);
+
     return 0;
 }
 
@@ -178,8 +204,7 @@ uint8_t send(CanMessage* mex){
     return 0;
 }
 
-int main(void)
-{
+int run_test(){
     BoardName board_name = {
         .full_data.name = "TSLAVE",
     };
@@ -216,11 +241,17 @@ int main(void)
         FAILED("failed updating vars");
         return -6;;
     }
+    return 0;
+}
 
-    printf("========================================");
+int main(void)
+{
+    run_test();
+
+    printf("========================================\n");
     printf("passed %d\n",passed);
     printf("failed %d\n",failed);
-    printf("========================================");
+    printf("========================================\n");
 
     return 0;
 }
