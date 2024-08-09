@@ -14,6 +14,8 @@
 
 //private
 
+#define CHECK_INIT() assert(dps.vars);assert(dps.coms);
+
 struct slave_dps{
     char board_name[BOARD_NAME_LENGTH];
     can_send send_f;
@@ -25,6 +27,11 @@ struct slave_dps{
 struct var_internal{
     uint8_t var_id :4; 
     VariableInfoGericType data;
+};
+
+struct com_internal{
+    uint8_t com_id :4; 
+    CommandInfo data;
 };
 
 static struct slave_dps dps;
@@ -39,10 +46,25 @@ static int found_var(const void* list_ele, const void* key){
     return ele_l->var_id == id;
 }
 
+static int found_com(const void* list_ele, const void* key){
+    const struct com_internal* ele_l =  list_ele;
+    uint8_t id = *(uint8_t *) key;
+
+    return ele_l->com_id == id;
+}
+
 static void print_var(const void* ele){
     const struct var_internal* var = ele;
     printf("var_id :%d,",var->var_id);
     printf("var_name :%s\n",var->data.name);
+}
+
+static void print_com(const void* ele){
+    const struct com_internal* com = ele;
+    printf("com_id :%d,",com->com_id);
+    printf("com_name :%s\n",com->data.name);
+    printf("com_id :%d\n",com->data.id);
+    printf("com_dlc :%d\n",com->data.dlc);
 }
 
 static uint8_t new_id(){
@@ -114,15 +136,27 @@ int dps_init(can_send send_f, BoardName* board_name)
     dps.send_f = send_f;
     dps.board_id = -1;
     {
-        struct c_vector_input_init args = {
+        struct c_vector_input_init vars = {
             .capacity = 10,
             .ele_size = sizeof(struct var_internal),
             .free_fun =  dummy_fun,
             .print_fun = print_var,
             .found_f = found_var,
         };
-        dps.vars = c_vector_init(&args);
+
+        struct c_vector_input_init coms= {
+            .capacity = 10,
+            .ele_size = sizeof(struct com_internal),
+            .free_fun =  dummy_fun,
+            .print_fun = print_com,
+            .found_f = found_com,
+        };
+        dps.vars = c_vector_init(&vars);
         if (!dps.vars){
+            return EXIT_FAILURE;
+        }
+        dps.coms = c_vector_init(&coms);
+        if (!dps.coms){
             return EXIT_FAILURE;
         }
     }
@@ -131,6 +165,8 @@ int dps_init(can_send send_f, BoardName* board_name)
 
 int dps_monitor_var_uint8_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -154,6 +190,8 @@ int dps_monitor_var_uint8_t(VariableInfoPrimitiveType* var_info)
 }
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -176,6 +214,8 @@ int dps_monitor_var_uint16_t(VariableInfoPrimitiveType* var_info)
 }
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -199,6 +239,8 @@ int dps_monitor_var_uint32_t(VariableInfoPrimitiveType* var_info)
 
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -221,6 +263,8 @@ int dps_monitor_var_int8_t(VariableInfoPrimitiveType* var_info)
 }
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -243,6 +287,8 @@ int dps_monitor_var_int16_t(VariableInfoPrimitiveType* var_info)
 }
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -266,6 +312,8 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType* var_info)
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -290,6 +338,8 @@ int dps_monitor_var_float_t(VariableInfoPrimitiveType* var_info)
 //INFO: tell to dps to monitor a variable
 int dps_monitor_var_general(VariableInfoGericType* var_info)
 {
+    CHECK_INIT();
+
     assert(var_info);
     assert(var_info->var_ptr);
     assert(var_info->name);
@@ -309,12 +359,29 @@ int dps_monitor_var_general(VariableInfoGericType* var_info)
 //INFO: tell to dps a dps_command the board can receive 
 int dps_monitor_command(CommandInfo* comm_name)
 {
-    return EXIT_FAILURE;
+    CHECK_INIT();
+
+    assert(comm_name);
+    assert(comm_name->name);
+    assert(comm_name->id);
+
+    struct com_internal new_com ={
+        .com_id = new_id(),
+        .data = *comm_name,
+    };
+
+    if(!c_vector_push(&dps.coms, &new_com)){
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
 
 //INFO: check if a can message is for the dps and if it's the case it executes the message
 int dps_check_can_command_recv(CanMessage* mex)
 {
+    CHECK_INIT();
+
     assert(mex);
 
     if (mex->id == DPS_CAN_MESSAGE_ID){
@@ -333,11 +400,15 @@ int dps_check_can_command_recv(CanMessage* mex)
 
 int dps_get_id()
 {
+    CHECK_INIT();
+
     return dps.board_id;
 }
 
 void dps_print_var()
 {
+    CHECK_INIT();
+
     struct var_internal* var = NULL;
     uint len = c_vector_length(dps.vars);
     for (int i=0; i<len; i++) {

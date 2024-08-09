@@ -82,8 +82,27 @@ int check_monitor_var()
 
 int check_monitor_com()
 {
-    //TODO: unimplemented
-    printf("to implement\n");
+#define monitor_com(ID,DLC,MAX,MIN,NAME,FLOAT,SIGN) \
+    {\
+        CommandInfo com ={\
+            .id = ID,\
+            .dlc = DLC,\
+            .max = MAX,\
+            .min = MIN,\
+            .name = NAME,\
+            .float_num= FLOAT,\
+            .signd_num = SIGN,\
+        };\
+        if(dps_monitor_command(&com)){\
+            FAILED("monitor command save failed");\
+            return -1;\
+        }\
+        PASSED("monitor command save success");\
+    }
+
+    monitor_com(15, 6, 50, 5, "COM_1S", 0, 0);
+    monitor_com(20, 8, 50, 5, "COM_2S", 1, 1);
+
     return 0;
 }
 

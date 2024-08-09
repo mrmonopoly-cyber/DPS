@@ -7,10 +7,12 @@
 #include "base_mex_components/base_payload.h"
 #include "base_mex_components/obj_id.h"
 
+#define NAME_MAX_SIZE CAN_MAX_SIZE_MEX - sizeof(ObjectId)
+
 DPS_TYPEDEF(
         struct{
         ObjectId obj_id;
-        char name[CAN_MAX_SIZE_MEX];
+        char name[NAME_MAX_SIZE];
         }, ObjName);
 
 DPS_TYPEDEF(

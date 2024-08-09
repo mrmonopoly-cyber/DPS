@@ -4,15 +4,16 @@
 #include <stdint.h>
 
 #include "common/can_mex/board.h"
+#include "common/can_mex/object.h"
 #include "common/messages.h"
 
 typedef struct{
-    char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+    char name[NAME_MAX_SIZE];
     void* var_ptr;
 }VariableInfoPrimitiveType;
 
 typedef struct{
-    char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+    char name[NAME_MAX_SIZE];
     uint8_t size;
     uint8_t signd_var : 1;
     uint8_t float_var : 1;
@@ -20,8 +21,8 @@ typedef struct{
 }VariableInfoGericType;
 
 typedef struct{
-    char name[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
-    uint8_t id;
+    char name[NAME_MAX_SIZE];
+    int id;
     uint8_t dlc;
     uint8_t min;
     uint8_t max;
