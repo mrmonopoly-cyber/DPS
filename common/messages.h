@@ -22,6 +22,4 @@ typedef struct CanMessage{
 
 typedef uint8_t (*can_send) (CanMessage* mex);
 
-uint8_t t = sizeof(CanMessage);
-
 #endif // !__DPS_MESSAGES__
