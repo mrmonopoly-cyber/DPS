@@ -9,7 +9,7 @@ OBJ_FILE = dps_slave.o c_vector.o c_check_input.o
 all: main
 
 main: main.c $(OBJ_FILE)
-	gcc $(C_FLAGS) main.c $(OBJ_FILE) -o main
+	gcc $(C_FLAGS) main.c $(OBJ_FILE) ../test_lib.c -o main
 
 clean:
 	rm main

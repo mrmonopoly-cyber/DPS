@@ -12,11 +12,13 @@ char board_name[][num_boards]={
     "STE",
 };
 
-uint8_t debug_send(CanMessage* mex){
+int debug_send(CanMessage* mex){
     return 0;
 }
 
 int main(void)
 {
+    if(dps_master_init(debug_send)){
+    }
     return 0;
 }

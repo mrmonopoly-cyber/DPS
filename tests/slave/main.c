@@ -1,23 +1,14 @@
 #include <assert.h>
 #include <string.h>
-#define DEBUG
 
+#define DEBUG
 #include "../../dps_slave.h"
 #include "../../common/can_mex/info_req.h"
 #include "../../common/can_mex/variable.h"
 
 #include <stdint.h>
-#include <stdio.h>
 
-#define Color_Red "\33[31m" 
-#define Color_Green "\33[32m" 
-#define Color_end "\33[0m" // To flush out prev settings
-
-#define PASSED(str) printf(Color_Green str Color_end "\n"); passed++;
-#define FAILED(str) printf(Color_Red str Color_end "\n"); failed++;
-
-uint8_t passed = 0;
-uint8_t failed = 0;
+#include "../test_lib.h"
 
 #define BOARD_ID 5
 
@@ -184,21 +175,15 @@ int check_update_var(){
     }
     
 #define check_variable(var,value_expected) \
-    if( var == value_expected) {\
-        PASSED(#var " updated correctly");\
-    }else{\
-        FAILED(#var " updated wrong") \
-    }
+    u8 == 1 ? PASSED("u8 updated correctly") : FAILED("u8 update failed");
+    u16 == 2 ? PASSED("u16 updated correctly") : FAILED("u16 update failed");
+    u32 == 3 ? PASSED("u32 updated correctly") : FAILED("u32 update failed");
 
-    check_variable(u8, 1);
-    check_variable(u16, 2);
-    check_variable(u32, 3);
+    s8 == -1 ? PASSED("s8 updated correctly") : FAILED("s8 update failed");
+    s16 == -2 ? PASSED("s16 updated correctly") : FAILED("s16 update failed");
+    s32 == -3 ? PASSED("s32 updated correctly") : FAILED("s32 update failed");
 
-    check_variable(s8, -1);
-    check_variable(s16, -2);
-    check_variable(s32, -3);
-
-    check_variable(fdata, 2.5f);
+    fdata == 2.5f ? PASSED("fdata updated correctly") : FAILED("fdata update failed");
 
     if(gen_t.a !=4 || gen_t.b != 12 || gen_t.c != 24){
         FAILED("generic type update failed");
@@ -323,11 +308,6 @@ int run_test(){
 int main(void)
 {
     run_test();
-
-    printf("========================================\n");
-    printf("passed %d\n",passed);
-    printf("failed %d\n",failed);
-    printf("========================================\n");
-
+    print_SCORE();
     return 0;
 }
