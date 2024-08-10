@@ -55,7 +55,9 @@ int dps_check_can_command_recv(CanMessage* mex);
 
 #ifdef DEBUG
 int dps_get_id();
-void dps_print_var();
+int dps_print_var();
+int dps_print_com();
+
 
 #endif // DEBUG
 #endif // !__DPS_SLAVE__

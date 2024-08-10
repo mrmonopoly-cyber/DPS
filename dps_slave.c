@@ -417,3 +417,16 @@ int dps_print_var()
     }
     return EXIT_SUCCESS;
 }
+
+int dps_print_com()
+{
+    CHECK_INIT();
+
+    struct com_internal* com = NULL;
+    uint len = c_vector_length(dps.coms);
+    for (uint i=0; i<len; i++) {
+        com = c_vector_get_at_index(dps.coms, i);
+        print_com(com);
+    }
+    return EXIT_SUCCESS;
+}
