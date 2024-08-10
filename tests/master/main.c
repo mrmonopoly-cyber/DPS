@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #define __DEBUG__
 #include "../../dps_master.h"
 #include "../../common/can_mex/board.h"
@@ -40,6 +41,17 @@ int new_board_connection(){
         }
         PASSED("ok saved new board");
     }
+
+    board_list_info* boards_l = dps_master_list_board();
+    for (uint8_t i =0; i < boards_l->board_num; i++) {
+        if (strcmp(boards_l->boards[i].name, boards[i])) {
+            free(boards_l);
+            FAILED("board saved different from imput");
+            return -1;
+        }
+        PASSED("ok board saved from imput");
+    }
+    free(boards_l);
 
     return 0;
 }

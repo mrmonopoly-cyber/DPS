@@ -2,6 +2,7 @@
 #include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/base_mex_components/mex_types.h"
 #include "common/can_mex/board.h"
+#include "common/can_mex/command.h"
 #include "common/can_mex/new_connection.h"
 #include "common/can_mex/object.h"
 #include "common/messages.h"
@@ -30,13 +31,10 @@ typedef struct {
 
 typedef struct{
     uint8_t com_id;
+    CommandInfoMetadata metadata;
     board_record* board;
 }com_record;
 
-typedef struct{
-    char name[NAME_MAX_SIZE];
-    ObjMetadata metadata;
-}var_record;
 
 static uint8_t new_id(){
     static uint8_t id_generator = 0;
@@ -198,4 +196,23 @@ int dps_master_print_boards()
     }
 
     return EXIT_SUCCESS;
+}
+
+
+board_list_info* dps_master_list_board()
+{
+    uint8_t len = c_vector_length(dps.boards);
+    board_list_info* res = calloc(1, sizeof(board_list_info) + (sizeof(board_info)* len));
+    res->board_num = len;
+    for (uint8_t i=0; i<len; i++) {
+        board_record* board = c_vector_get_at_index(dps.boards, i);
+        if (!board) {
+            free(res);
+            return NULL;
+        }
+        res->boards[i].id = board->id;
+        res->boards[i].name = board->board_name;
+    }
+    
+    return res;
 }
