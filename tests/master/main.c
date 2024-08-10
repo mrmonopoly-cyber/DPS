@@ -1,21 +1,46 @@
+#define __DEBUG__
 #include "../../dps_master.h"
+#include "../../common/can_mex/board.h"
 
 #include "../test_lib.h"
 
+#include <string.h>
 #include <stdint.h>
 
-#define num_boards 6
-uint8_t board_ids[num_boards] = {0,1,2,3,4,5};
-char board_name[][num_boards]={
-    "ATC",
-    "SMU",
-    "MCU",
-    "PCU",
-    "IMU",
-    "STE",
+
+char *boards[BOARD_NAME_LENGTH] =
+{
+    "SLAVE1",
+    "SLAVE2",
+    "SLAVE3",
+    "SLAVE4",
+    "SLAVE5",
 };
 
 int debug_send(CanMessage* mex){
+    return 0;
+}
+
+int new_board_connection(){
+    for (long unsigned int i =0; i < 5; i++) {
+        BoardName new_board_name ={
+        };
+        memcpy(new_board_name.full_data.name, boards[i], BOARD_NAME_LENGTH);
+        CanMessage mex = {
+            .id = DPS_CAN_MESSAGE_ID,
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload = {
+                .mext_type = {GET_BOARD_NAME},
+                .data = new_board_name.raw_data,
+            },
+        };
+        if(dps_master_check_mex_recv(&mex)){
+            FAILED("failed saved new board");
+            return -1;
+        }
+        PASSED("ok saved new board");
+    }
+
     return 0;
 }
 
@@ -33,6 +58,12 @@ int run_test(){
     }
     PASSED("ok sending new connection request");
 
+    if(new_board_connection()){
+        FAILED("failed connection saving of new boards");
+        return -1;
+    }
+    PASSED("ok connection saving of new boards");
+
     return 0;
 }
 
@@ -40,6 +71,8 @@ int main(void)
 {
     run_test();
     print_SCORE();
+
+    dps_master_print_boards();
 
     return 0;
 }

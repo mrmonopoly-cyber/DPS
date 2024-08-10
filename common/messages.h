@@ -17,7 +17,6 @@ typedef struct CanMessage{
         }dps_payload;
         RawPayloadCanMex rawMex;
     };
-    uint8_t padding_byte;
 }CanMessage;
 
 typedef int (*can_send) (CanMessage* mex);

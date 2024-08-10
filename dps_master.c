@@ -2,12 +2,15 @@
 #include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/base_mex_components/mex_types.h"
 #include "common/can_mex/board.h"
-#include "common/can_mex/info_req.h"
 #include "common/can_mex/new_connection.h"
+#include "common/can_mex/object.h"
 #include "common/messages.h"
 #include "lib/c_vector/c_vector.h"
 
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //private
 
@@ -30,6 +33,11 @@ typedef struct{
     board_record* board;
 }com_record;
 
+typedef struct{
+    char name[NAME_MAX_SIZE];
+    ObjMetadata metadata;
+}var_record;
+
 static uint8_t new_id(){
     static uint8_t id_generator = 0;
     id_generator++;
@@ -37,6 +45,7 @@ static uint8_t new_id(){
 }
 
 static struct dps_master dps;
+#define CHECK_INIT() if(!dps.send_f || !dps.boards || !dps.coms) return EXIT_FAILURE;
 
 static int found_board(const void* ele, const void* key){
     const board_record* board = ele;
@@ -52,11 +61,57 @@ static int found_com(const void* ele, const void* key){
     return board->id == *id;
 }
 
+static int found_var(const void* ele, const void* key){
+    const var_record* var= ele;
+    const uint8_t* id = key;
+
+    return var->metadata.full_data.obj_id.data_id == *id;
+}
+
 static void dummy_func_const(const void* ele) {}
 
 
 static void dummy_fun(void* ele){}
 
+static int get_board_name_exec(CanMessage* mex){
+    BoardName b_name = {
+        .raw_data = mex->dps_payload.data,
+    };
+
+    struct c_vector_input_init args = {
+        .capacity = 10,
+        .ele_size = sizeof(var_record),
+        .print_fun = dummy_func_const,
+        .free_fun = dummy_fun,
+        .found_f = found_var,
+    };
+
+    board_record new_board = {
+        .id = new_id(),
+        .vars = c_vector_init(&args),
+    };
+    memcpy(new_board.board_name, b_name.full_data.name, BOARD_NAME_LENGTH);
+
+    if (!c_vector_push(&dps.boards, &new_board)){
+        return EXIT_FAILURE;
+    }
+
+    AssignBoarId board_id = {
+        .full_data.obj_id.board_id = new_board.id,
+    };
+    memcpy(board_id.full_data.name,new_board.board_name,BOARD_NAME_LENGTH);
+
+    CanMessage mex_id = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload = {
+            .mext_type = {SET_BOARD_ID},
+            .data = board_id.raw_data,
+        },
+    };
+
+    return dps.send_f(&mex_id);
+}
 
 //public
 int dps_master_init(can_send send_f)
@@ -94,6 +149,8 @@ int dps_master_init(can_send send_f)
 
 int dps_master_new_connection()
 {
+    CHECK_INIT();
+
     new_connection conn = {
     };
     CanMessage mex = {
@@ -106,4 +163,39 @@ int dps_master_new_connection()
     };
 
     return dps.send_f(&mex);
+}
+
+int dps_master_check_mex_recv(CanMessage* mex)
+{
+    CHECK_INIT();
+
+    CHECK_INPUT(mex);
+
+    if(mex->id == DPS_CAN_MESSAGE_ID) {
+        switch (mex->dps_payload.mext_type.type) {
+            case GET_BOARD_NAME:
+                return get_board_name_exec(mex);
+        }
+    
+    }
+
+
+    return EXIT_FAILURE;
+}
+
+//debug
+
+int dps_master_print_boards()
+{
+    int len = c_vector_length(dps.boards);
+    for (int i=0; i<len; i++) {
+        board_record* board = c_vector_get_at_index(dps.boards, i);
+        if (!board) {
+            return EXIT_FAILURE;
+        }
+        printf("board id: %d,",board->id);
+        printf("board name: %s\n",board->board_name);
+    }
+
+    return EXIT_SUCCESS;
 }

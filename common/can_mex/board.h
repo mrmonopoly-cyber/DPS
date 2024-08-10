@@ -15,7 +15,7 @@ DPS_TYPEDEF(
 
 DPS_TYPEDEF(
         struct{
-        char name[CAN_MAX_SIZE_MEX];
+        char name[BOARD_NAME_LENGTH];
         },BoardName);
 
 #endif // !__DPS_CAN_BOARD__

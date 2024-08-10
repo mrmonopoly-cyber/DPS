@@ -23,4 +23,10 @@ int dps_master_new_connection();
 //EXIT_FAILURE otherwise
 int dps_master_check_mex_recv(CanMessage* mex);
 
+#ifdef __DEBUG__
+
+int dps_master_print_boards();
+
+#endif // __DEBUG__
+
 #endif // !__DPS_MASTER__
