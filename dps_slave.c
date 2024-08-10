@@ -411,7 +411,7 @@ void dps_print_var()
 
     struct var_internal* var = NULL;
     uint len = c_vector_length(dps.vars);
-    for (int i=0; i<len; i++) {
+    for (uint i=0; i<len; i++) {
         var = c_vector_get_at_index(dps.vars, i);
         print_var(var);
     }

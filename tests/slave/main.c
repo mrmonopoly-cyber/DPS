@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #define DEBUG
 
@@ -33,7 +34,9 @@ int64_t s64= 0;
 float fdata= 0;
 
 typedef struct{
-    uint8_t buffer[24];
+    uint8_t a;
+    uint16_t b;
+    uint8_t c;
 }generic_type;
 
 generic_type gen_t = {};
@@ -155,6 +158,30 @@ int check_update_var(){
         }
         PASSED("update mex recognized");
     }
+
+    {
+        generic_type new_value = {
+            .a = 4,
+            .b = 12,
+            .c = 24,
+        };
+        VariableModify var ={
+            .full_data.obj_id.data_id= 7,
+            .full_data.obj_id.board_id= BOARD_ID,
+        };
+        mempcpy(var.full_data.value, &new_value, sizeof(new_value));
+        CanMessage mex ={
+            .id = DPS_CAN_MESSAGE_ID,
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
+            .dps_payload.data = var.raw_data,
+        };
+        if (dps_check_can_command_recv(&mex)){
+            FAILED("update mex not recognized");
+            return -1;
+        }
+        PASSED("update mex recognized");
+    }
     
 #define check_variable(var,value_expected) \
     if( var == value_expected) {\
@@ -172,6 +199,12 @@ int check_update_var(){
     check_variable(s32, -3);
 
     check_variable(fdata, 2.5f);
+
+    if(gen_t.a !=4 || gen_t.b != 12 || gen_t.c != 24){
+        FAILED("generic type update failed");
+        return -1;
+    }
+    PASSED("generic type update ok");
     return 0;
 }
 
