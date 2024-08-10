@@ -7,14 +7,14 @@
 #include "common/messages.h"
 #include "lib/c_vector/c_vector.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 //private
 
-#define CHECK_INIT() assert(dps.vars);assert(dps.coms);
+#define CHECK_INIT() if(!dps.vars || !dps.coms){return EXIT_FAILURE;}
+#define CHECK_INPUT(input) if(!input) {return EXIT_FAILURE;}
 
 struct slave_dps{
     char board_name[BOARD_NAME_LENGTH];
@@ -129,8 +129,8 @@ static int set_var_value_exec(CanMessage* mex){
 //public
 int dps_init(can_send send_f, BoardName* board_name)
 {
-    assert(send_f);
-    assert(board_name);
+    CHECK_INPUT(send_f);
+    CHECK_INPUT(board_name);
 
     memcpy(dps.board_name, board_name->full_data.name, BOARD_NAME_LENGTH);
     dps.send_f = send_f;
@@ -167,9 +167,9 @@ int dps_monitor_var_uint8_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -192,9 +192,9 @@ int dps_monitor_var_uint16_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -216,9 +216,9 @@ int dps_monitor_var_uint32_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -241,9 +241,9 @@ int dps_monitor_var_int8_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -265,9 +265,9 @@ int dps_monitor_var_int16_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -289,9 +289,9 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -314,9 +314,9 @@ int dps_monitor_var_float_t(VariableInfoPrimitiveType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -340,9 +340,9 @@ int dps_monitor_var_general(VariableInfoGericType* var_info)
 {
     CHECK_INIT();
 
-    assert(var_info);
-    assert(var_info->var_ptr);
-    assert(var_info->name);
+    CHECK_INPUT(var_info);
+    CHECK_INPUT(var_info->var_ptr);
+    CHECK_INPUT(var_info->name);
 
     struct var_internal new_var = {
         .var_id = new_id(),
@@ -361,9 +361,9 @@ int dps_monitor_command(CommandInfo* comm_name)
 {
     CHECK_INIT();
 
-    assert(comm_name);
-    assert(comm_name->name);
-    assert(comm_name->id);
+    CHECK_INPUT(comm_name);
+    CHECK_INPUT(comm_name->name);
+    CHECK_INPUT(comm_name->id);
 
     struct com_internal new_com ={
         .com_id = new_id(),
@@ -382,7 +382,7 @@ int dps_check_can_command_recv(CanMessage* mex)
 {
     CHECK_INIT();
 
-    assert(mex);
+    CHECK_INPUT(mex);
 
     if (mex->id == DPS_CAN_MESSAGE_ID){
         switch(mex->dps_payload.mext_type.type){
@@ -405,7 +405,7 @@ int dps_get_id()
     return dps.board_id;
 }
 
-void dps_print_var()
+int dps_print_var()
 {
     CHECK_INIT();
 
@@ -415,4 +415,5 @@ void dps_print_var()
         var = c_vector_get_at_index(dps.vars, i);
         print_var(var);
     }
+    return EXIT_SUCCESS;
 }
