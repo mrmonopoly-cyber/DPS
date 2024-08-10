@@ -3,8 +3,8 @@
 
 #define DEBUG
 #include "../../dps_slave.h"
-#include "../../common/can_mex/info_req.h"
 #include "../../common/can_mex/variable.h"
+#include "../../common/can_mex/new_connection.h"
 
 #include <stdint.h>
 
@@ -194,15 +194,12 @@ int check_update_var(){
 }
 
 int check_link_req(){
-    ReqInfo new_connection= {
-        .full_data.info_t = NEW_CONNECTION,
-    };
-
+    new_connection conn = {};
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-        .dps_payload.mext_type = {GET_INFO},
-        .dps_payload.data = new_connection.raw_data,
+        .dps_payload.mext_type = {NEW_CONNECTION},
+        .dps_payload.data = conn.raw_data,
     };
 
     if(dps_check_can_command_recv(&mex)){

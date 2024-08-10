@@ -12,6 +12,7 @@ enum MEX_TYPE{
 
     GET_INFO,
 
+NEW_CONNECTION,
     DUMMY_TYPE,
 };
 

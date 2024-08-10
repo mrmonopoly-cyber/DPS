@@ -77,21 +77,6 @@ static int req_inf_exec(CanMessage* mex){
         .raw_data = mex->dps_payload.data,
     };
     switch (data_mex.full_data.info_t) {
-        case NEW_CONNECTION:
-            {
-                BoardName resp_payload;
-                memcpy(resp_payload.full_data.name, dps.board_name, 
-                        BOARD_NAME_LENGTH);
-                CanMessage mex = {
-                    .id = DPS_CAN_MESSAGE_ID,
-                    .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-                    .dps_payload.data = resp_payload.raw_data,
-                };
-                if(dps.send_f(&mex)){
-                    return EXIT_FAILURE;
-                }
-                return EXIT_SUCCESS;
-            }
             break;
         default:
             perror("not implemented");
@@ -123,6 +108,22 @@ static int set_var_value_exec(CanMessage* mex){
         }
     }
 
+    return EXIT_SUCCESS;
+}
+
+static int new_connection_exec()
+{
+    BoardName resp_payload;
+    memcpy(resp_payload.full_data.name, dps.board_name, 
+            BOARD_NAME_LENGTH);
+    CanMessage mex = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload.data = resp_payload.raw_data,
+    };
+    if(dps.send_f(&mex)){
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 
@@ -393,6 +394,9 @@ int dps_check_can_command_recv(CanMessage* mex)
                 return set_board_id_exec(mex);
             case SET_CURRENT_VAR_VALUE:
                 return set_var_value_exec(mex);
+            case NEW_CONNECTION:
+                return new_connection_exec();
+                break;
         }
     }
 
