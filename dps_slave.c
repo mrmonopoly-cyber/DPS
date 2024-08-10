@@ -131,6 +131,7 @@ int dps_init(can_send send_f, BoardName* board_name)
 {
     CHECK_INPUT(send_f);
     CHECK_INPUT(board_name);
+    CHECK_INPUT(board_name->full_data.name[0])
 
     memcpy(dps.board_name, board_name->full_data.name, BOARD_NAME_LENGTH);
     dps.send_f = send_f;
@@ -398,6 +399,7 @@ int dps_check_can_command_recv(CanMessage* mex)
     return EXIT_FAILURE;
 }
 
+//debug
 int dps_get_id()
 {
     CHECK_INIT();
