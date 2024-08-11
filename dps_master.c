@@ -5,6 +5,7 @@
 #include "common/can_mex/command.h"
 #include "common/can_mex/new_connection.h"
 #include "common/can_mex/object.h"
+#include "common/can_mex/variable.h"
 #include "common/messages.h"
 #include "lib/c_vector/c_vector.h"
 
@@ -111,6 +112,52 @@ static int get_board_name_exec(CanMessage* mex){
     return dps.send_f(&mex_id);
 }
 
+int get_var_name_exec(CanMessage* mex)
+{
+    VariableInfoName var_name = {
+        .raw_data = mex->dps_payload.data,
+    };
+
+    uint8_t board_id  = var_name.full_data.obj_id.board_id;
+    board_record* board = c_vector_find(dps.boards, &board_id);
+    if (board) {
+        var_record new_var = {
+            .metadata.full_data.obj_id = var_name.full_data.obj_id,
+        };
+        memcpy(new_var.name, var_name.full_data.name, sizeof(var_name.full_data.name));
+
+        if(!c_vector_push(&board->vars, &new_var)){
+            return EXIT_FAILURE;
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_FAILURE;
+}
+
+int get_var_metadata_exec(CanMessage* mex)
+{
+    VariableInfoMetadata var_metadata = {
+        .raw_data = mex->dps_payload.data,
+    };
+
+    uint8_t board_id  = var_metadata.full_data.obj_id.board_id;
+    board_record* board = c_vector_find(dps.boards, &board_id);
+    if (board) {
+        uint8_t var_id = var_metadata.full_data.obj_id.data_id;
+        var_record* new_var = c_vector_find(board->vars, &var_id);
+        if (new_var) {
+            new_var->metadata = var_metadata;
+            return EXIT_SUCCESS;
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_FAILURE;
+}
+
 //public
 int dps_master_init(can_send send_f)
 {
@@ -163,6 +210,58 @@ int dps_master_new_connection()
     return dps.send_f(&mex);
 }
 
+board_list_info* dps_master_list_board()
+{
+    uint8_t len = c_vector_length(dps.boards);
+    board_list_info* res = calloc(1, sizeof(board_list_info) + (sizeof(board_info)* len));
+    res->board_num = len;
+    for (uint8_t i=0; i<len; i++) {
+        board_record* board = c_vector_get_at_index(dps.boards, i);
+        if (!board) {
+            free(res);
+            return NULL;
+        }
+        res->boards[i].id = board->id;
+        res->boards[i].name = board->board_name;
+    }
+    
+    return res;
+}
+
+//INFO: return a list of all the vars known by the master in a board
+int dps_master_list_vars(uint8_t board_id, var_list_info** o_list)
+{
+    CHECK_INIT();
+    CHECK_INPUT(o_list);
+
+    board_record* board = c_vector_find(dps.boards, &board_id);
+    var_list_info* list = NULL;
+    if (board) {
+        uint8_t len = c_vector_length(board->vars);
+        *o_list = calloc(len, sizeof(*list) + (len * sizeof( *((*list).vars)) ));
+        list = *o_list;
+
+        for (uint8_t i=0; i<len; i++) {
+            var_record* var = c_vector_get_at_index(board->vars, i);
+            if (var) {
+                list->vars[i] = *var;
+            }
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_FAILURE;
+}
+
+//INFO: return a list of all the coms known by the master in a board
+int dps_master_list_coms(com_list_info* o_list)
+{
+
+
+    return EXIT_FAILURE;
+}
+
 int dps_master_check_mex_recv(CanMessage* mex)
 {
     CHECK_INIT();
@@ -173,6 +272,10 @@ int dps_master_check_mex_recv(CanMessage* mex)
         switch (mex->dps_payload.mext_type.type) {
             case GET_BOARD_NAME:
                 return get_board_name_exec(mex);
+            case VAR_NAME:
+                return get_var_name_exec(mex);
+            case VAR_METADATA:
+                return get_var_metadata_exec(mex);
         }
     
     }
@@ -199,20 +302,3 @@ int dps_master_print_boards()
 }
 
 
-board_list_info* dps_master_list_board()
-{
-    uint8_t len = c_vector_length(dps.boards);
-    board_list_info* res = calloc(1, sizeof(board_list_info) + (sizeof(board_info)* len));
-    res->board_num = len;
-    for (uint8_t i=0; i<len; i++) {
-        board_record* board = c_vector_get_at_index(dps.boards, i);
-        if (!board) {
-            free(res);
-            return NULL;
-        }
-        res->boards[i].id = board->id;
-        res->boards[i].name = board->board_name;
-    }
-    
-    return res;
-}

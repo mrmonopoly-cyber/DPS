@@ -51,19 +51,19 @@ int dps_master_init(can_send send_f);
 //EXIT_FAILURE if errors happens
 int dps_master_new_connection();
 
-//INFO: check if a message in input is for the library and operate if can
-//return EXIT_SUCCESS if the message belongs to the library
-//EXIT_FAILURE otherwise
-int dps_master_check_mex_recv(CanMessage* mex);
-
 //INFO: return a list of all the board known by the master with theirs id
 board_list_info* dps_master_list_board();
 
 //INFO: return a list of all the vars known by the master in a board
-var_list_info* dps_master_list_vars(uint8_t board_id);
+int dps_master_list_vars(uint8_t board_id, var_list_info** o_list);
 
-//INFO: return a list of all the coms known by the master in a board
-com_list_info* dps_master_list_coms(uint8_t board_id);
+//INFO: return a list of all the coms known by the master 
+int dps_master_list_coms(com_list_info* o_list);
+
+//INFO: check if a message in input is for the library and operate if can
+//return EXIT_SUCCESS if the message belongs to the library
+//EXIT_FAILURE otherwise
+int dps_master_check_mex_recv(CanMessage* mex);
 
 #ifdef __DEBUG__
 

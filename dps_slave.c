@@ -7,6 +7,7 @@
 #include "common/messages.h"
 #include "lib/c_vector/c_vector.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -76,8 +77,37 @@ static int req_inf_exec(CanMessage* mex){
     ReqInfo data_mex = {
         .raw_data = mex->dps_payload.data,
     };
+    VariableInfoName var_name;
+    VariableInfoMetadata var_metadata;
+    CanMessage new_mex = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+    };
+
     switch (data_mex.full_data.info_t) {
-            break;
+        case VAR:
+            for (uint8_t i =0 ; i < c_vector_length(dps.vars); i++) {
+                struct var_internal* var = c_vector_get_at_index(dps.vars, i);
+                
+                //var name
+                var_name.full_data.obj_id.board_id = dps.board_id;
+                var_name.full_data.obj_id.data_id = var->var_id;
+                memcpy(var_name.full_data.name, var->data.name, sizeof(var->data.name));
+                new_mex.dps_payload.mext_type.type = VAR_NAME;
+                new_mex.dps_payload.data = var_name.raw_data;
+                dps.send_f(&new_mex);
+
+                //var  metadata
+                var_metadata.full_data.obj_id.board_id = dps.board_id;
+                var_metadata.full_data.obj_id.data_id = var->var_id;
+                var_metadata.full_data.size = var->data.size;
+                var_metadata.full_data.float_num = var->data.float_var;
+                var_metadata.full_data.signe_num = var->data.signd_var;
+                new_mex.dps_payload.mext_type.type = VAR_METADATA;
+                new_mex.dps_payload.data = var_metadata.raw_data;
+                dps.send_f(&new_mex);
+            }
+            return EXIT_SUCCESS;
         default:
             perror("not implemented");
 
