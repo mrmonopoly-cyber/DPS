@@ -61,6 +61,11 @@ int dps_master_list_vars(uint8_t board_id, var_list_info** o_list);
 //INFO: return a list of all the coms known by the master 
 int dps_master_list_coms(com_list_info** o_list);
 
+//INFO: send and update request for a variable of a board
+//if the size is do not fit can message or is greater than the size of the variable
+//the message will not be sent and return EXIT_FAILURE
+int dps_master_update_var(uint8_t board_id, uint8_t var_id, void* value, uint8_t value_size);
+
 //INFO: check if a message in input is for the library and operate if can
 //return EXIT_SUCCESS if the message belongs to the library
 //EXIT_FAILURE otherwise
@@ -70,6 +75,7 @@ int dps_master_check_mex_recv(CanMessage* mex);
 
 int dps_master_print_boards();
 int dps_master_print_coms();
+int dps_master_print_vars();
 
 #endif // __DEBUG__
 

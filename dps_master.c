@@ -310,6 +310,9 @@ int dps_master_list_vars(uint8_t board_id, var_list_info** o_list)
 //INFO: return a list of all the coms known by the master in a board
 int dps_master_list_coms(com_list_info** o_list)
 {
+    CHECK_INIT();
+    CHECK_INPUT(o_list);
+
     uint8_t len = c_vector_length(dps.coms);
     *o_list = calloc(1,sizeof(**o_list) + (len * sizeof(*(**o_list).coms)) );
     com_list_info* list = *o_list;
@@ -325,6 +328,45 @@ int dps_master_list_coms(com_list_info** o_list)
     }
 
     return EXIT_SUCCESS;
+}
+
+//INFO: send and update request for a variable of a board
+//if the size is do not fit can message or is greater than the size of the variable
+//the message will not be sent and return EXIT_FAILURE
+int dps_master_update_var(uint8_t board_id, uint8_t var_id, void* value, uint8_t value_size)
+{
+    CHECK_INIT();
+    CHECK_INPUT(value);
+    CHECK_INPUT(value_size);
+
+    board_record* board = c_vector_find(dps.boards, &board_id);
+    if (!board) {
+        return EXIT_FAILURE;
+    }
+    var_record* var = c_vector_find(board->vars, &var_id);
+    if (!var) {
+        return EXIT_FAILURE;
+    }
+
+    if (var->metadata.full_data.size > value_size) {
+        return EXIT_FAILURE;
+    }
+
+    VariableModify new_value = {
+        .full_data.obj_id = {.board_id = board_id, .data_id = var_id},
+    };
+    memcpy(new_value.full_data.value, value, value_size);
+    CanMessage mex = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload = {
+            .mext_type  = {SET_CURRENT_VAR_VALUE},
+            .data = new_value.raw_data,
+        },
+    };
+
+    return dps.send_f(&mex);
+
 }
 
 int dps_master_check_mex_recv(CanMessage* mex)
@@ -373,6 +415,30 @@ int dps_master_print_boards()
 int dps_master_print_coms()
 {
     c_vector_to_string(dps.coms);
+    return 0;
+}
+
+int dps_master_print_vars()
+{
+    uint8_t len = c_vector_length(dps.boards);
+    for (uint8_t i=0; i<len; i++) {
+        board_record* board = c_vector_get_at_index(dps.boards, i);
+        if (board) {
+            uint8_t vars = c_vector_length(board->vars);
+            for (uint8_t j=0; j<vars; j++) {
+                var_record* var = c_vector_get_at_index(board->vars, j);
+                if (var) {
+                    printf("var name: %s,",var->name);
+                    printf("board id: %d,",var->metadata.full_data.obj_id.board_id);
+                    printf("var id: %d,",var->metadata.full_data.obj_id.data_id);
+                    printf("var size: %d,",var->metadata.full_data.size);
+                    printf("var signed: %d,",var->metadata.full_data.signe_num);
+                    printf("var float: %d,",var->metadata.full_data.float_num);
+                    printf("var board: %s\n", board->board_name);
+                }
+            }
+        }
+    }
     return 0;
 }
 
