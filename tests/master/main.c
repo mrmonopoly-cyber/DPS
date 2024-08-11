@@ -291,14 +291,14 @@ free_2:
 int test_saved_com()
 {
  
-#define ADD_NEW_COM(BOARD_ID,COM_B_ID,COM,COM_ID,SIGNED,FLOAT, MIN, MAX, SIZE) \
+#define ADD_NEW_COM(BOARD_ID,COM,COM_ID,SIGNED,FLOAT, MIN, MAX, SIZE) \
     {\
         CanMessage mex = {\
             .id = DPS_CAN_MESSAGE_ID,\
             .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,\
         };\
         CommandInfoName new_com_name = {\
-            .full_data.obj_id = {.board_id = BOARD_ID, .data_id = COM_B_ID},\
+            .full_data.com_id = COM_ID,\
             .full_data.name = COM,\
         };\
         mex.dps_payload.mext_type.type = COM_NAME,\
@@ -309,14 +309,13 @@ int test_saved_com()
         }\
         PASSED("com name mex recognized " #COM);\
         CommandInfoMetadata new_com_metadata = {\
-            .full_data.obj_id = COM_ID,\
+            .full_data.com_id = COM_ID,\
             .full_data.size = SIZE,\
             .full_data.float_num = FLOAT,\
             .full_data.signe_num = SIGNED,\
             .full_data.min = MIN, \
             .full_data.max = MAX, \
-            .full_data.ids.board_id = BOARD_ID,\
-            .full_data.ids.data_id = COM_B_ID,\
+            .full_data.board_id = BOARD_ID, \
         };\
         mex.dps_payload.mext_type.type = COM_METADATA;\
         mex.dps_payload.data = new_com_metadata.raw_data;\
@@ -327,14 +326,14 @@ int test_saved_com()
         PASSED("com metadata mex recognized " #COM);\
     }
 
-    ADD_NEW_COM(0,0,"S0C1", 0x12, 0, 0,0, 5,1);
-    ADD_NEW_COM(0,1,"S0C2", 0x13, 0, 0,1, 40,2);
+    ADD_NEW_COM(0,"S0C1", 0x12, 0, 0,0, 5,1);
+    ADD_NEW_COM(0,"S0C2", 0x13, 0, 0,1, 40,2);
 
-    ADD_NEW_COM(1,0,"S1C1", 0x14, 1, 0,-5, -2,1);
-    ADD_NEW_COM(1,1,"S1C2", 0x15, 1, 0,-5, -2,4);
+    ADD_NEW_COM(1,"S1C1", 0x14, 1, 0,-5, -2,1);
+    ADD_NEW_COM(1,"S1C2", 0x15, 1, 0,-5, -2,4);
 
-    ADD_NEW_COM(2,0,"S2C1", 0x16, 1, 1,-5, -2,3);
-    ADD_NEW_COM(2,1,"S2C2", 0x17, 1, 1,-20, -10,2);
+    ADD_NEW_COM(2,"S2C1", 0x16, 1, 1,-5, -2,3);
+    ADD_NEW_COM(2,"S2C2", 0x17, 1, 1,-20, -10,2);
 
     com_list_info* com_l = NULL;
     if(dps_master_list_coms(&com_l)){
@@ -348,19 +347,20 @@ int test_saved_com()
     {\
         com_info* com = &com_l->coms[INDEX];\
         if (strcmp(com->name, NAME) ||\
+                com->metadata.full_data.com_id != COM_ID || \
                 com->metadata.full_data.max != MAX||\
                 com->metadata.full_data.min != MIN ||\
                 com->metadata.full_data.size != SIZE ||\
-                com->metadata.full_data.obj_id != COM_ID ||\
                 com->metadata.full_data.float_num != FLOAT ||\
                 com->metadata.full_data.signe_num != SIGNED \
                 ){\
-            FAILED("command saved not match " #NAME);\
+            FAILED("command saved not match " NAME);\
             goto free_f;\
         }\
-        PASSED("command saved match " #NAME);\
+        PASSED("command saved match " NAME);\
     }
     
+//CHECK_COM(INDEX, NAME, COM_ID, SIGNED, FLOAT, MIN, MAX, SIZE)
     CHECK_COM(0,"S0C1", 0x12, 0, 0,0, 5,1);
     CHECK_COM(1,"S0C2", 0x13, 0, 0,1, 40,2);
 
@@ -419,6 +419,7 @@ int main(void)
     print_SCORE();
 
     dps_master_print_boards();
+    dps_master_print_coms();
 
     return 0;
 }

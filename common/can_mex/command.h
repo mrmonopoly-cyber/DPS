@@ -5,18 +5,18 @@
 #include "object.h"
 
 DPS_TYPEDEF(struct{
-        ObjectId obj_id;
+        uint16_t com_id;
         char name[CAN_MAX_SIZE_MEX - sizeof(uint16_t)];
         }, CommandInfoName)
 
 DPS_TYPEDEF(struct{
-        uint16_t obj_id;
+        uint16_t com_id;
         uint8_t size;
         int8_t min;
         int8_t max;
         uint8_t float_num :1;
         uint8_t signe_num :1;
-        ObjectId ids;
+        uint8_t board_id: 4;
         }, CommandInfoMetadata);
 
 DPS_TYPEDEF( 

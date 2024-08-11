@@ -69,6 +69,7 @@ int dps_master_check_mex_recv(CanMessage* mex);
 #ifdef __DEBUG__
 
 int dps_master_print_boards();
+int dps_master_print_coms();
 
 #endif // __DEBUG__
 

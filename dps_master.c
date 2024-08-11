@@ -31,7 +31,6 @@ typedef struct {
 }board_record;
 
 typedef struct{
-    uint8_t com_id;
     char name[NAME_MAX_SIZE];
     CommandInfoMetadata metadata;
     board_record* board;
@@ -55,10 +54,10 @@ static int found_board(const void* ele, const void* key){
 }
 
 static int found_com(const void* ele, const void* key){
-    const board_record* board = ele;
+    const com_record* com= ele;
     const uint8_t* id = key;
 
-    return board->id == *id;
+    return com->metadata.full_data.com_id == *id;
 }
 
 static int found_var(const void* ele, const void* key){
@@ -66,6 +65,18 @@ static int found_var(const void* ele, const void* key){
     const uint8_t* id = key;
 
     return var->metadata.full_data.obj_id.data_id == *id;
+}
+
+static void print_com(const void* ele){
+    const com_record* com = ele;
+    printf("com name: %s,", com->name);
+    printf("com id: %d,", com->metadata.full_data.com_id);
+    printf("com size: %d,", com->metadata.full_data.size);
+    printf("com min: %d,", com->metadata.full_data.min);
+    printf("com max: %d,", com->metadata.full_data.max);
+    printf("com float: %d,", com->metadata.full_data.float_num);
+    printf("com signed num: %d,", com->metadata.full_data.signe_num);
+    printf("com board: %s\n", com->board->board_name);
 }
 
 static void dummy_func_const(const void* ele) {}
@@ -165,15 +176,8 @@ int get_com_name_exec(CanMessage* mex)
         .raw_data = mex->dps_payload.data,
     };
 
-    uint16_t board_id = com_name.full_data.obj_id.board_id;
-    board_record* board = c_vector_find(dps.boards, &board_id);
-    if (!board) {
-        return EXIT_FAILURE;
-    }
-
     com_record new_com = {
-        .board = board,
-        .com_id = com_name.full_data.obj_id.data_id,
+        .metadata.full_data.com_id = com_name.full_data.com_id,
     };
     memcpy(new_com.name, com_name.full_data.name, NAME_MAX_SIZE);
 
@@ -190,14 +194,21 @@ int get_com_metadata_exec(CanMessage* mex)
         .raw_data = mex->dps_payload.data,
     };
 
-    uint16_t id = com_metadata.full_data.ids.data_id;
-    com_record* saved_com = c_vector_find(dps.coms, &id );
-    if (saved_com) {
-        saved_com->metadata = com_metadata;
-        return EXIT_SUCCESS;
+    uint8_t b_id = com_metadata.full_data.board_id;
+    board_record* board = c_vector_find(dps.boards, &b_id);
+    if (!board) {
+        return EXIT_FAILURE;
     }
 
-    return EXIT_FAILURE;
+    uint16_t id = com_metadata.full_data.com_id;
+    com_record* saved_com = c_vector_find(dps.coms, &id );
+    if (!saved_com) {
+        return EXIT_FAILURE;
+    }
+    saved_com->board = board;
+    saved_com->metadata = com_metadata;
+
+    return EXIT_SUCCESS;
 }
 
 //public
@@ -225,7 +236,7 @@ int dps_master_init(can_send send_f)
             .found_f = found_com,
             .ele_size = sizeof(com_record),
             .free_fun = dummy_fun,
-            .print_fun = dummy_func_const,
+            .print_fun = print_com,
         };
         dps.coms = c_vector_init(&args);
     }
@@ -309,6 +320,7 @@ int dps_master_list_coms(com_list_info** o_list)
             free(list);
             return EXIT_FAILURE;
         }
+        memcpy(list->coms[i].name, com->name, NAME_MAX_SIZE);
         list->coms[i].metadata.full_data = com->metadata.full_data;
     }
 
@@ -356,6 +368,12 @@ int dps_master_print_boards()
     }
 
     return EXIT_SUCCESS;
+}
+
+int dps_master_print_coms()
+{
+    c_vector_to_string(dps.coms);
+    return 0;
 }
 
 
