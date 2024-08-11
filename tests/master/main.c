@@ -109,8 +109,8 @@ int test_saved_var()
     int32_t s_2_3;
     ADD_NEW_VAR(2, s_2_0, 0, 1, 1);
     ADD_NEW_VAR(2, s_2_1, 1, 1, 0);
-    ADD_NEW_VAR(2, s_2_2, 1, 1, 0);
-    ADD_NEW_VAR(2, s_2_3, 1, 1, 0);
+    ADD_NEW_VAR(2, s_2_2, 2, 1, 0);
+    ADD_NEW_VAR(2, s_2_3, 3, 1, 0);
 
     {
         var_list_info* list= NULL;
@@ -378,6 +378,36 @@ free_f:
     return -1;
 }
 
+int test_update_var(){
+#define UPDATE_VAR(BOARD_ID, VAR_ID, VAR) \
+    if (dps_master_update_var(BOARD_ID, VAR_ID, &VAR, sizeof(VAR))) {\
+        FAILED("send update var value failed " #VAR);\
+        return -1;\
+    }\
+    PASSED("send update var value ok " #VAR);
+
+    uint8_t s_0_0 = 15;
+    int8_t s_0_1 = -6;
+    UPDATE_VAR(0, 0, s_0_0);
+    UPDATE_VAR(0, 1, s_0_1);
+    
+    float s_1_0 = 5.3f;
+    int32_t s_1_1 = -80;
+    UPDATE_VAR(1, 0, s_1_0);
+    UPDATE_VAR(1, 1, s_1_1);
+
+    float s_2_0 = -4.3f;
+    int32_t s_2_1 = -34;
+    int32_t s_2_2 = 59;
+    int32_t s_2_3 = 22;
+    UPDATE_VAR(2, 0, s_2_0);
+    UPDATE_VAR(2, 1, s_2_1);
+    UPDATE_VAR(2, 2, s_2_2);
+    UPDATE_VAR(2, 3, s_2_3);
+
+    return 0;
+}
+
 int run_test(){
     if(dps_master_init(debug_send)){
         FAILED("failed init master");
@@ -410,6 +440,13 @@ int run_test(){
     }
     PASSED("ok test saved com");
 
+
+    if (test_update_var()) {
+        FAILED("update var failed");
+        return -1;
+    }
+    PASSED("ok test update var");
+
     return 0;
 }
 
@@ -420,6 +457,7 @@ int main(void)
 
     dps_master_print_boards();
     dps_master_print_coms();
+    dps_master_print_vars();
 
     return 0;
 }
