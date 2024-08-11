@@ -59,7 +59,7 @@ board_list_info* dps_master_list_board();
 int dps_master_list_vars(uint8_t board_id, var_list_info** o_list);
 
 //INFO: return a list of all the coms known by the master 
-int dps_master_list_coms(com_list_info* o_list);
+int dps_master_list_coms(com_list_info** o_list);
 
 //INFO: check if a message in input is for the library and operate if can
 //return EXIT_SUCCESS if the message belongs to the library

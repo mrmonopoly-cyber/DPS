@@ -32,6 +32,7 @@ typedef struct {
 
 typedef struct{
     uint8_t com_id;
+    char name[NAME_MAX_SIZE];
     CommandInfoMetadata metadata;
     board_record* board;
 }com_record;
@@ -158,6 +159,47 @@ int get_var_metadata_exec(CanMessage* mex)
     return EXIT_FAILURE;
 }
 
+int get_com_name_exec(CanMessage* mex)
+{
+    CommandInfoName com_name = {
+        .raw_data = mex->dps_payload.data,
+    };
+
+    uint16_t board_id = com_name.full_data.obj_id.board_id;
+    board_record* board = c_vector_find(dps.boards, &board_id);
+    if (!board) {
+        return EXIT_FAILURE;
+    }
+
+    com_record new_com = {
+        .board = board,
+        .com_id = com_name.full_data.obj_id.data_id,
+    };
+    memcpy(new_com.name, com_name.full_data.name, NAME_MAX_SIZE);
+
+    if(!c_vector_push(&dps.coms, &new_com)){
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int get_com_metadata_exec(CanMessage* mex)
+{
+    CommandInfoMetadata com_metadata = {
+        .raw_data = mex->dps_payload.data,
+    };
+
+    uint16_t id = com_metadata.full_data.ids.data_id;
+    com_record* saved_com = c_vector_find(dps.coms, &id );
+    if (saved_com) {
+        saved_com->metadata = com_metadata;
+        return EXIT_SUCCESS;
+    }
+
+    return EXIT_FAILURE;
+}
+
 //public
 int dps_master_init(can_send send_f)
 {
@@ -255,11 +297,22 @@ int dps_master_list_vars(uint8_t board_id, var_list_info** o_list)
 }
 
 //INFO: return a list of all the coms known by the master in a board
-int dps_master_list_coms(com_list_info* o_list)
+int dps_master_list_coms(com_list_info** o_list)
 {
+    uint8_t len = c_vector_length(dps.coms);
+    *o_list = calloc(1,sizeof(**o_list) + (len * sizeof(*(**o_list).coms)) );
+    com_list_info* list = *o_list;
 
+    for (uint8_t i =0; i<len; i++) {
+        com_record* com = c_vector_get_at_index(dps.coms, i);
+        if (!com) {
+            free(list);
+            return EXIT_FAILURE;
+        }
+        list->coms[i].metadata.full_data = com->metadata.full_data;
+    }
 
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
 int dps_master_check_mex_recv(CanMessage* mex)
@@ -276,6 +329,10 @@ int dps_master_check_mex_recv(CanMessage* mex)
                 return get_var_name_exec(mex);
             case VAR_METADATA:
                 return get_var_metadata_exec(mex);
+            case COM_NAME:
+                return get_com_name_exec(mex);
+            case COM_METADATA:
+                return get_com_metadata_exec(mex);
         }
     
     }
