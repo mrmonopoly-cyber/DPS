@@ -5,7 +5,15 @@
 #include "object.h"
 
 typedef ObjName CommandInfoName;
-typedef ObjMetadata CommandInfoMetadata;
+
+DPS_TYPEDEF(struct{
+        ObjectId obj_id;
+        uint8_t size;
+        uint8_t min;
+        uint8_t max;
+        uint8_t float_num :1;
+        uint8_t signe_num :1;
+        }, CommandInfoMetadata);
 
 DPS_TYPEDEF( 
         struct{

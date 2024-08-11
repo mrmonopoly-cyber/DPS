@@ -13,8 +13,13 @@ DPS_TYPEDEF(
         };
         },VariableValue);
 
+DPS_TYPEDEF(struct{
+        ObjectId obj_id;
+        uint8_t size;
+        uint8_t float_num :1;
+        uint8_t signe_num :1;
+        }, VariableInfoMetadata);
 typedef VariableValue VariableModify;
 typedef ObjName VariableInfoName;
-typedef ObjMetadata VariableInfoMetadata;
 
 #endif // !__DPS_CAN_VARIABLE__

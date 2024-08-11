@@ -5,6 +5,7 @@
 #include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/base_mex_components/obj_id.h"
 #include "common/can_mex/board.h"
+#include "common/can_mex/variable.h"
 #include "common/messages.h"
 
 #include "lib/c_vector/c_vector.h"
@@ -17,12 +18,12 @@ typedef struct{
 
 typedef struct{
     char name[NAME_MAX_SIZE];
-    ObjMetadata metadata;
+    CommandInfoMetadata metadata;
 }com_info;
 
 typedef struct{
     char name[NAME_MAX_SIZE];
-    ObjMetadata metadata;
+    VariableInfoMetadata metadata;
 }var_record;
 
 typedef struct{
