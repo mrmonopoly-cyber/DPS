@@ -333,7 +333,7 @@ int test_saved_com()
     ADD_NEW_COM(1,"S1C2", 0x15, 1, 0,-5, -2,4);
 
     ADD_NEW_COM(2,"S2C1", 0x16, 1, 1,-5, -2,3);
-    ADD_NEW_COM(2,"S2C2", 0x17, 1, 1,-20, -10,2);
+    ADD_NEW_COM(2,"S2C2", 0x17, 1, 1,-20, -10,4);
 
     com_list_info* com_l = NULL;
     if(dps_master_list_coms(&com_l)){
@@ -368,7 +368,7 @@ int test_saved_com()
     CHECK_COM(3,"S1C2", 0x15, 1, 0,-5, -2,4);
               
     CHECK_COM(4,"S2C1", 0x16, 1, 1,-5, -2,3);
-    CHECK_COM(5,"S2C2", 0x17, 1, 1,-20, -10,2);
+    CHECK_COM(5,"S2C2", 0x17, 1, 1,-20, -10,4);
 
     free(com_l);
     return 0;
@@ -404,6 +404,33 @@ int test_update_var(){
     UPDATE_VAR(2, 1, s_2_1);
     UPDATE_VAR(2, 2, s_2_2);
     UPDATE_VAR(2, 3, s_2_3);
+
+    return 0;
+}
+
+int test_send_com(){
+#define SEND_COM_C(ID,VAR)\
+    if(dps_master_send_command(ID, &VAR, sizeof(VAR))){\
+        FAILED("send command correct failed " #VAR);\
+        return -1;\
+    }\
+    PASSED("send command correct ok" #VAR);
+
+#define SEND_COM_F(ID,VAR)\
+    if(!dps_master_send_command(ID, &VAR, sizeof(VAR))){\
+        FAILED("send wrong command prevented failed " #VAR);\
+        return -1;\
+    }\
+    PASSED("send wrong command prevented ok" #VAR);
+
+    uint16_t com_0_f = 15;SEND_COM_F(18, com_0_f);
+    uint8_t com_0_c = 3;SEND_COM_C(18, com_0_c);
+
+    uint32_t com_1_f = 50 ;SEND_COM_F(19, com_1_f);
+    uint16_t com_1_c = 40 ;SEND_COM_C(19, com_1_c);
+
+    double com_2_f = -50;SEND_COM_F(23, com_2_f);
+    float com_2_c = -3;SEND_COM_C(23, com_2_c);
 
     return 0;
 }
@@ -446,6 +473,12 @@ int run_test(){
         return -1;
     }
     PASSED("ok test update var");
+
+    if (test_send_com()) {
+        FAILED("send coms failed");
+        return -1;
+    }
+    PASSED("send coms ok");
 
     return 0;
 }

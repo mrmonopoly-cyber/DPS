@@ -66,6 +66,11 @@ int dps_master_list_coms(com_list_info** o_list);
 //the message will not be sent and return EXIT_FAILURE
 int dps_master_update_var(uint8_t board_id, uint8_t var_id, void* value, uint8_t value_size);
 
+//INFO: send a command with a payload
+//if value size is > then the bound of the command metadata or greater to CAN payload buffer
+//message is not sent. If value is NULL or value_size is 0 message is not sent
+int dps_master_send_command(uint16_t com_dps_id, void* value, uint8_t value_size);
+
 //INFO: check if a message in input is for the library and operate if can
 //return EXIT_SUCCESS if the message belongs to the library
 //EXIT_FAILURE otherwise

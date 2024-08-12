@@ -369,6 +369,30 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void* value, uint8_t
 
 }
 
+//INFO: send a command with a payload
+//if value size is > then the bound of the command metadata or greater to CAN payload buffer
+//message is not sent. If value is NULL or value_size is 0 message is not sent
+int dps_master_send_command(uint16_t com_dps_id, void* value, uint8_t value_size)
+{
+    com_record* com = c_vector_find(dps.coms, &com_dps_id);
+    if (!com) {
+        return EXIT_FAILURE;
+    }
+
+    if (com->metadata.full_data.size < value_size ||
+        value_size > CAN_MAX_SIZE_MEX) {
+        return EXIT_FAILURE;
+    }
+
+    CanMessage mex = {
+        .id = com->metadata.full_data.com_id,
+        .dlc = com->metadata.full_data.size,
+    };
+    memcpy(&mex.rawMex, value, value_size);
+
+    return EXIT_SUCCESS;
+}
+
 int dps_master_check_mex_recv(CanMessage* mex)
 {
     CHECK_INIT();
