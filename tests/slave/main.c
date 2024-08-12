@@ -66,8 +66,8 @@ int check_monitor_var()
     };
 
     if(dps_monitor_var_general(&gen)){
-            FAILED("error saving var gen_t");
-            return -2;
+        FAILED("error saving var gen_t");
+        return -2;
     }
     PASSED("check ok save var gen_t");
 
@@ -96,127 +96,151 @@ int check_monitor_com()
     }
 
     monitor_com(15, 6, "CM_1S", 0, 0);
-        monitor_com(20, 8, "CM_2S", 1, 1);
+    monitor_com(20, 8, "CM_2S", 1, 1);
 
-        return 0;
-    }
+    return 0;
+}
 
-    int check_update_var(){
+int check_update_var(){
 #define update_var(VID,VALUE_T, VALUE_D)  \
-        {\
-            VALUE_T mod = VALUE_D;\
-            VariableModify var ={\
-                .full_data.obj_id.data_id= VID,\
-                .full_data.obj_id.board_id= BOARD_ID,\
-            };\
-            memcpy(var.full_data.value, &mod, sizeof(mod));\
-            CanMessage mex ={\
-                .id = DPS_CAN_MESSAGE_ID,\
-                .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,\
-                .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
-                .dps_payload.data = var.raw_data,\
-            };\
-            if (dps_check_can_command_recv(&mex)){\
-                FAILED("update mex not recognized");\
-                return -1;\
-            }\
-            PASSED("update mex recognized");\
-        }
-
-        update_var(0, uint8_t, 1);
-        update_var(1, uint16_t,2);
-        update_var(2, uint32_t,3);
-
-        update_var(3, int8_t,-1);
-        update_var(4, int16_t,-2);
-        update_var(5, int32_t,-3);
-
-        {
-            float new_value = 2.5f;
-            VariableModify var ={
-                .full_data.obj_id.data_id= 6,
-                .full_data.obj_id.board_id= BOARD_ID,
-            };
-            mempcpy(var.full_data.value, &new_value, sizeof(new_value));
-            CanMessage mex ={
-                .id = DPS_CAN_MESSAGE_ID,
-                .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-                .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
-                .dps_payload.data = var.raw_data,
-            };
-            if (dps_check_can_command_recv(&mex)){
-                FAILED("update mex not recognized");
-                return -1;
-            }
-            PASSED("update mex recognized");
-        }
-
-        {
-            generic_type new_value = {
-                .a = 4,
-                .b = 12,
-                .c = 24,
-            };
-            VariableModify var ={
-                .full_data.obj_id.data_id= 7,
-                .full_data.obj_id.board_id= BOARD_ID,
-            };
-            mempcpy(var.full_data.value, &new_value, sizeof(new_value));
-            CanMessage mex ={
-                .id = DPS_CAN_MESSAGE_ID,
-                .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-                .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
-                .dps_payload.data = var.raw_data,
-            };
-            if (dps_check_can_command_recv(&mex)){
-                FAILED("update mex not recognized");
-                return -1;
-            }
-            PASSED("update mex recognized");
-        }
-        
-#define check_variable(var,value_expected) \
-        u8 == 1 ? PASSED("u8 updated correctly") : FAILED("u8 update failed");
-        u16 == 2 ? PASSED("u16 updated correctly") : FAILED("u16 update failed");
-        u32 == 3 ? PASSED("u32 updated correctly") : FAILED("u32 update failed");
-
-        s8 == -1 ? PASSED("s8 updated correctly") : FAILED("s8 update failed");
-        s16 == -2 ? PASSED("s16 updated correctly") : FAILED("s16 update failed");
-        s32 == -3 ? PASSED("s32 updated correctly") : FAILED("s32 update failed");
-
-        fdata == 2.5f ? PASSED("fdata updated correctly") : FAILED("fdata update failed");
-
-        if(gen_t.a !=4 || gen_t.b != 12 || gen_t.c != 24){
-            FAILED("generic type update failed");
-            return -1;
-        }
-        PASSED("generic type update ok");
-        return 0;
+    {\
+        VALUE_T mod = VALUE_D;\
+        VariableModify var ={\
+            .full_data.obj_id.data_id= VID,\
+            .full_data.obj_id.board_id= BOARD_ID,\
+        };\
+        memcpy(var.full_data.value, &mod, sizeof(mod));\
+        CanMessage mex ={\
+            .id = DPS_CAN_MESSAGE_ID,\
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,\
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
+            .dps_payload.data = var.raw_data,\
+        };\
+        if (dps_check_can_command_recv(&mex)){\
+            FAILED("update mex not recognized");\
+            return -1;\
+        }\
+        PASSED("update mex recognized");\
     }
 
-    int send_com_info_master(){
-        ReqInfo req = {
-            .full_data.board_id = BOARD_ID,
-            .full_data.info_t = COMMAND,
-        };
+    update_var(0, uint8_t, 1);
+    update_var(1, uint16_t,2);
+    update_var(2, uint32_t,3);
 
-        CanMessage com_info_req = {
+    update_var(3, int8_t,-1);
+    update_var(4, int16_t,-2);
+    update_var(5, int32_t,-3);
+
+    {
+        float new_value = 2.5f;
+        VariableModify var ={
+            .full_data.obj_id.data_id= 6,
+            .full_data.obj_id.board_id= BOARD_ID,
+        };
+        mempcpy(var.full_data.value, &new_value, sizeof(new_value));
+        CanMessage mex ={
             .id = DPS_CAN_MESSAGE_ID,
             .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-            .dps_payload = {
-                .mext_type = {GET_INFO},
-                .data = req.raw_data,
-            },
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
+                                     .dps_payload.data = var.raw_data,
         };
-
-        if (dps_check_can_command_recv(&com_info_req)){
-            FAILED("info req command not recognized");
+        if (dps_check_can_command_recv(&mex)){
+            FAILED("update mex not recognized");
             return -1;
         }
-        PASSED("info req command recognized");
-
-        return 0;
+        PASSED("update mex recognized");
     }
+
+    {
+        generic_type new_value = {
+            .a = 4,
+            .b = 12,
+            .c = 24,
+        };
+        VariableModify var ={
+            .full_data.obj_id.data_id= 7,
+            .full_data.obj_id.board_id= BOARD_ID,
+        };
+        mempcpy(var.full_data.value, &new_value, sizeof(new_value));
+        CanMessage mex ={
+            .id = DPS_CAN_MESSAGE_ID,
+            .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+            .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},\
+                                     .dps_payload.data = var.raw_data,
+        };
+        if (dps_check_can_command_recv(&mex)){
+            FAILED("update mex not recognized");
+            return -1;
+        }
+        PASSED("update mex recognized");
+    }
+
+#define check_variable(var,value_expected) \
+    u8 == 1 ? PASSED("u8 updated correctly") : FAILED("u8 update failed");
+    u16 == 2 ? PASSED("u16 updated correctly") : FAILED("u16 update failed");
+    u32 == 3 ? PASSED("u32 updated correctly") : FAILED("u32 update failed");
+
+    s8 == -1 ? PASSED("s8 updated correctly") : FAILED("s8 update failed");
+    s16 == -2 ? PASSED("s16 updated correctly") : FAILED("s16 update failed");
+    s32 == -3 ? PASSED("s32 updated correctly") : FAILED("s32 update failed");
+
+    fdata == 2.5f ? PASSED("fdata updated correctly") : FAILED("fdata update failed");
+
+    if(gen_t.a !=4 || gen_t.b != 12 || gen_t.c != 24){
+        FAILED("generic type update failed");
+        return -1;
+    }
+    PASSED("generic type update ok");
+    return 0;
+}
+
+int send_com_info_master(){
+    ReqInfo req = {
+        .full_data.board_id = BOARD_ID,
+        .full_data.info_t = COMMAND,
+    };
+
+    CanMessage com_info_req = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload = {
+            .mext_type = {GET_INFO},
+            .data = req.raw_data,
+        },
+    };
+
+    if (dps_check_can_command_recv(&com_info_req)){
+        FAILED("info req command not recognized");
+        return -1;
+    }
+    PASSED("info req command recognized");
+
+    return 0;
+}
+
+int send_var_info_master(){
+    ReqInfo req = {
+        .full_data.board_id = BOARD_ID,
+        .full_data.info_t = VAR,
+    };
+
+    CanMessage com_info_req = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload = {
+            .mext_type = {GET_INFO},
+            .data = req.raw_data,
+        },
+    };
+
+    if (dps_check_can_command_recv(&com_info_req)){
+        FAILED("info req variables not recognized");
+        return -1;
+    }
+    PASSED("info req variables recognized");
+
+    return 0;
+}
 
     int check_link_req(){
         new_connection conn = {};
@@ -328,8 +352,14 @@ int check_monitor_com()
         if (send_com_info_master()) {
             FAILED("failed send info com master");
         return -7;;
-    }
-    PASSED("send info com master ok");
+        }
+        PASSED("send info com master ok");
+
+        if (send_var_info_master()) {
+            FAILED("failed send info var master");
+        return -7;;
+        }
+        PASSED("send info var master ok");
 
     return 0;
 }
