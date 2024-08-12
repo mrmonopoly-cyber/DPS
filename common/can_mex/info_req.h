@@ -3,12 +3,12 @@
 
 enum INFO_TYPES{
     VAR,
-    BOARD,
     COMMAND,
 };
 
 #include "base_mex_components/base_payload.h"
 DPS_TYPEDEF(struct {
+    uint8_t board_id;
     enum INFO_TYPES info_t;
 },ReqInfo);
 

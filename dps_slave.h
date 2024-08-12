@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/board.h"
 #include "common/can_mex/command.h"
 #include "common/can_mex/object.h"
@@ -22,7 +23,7 @@ typedef struct{
 }VariableInfoGericType;
 
 typedef struct{
-    char name[NAME_MAX_SIZE];
+    char name[COMMAND_NAME_SIZE];
     CommandInfoMetadata metadata;
 }CommandInfo;
 

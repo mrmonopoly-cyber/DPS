@@ -2,6 +2,7 @@
 #include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/base_mex_components/mex_types.h"
 #include "common/can_mex/board.h"
+#include "common/can_mex/command.h"
 #include "common/can_mex/info_req.h"
 #include "common/can_mex/variable.h"
 #include "common/messages.h"
@@ -105,8 +106,27 @@ static int req_inf_exec(CanMessage* mex){
                 dps.send_f(&new_mex);
             }
             return EXIT_SUCCESS;
+        case COMMAND:
+            for (uint8_t i=0; i < c_vector_length(dps.coms); i++) {
+                CommandInfo* com = c_vector_get_at_index(dps.coms, i);
+
+                //name
+                CommandInfoName com_name = {
+                    .full_data.com_id = com->metadata.full_data.com_id,
+                };
+                memcpy(com_name.full_data.name, com->name, sizeof(com->name));
+                new_mex.dps_payload.mext_type.type = COM_NAME;
+                new_mex.dps_payload.data = com_name.raw_data;
+                dps.send_f(&new_mex);
+
+                //metadata
+                new_mex.dps_payload.mext_type.type = COM_METADATA;
+                new_mex.dps_payload.data = com->metadata.raw_data;
+                dps.send_f(&new_mex);
+            }
+            return EXIT_SUCCESS;
         default:
-            perror("not implemented");
+            return EXIT_FAILURE;
 
     }
     return EXIT_FAILURE;

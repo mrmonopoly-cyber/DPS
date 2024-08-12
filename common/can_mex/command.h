@@ -4,9 +4,11 @@
 #include "base_mex_components/base_payload.h"
 #include "object.h"
 
+#define COMMAND_NAME_SIZE  CAN_MAX_SIZE_MEX - sizeof(uint16_t)
+
 DPS_TYPEDEF(struct{
         uint16_t com_id;
-        char name[CAN_MAX_SIZE_MEX - sizeof(uint16_t)];
+        char name[COMMAND_NAME_SIZE];
         }, CommandInfoName)
 
 DPS_TYPEDEF(struct{
