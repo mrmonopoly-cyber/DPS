@@ -1,5 +1,6 @@
 #include "../../../../dps_slave.h"
 #include "../../can_lib/canlib.h"
+#include "../../../test_lib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,11 +21,21 @@ int check_input_mex(void* args)
         dps_mex.dlc = frame.can_dlc;
         memcpy(dps_mex.rawMex.raw_buffer, frame.data, frame.can_dlc);
         dps_check_can_command_recv(&dps_mex);
+        printf("message\n");
     }
 }
 
 int send_f_can(CanMessage* mex)
 {
+    struct can_frame frame = {
+        .can_dlc = mex->dlc,
+        .can_id = mex->id,
+    };
+    memcpy(frame.data, mex->rawMex.raw_buffer, mex->dlc);
+    if(can_send_frame(can_socket, &frame)){
+        printf("failed send");
+    }
+    return 0;
     return 0;
 }
 
