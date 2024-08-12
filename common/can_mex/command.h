@@ -12,8 +12,6 @@ DPS_TYPEDEF(struct{
 DPS_TYPEDEF(struct{
         uint16_t com_id;
         uint8_t size;
-        int8_t min;
-        int8_t max;
         uint8_t float_num :1;
         uint8_t signe_num :1;
         uint8_t board_id: 4;

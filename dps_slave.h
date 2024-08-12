@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "common/can_mex/board.h"
+#include "common/can_mex/command.h"
 #include "common/can_mex/object.h"
 #include "common/messages.h"
 
@@ -22,12 +23,7 @@ typedef struct{
 
 typedef struct{
     char name[NAME_MAX_SIZE];
-    int id;
-    uint8_t dlc;
-    uint8_t min;
-    uint8_t max;
-    uint8_t signd_num : 1;
-    uint8_t float_num : 1;
+    CommandInfoMetadata metadata;
 }CommandInfo;
 
 //INFO: create dps manager

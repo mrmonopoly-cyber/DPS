@@ -30,11 +30,6 @@ struct var_internal{
     VariableInfoGericType data;
 };
 
-struct com_internal{
-    uint8_t com_id :4; 
-    CommandInfo data;
-};
-
 static struct slave_dps dps;
 static uint8_t object_id_slave = 0;
 
@@ -48,10 +43,10 @@ static int found_var(const void* list_ele, const void* key){
 }
 
 static int found_com(const void* list_ele, const void* key){
-    const struct com_internal* ele_l =  list_ele;
-    uint8_t id = *(uint8_t *) key;
+    const CommandInfo* ele_l =  list_ele;
+    const uint16_t *id = key;
 
-    return ele_l->com_id == id;
+    return ele_l->metadata.full_data.com_id == *id;
 }
 
 static void print_var(const void* ele){
@@ -61,11 +56,13 @@ static void print_var(const void* ele){
 }
 
 static void print_com(const void* ele){
-    const struct com_internal* com = ele;
-    printf("com_id :%d,",com->com_id);
-    printf("com_name :%s\n",com->data.name);
-    printf("com_id :%d\n",com->data.id);
-    printf("com_dlc :%d\n",com->data.dlc);
+    const CommandInfo* com = ele;
+    printf("com_id :%d,",com->metadata.full_data.com_id);
+    printf("com_name :%s\n",com->name);
+    printf("com_dlc :%d\n",com->metadata.full_data.size);
+    printf("com signed :%d\n",com->metadata.full_data.signe_num);
+    printf("com floated :%d\n",com->metadata.full_data.float_num);
+    printf("com board:%d\n",com->metadata.full_data.board_id);
 }
 
 static uint8_t new_id(){
@@ -178,7 +175,7 @@ int dps_init(can_send send_f, BoardName* board_name)
 
         struct c_vector_input_init coms= {
             .capacity = 10,
-            .ele_size = sizeof(struct com_internal),
+            .ele_size = sizeof(CommandInfo),
             .free_fun =  dummy_fun,
             .print_fun = print_com,
             .found_f = found_com,
@@ -388,21 +385,25 @@ int dps_monitor_var_general(VariableInfoGericType* var_info)
     return EXIT_SUCCESS;
 }
 
-//INFO: tell to dps a dps_command the board can receive 
-int dps_monitor_command(CommandInfo* comm_name)
+/*
+ * INFO: tell to dps a dps_command the board can receive 
+ * board_id field can be ignored, will be overwritten in any case by the library
+ */
+int dps_monitor_command(CommandInfo* com)
 {
     CHECK_INIT();
 
-    CHECK_INPUT(comm_name);
-    CHECK_INPUT(comm_name->name);
-    CHECK_INPUT(comm_name->id);
+    CHECK_INPUT(com);
+    CHECK_INPUT(com->name);
+    CHECK_INPUT(com->metadata.full_data.com_id);
+    CHECK_INPUT(com->metadata.full_data.size);
 
-    struct com_internal new_com ={
-        .com_id = new_id(),
-        .data = *comm_name,
-    };
+    com->metadata.full_data.board_id = dps.board_id;
+    if ((*com).metadata.full_data.size > CAN_PROTOCOL_MAX_PAYLOAD_SIZE) {
+        return EXIT_FAILURE;
+    }
 
-    if(!c_vector_push(&dps.coms, &new_com)){
+    if(!c_vector_push(&dps.coms, com)){
         return EXIT_FAILURE;
     }
 

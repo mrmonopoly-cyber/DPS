@@ -75,16 +75,17 @@ int check_monitor_var()
 
 int check_monitor_com()
 {
-#define monitor_com(ID,DLC,MAX,MIN,NAME,FLOAT,SIGN) \
+#define monitor_com(ID,DLC,NAME,FLOAT,SIGN) \
     {\
         CommandInfo com ={\
-            .id = ID,\
-            .dlc = DLC,\
-            .max = MAX,\
-            .min = MIN,\
             .name = NAME,\
-            .float_num= FLOAT,\
-            .signd_num = SIGN,\
+            .metadata.full_data= {\
+                .com_id = ID,\
+                .size = DLC,\
+                .float_num = FLOAT, \
+                .signe_num = SIGN,\
+                .board_id = BOARD_ID,\
+            },\
         };\
         if(dps_monitor_command(&com)){\
             FAILED("monitor command save failed");\
@@ -93,8 +94,8 @@ int check_monitor_com()
         PASSED("monitor command save success");\
     }
 
-    monitor_com(15, 6, 50, 5, "COM_1S", 0, 0);
-    monitor_com(20, 8, 50, 5, "COM_2S", 1, 1);
+    monitor_com(15, 6, "COM_1S", 0, 0);
+    monitor_com(20, 8, "COM_2S", 1, 1);
 
     return 0;
 }

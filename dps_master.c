@@ -72,8 +72,6 @@ static void print_com(const void* ele){
     printf("com name: %s,", com->name);
     printf("com id: %d,", com->metadata.full_data.com_id);
     printf("com size: %d,", com->metadata.full_data.size);
-    printf("com min: %d,", com->metadata.full_data.min);
-    printf("com max: %d,", com->metadata.full_data.max);
     printf("com float: %d,", com->metadata.full_data.float_num);
     printf("com signed num: %d,", com->metadata.full_data.signe_num);
     printf("com board: %s\n", com->board->board_name);
