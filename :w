@@ -160,7 +160,6 @@ static int get_var_metadata_exec(CanMessage* mex)
         var_record* new_var = c_vector_find(board->vars, &var_id);
         if (new_var) {
             new_var->metadata = var_metadata;
-            dps_master_refresh_value_var(board_id, var_id);
             return EXIT_SUCCESS;
         }
 
@@ -213,22 +212,6 @@ static int get_com_metadata_exec(CanMessage* mex)
 
 static int get_curr_var_value_exec(CanMessage* mex)
 {
-    VariableValue var_val = {
-        .raw_data = mex->dps_payload.data,
-    };
-
-    uint8_t board_id = var_val.full_data.obj_id.board_id;
-    board_record* board = c_vector_find(dps.boards, &board_id);
-    if (board) {
-        uint8_t var_id = var_val.full_data.obj_id.data_id;
-        var_record* var = c_vector_find(board->vars, &var_id);
-        if (var) {
-            memcpy(var->value, var_val.full_data.value, var->metadata.full_data.size);
-            var->updated = 1;
-            return EXIT_SUCCESS;
-        }
-    }
-
     return EXIT_FAILURE;
 }
 
@@ -392,31 +375,25 @@ int dps_master_list_coms(com_list_info** o_list)
 
 
 //INFO: fetch the current value of a variable in a board in the system 
-int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id)
+int dps_master_update_value_var(uint8_t board_id, uint8_t var_id)
 {
-    board_record* board = c_vector_find(dps.boards , &board_id);
-    if (board) {
-        var_record* var  = c_vector_find(board->vars, &var_id);
-        if (var) {
-            var->updated = 0;
-            ReqInfo req_value = {
-                .full_data.info_t = VAR_VALUE,
-                .full_data.data_it.board_id = board_id,
-                .full_data.data_it.data_id = var_id,
-            };
+    ReqInfo req_value = {
+        .full_data.info_t = VAR_VALUE,
+        .full_data.data_it.board_id = board_id,
+        .full_data.data_it.data_id = var_id,
+    };
 
-            CanMessage mex = {
-                .id = DPS_CAN_MESSAGE_ID,
-                .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-                .dps_payload = {
-                    .mext_type = {GET_INFO},
-                    .data = req_value.raw_data,
-                },
-            };
-            return dps.send_f(&mex);
-        }
-    }
-    return EXIT_FAILURE;
+    
+    CanMessage mex = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload = {
+            .mext_type = {GET_INFO},
+            .data = req_value.raw_data,
+        },
+    };
+
+    return dps.send_f(&mex);
 }
 
 //INFO: fetch the current value of a variable in a board in the system and put in in o_buffer
@@ -425,10 +402,6 @@ int dps_master_get_value_var(uint8_t board_id, uint8_t var_i, var_record* o_var)
     board_record* board = c_vector_find(dps.boards , &board_id);
     if (board) {
         var_record* var  = c_vector_find(board->vars, &var_i);
-        if (var && var->updated) {
-            *o_var = *var;
-            return EXIT_SUCCESS;
-        }
     }
     return EXIT_FAILURE;
 }
@@ -563,7 +536,6 @@ int dps_master_print_vars()
                     printf("var size: %d,",var->metadata.full_data.size);
                     printf("var signed: %d,",var->metadata.full_data.signe_num);
                     printf("var float: %d,",var->metadata.full_data.float_num);
-                    printf("var value: %ld,",(long)*var->value);
                     printf("var board: %s\n", board->board_name);
                 }
             }

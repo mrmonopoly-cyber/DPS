@@ -1,6 +1,7 @@
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
-#define __DEBUG__
+#define DEBUG
 
 #include "../../../../dps_master.h"
 #include "../../can_lib/canlib.h"
@@ -24,8 +25,10 @@ int check_input_mex(void* args)
         dps_mex.id = frame.can_id;
         dps_mex.dlc = frame.can_dlc;
         memcpy(dps_mex.rawMex.raw_buffer, frame.data, frame.can_dlc);
-        dps_master_check_mex_recv(&dps_mex);
-        printf("message\n");
+        if(dps_master_check_mex_recv(&dps_mex)){
+            FAILED("message not recognized");
+        }
+        PASSED("message recognized");
     }
 }
 
@@ -59,6 +62,14 @@ int get_boards(){
     return 0;
 }
 
+int req_info(){
+    if(dps_master_request_info_board(0, REQ_COM | REQ_VAR)){
+        FAILED("requesting info board failed");
+    }
+    PASSED("requesting info board ok");
+    return 0;
+}
+
 void run_test(){
     if(dps_master_new_connection()){
         FAILED("failed sending new connection request");
@@ -72,6 +83,61 @@ void run_test(){
     }
     PASSED("ok getting boards");
 
+    if(req_info()){
+        FAILED("requiring info failed");
+        return;
+    }
+    PASSED("requiring info ok");
+
+    sleep(3);
+    if (dps_master_refresh_value_var(0, 1)) {
+        FAILED("failed refresh value var");
+        return;
+    }
+    PASSED("refresh value var ok");
+
+    sleep(3);
+    var_record o_var;
+    if(dps_master_get_value_var(0, 1, &o_var)){
+        FAILED("failed get initial value var");
+        return;
+    }
+    PASSED("get initial value var ok");
+
+    uint16_t expt = 2;
+    if (memcmp(o_var.value,&expt, sizeof(expt))) {
+        FAILED("getted value are different than expected");
+        return;
+    }
+    PASSED("getted value are ok");
+
+    int16_t new = -20;
+    if (dps_master_update_var(0, 4, &new, sizeof(new))) {
+        FAILED("remote update value failed");
+        return;
+    }
+    PASSED("remote update value ok");
+
+    sleep(3);
+    if (dps_master_refresh_value_var(0, 4)) {
+        FAILED("failed refresh value var");
+        return;
+    }
+    PASSED("refresh value var ok");
+
+    sleep(3);
+    var_record o_var_1;
+    if(dps_master_get_value_var(0, 4, &o_var_1)){
+        FAILED("failed get initial value var");
+        return;
+    }
+    PASSED("get initial value var ok");
+
+    if (memcmp(o_var_1.value,&new, sizeof(new))) {
+        FAILED("getted value are different than expected");
+        return;
+    }
+    PASSED("getted value are ok");
 }
 
 
@@ -88,6 +154,14 @@ int main(void)
     thrd_create(&th, check_input_mex, NULL);
 
     run_test();
+
+    sleep(3);
+
+    dps_master_print_boards();
+    dps_master_print_vars();
+    dps_master_print_coms();
+
+    print_SCORE();
 
     thrd_join(th, NULL);
     return 0;

@@ -14,7 +14,7 @@
 
 uint8_t u8 =0;
 uint16_t u16 = 0;
-uint32_t u32= 0;
+uint32_t u32= 15;
 uint64_t u64= 0;
 
 int8_t s8 =0;
@@ -196,7 +196,7 @@ int check_update_var(){
 
 int send_com_info_master(){
     ReqInfo req = {
-        .full_data.board_id = BOARD_ID,
+        .full_data.data_it.board_id = BOARD_ID,
         .full_data.info_t = COMMAND,
     };
 
@@ -220,7 +220,7 @@ int send_com_info_master(){
 
 int send_var_info_master(){
     ReqInfo req = {
-        .full_data.board_id = BOARD_ID,
+        .full_data.data_it.board_id = BOARD_ID,
         .full_data.info_t = VAR,
     };
 
@@ -238,6 +238,46 @@ int send_var_info_master(){
         return -1;
     }
     PASSED("info req variables recognized");
+
+    return 0;
+}
+
+int get_cur_values(){
+    ReqInfo req_val_wrong = {
+        .full_data = {
+            .info_t = VAR_VALUE,
+            .data_it.board_id = 8,
+            .data_it.data_id = 2,
+        },
+    };
+
+    ReqInfo req_val_right = {
+        .full_data = {
+            .info_t = VAR_VALUE,
+            .data_it.board_id = BOARD_ID,
+            .data_it.data_id = 2,
+        },
+    };
+
+    CanMessage mex = {
+        .id = DPS_CAN_MESSAGE_ID,
+        .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+        .dps_payload.mext_type = {GET_INFO},
+        .dps_payload.data = req_val_wrong.raw_data,
+    };
+
+    if (!dps_check_can_command_recv(&mex)) {
+        FAILED("wrong variable accessed");
+        return -1;
+    }
+    PASSED("wrong variable read refused");
+
+    mex.dps_payload.data = req_val_right.raw_data;
+    if (dps_check_can_command_recv(&mex)) {
+        FAILED("correct variable read failed");
+        return -1;
+    }
+    PASSED("correct variable read ok");
 
     return 0;
 }
@@ -360,6 +400,12 @@ int send_var_info_master(){
         return -7;;
         }
         PASSED("send info var master ok");
+
+        if (get_cur_values()) {
+            FAILED("failed sending current var values");
+        return -7;;
+        }
+        PASSED("sending current var values ok");
 
     return 0;
 }

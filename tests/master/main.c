@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#define __DEBUG__
+#define DEBUG
 #include "../../dps_master.h"
 #include "../../common/can_mex/board.h"
 #include "../../common/can_mex/variable.h"
@@ -57,6 +57,10 @@ int new_board_connection(){
 
     return 0;
 } 
+
+int req_info(){
+    return 0;
+}
 
 int test_saved_var()
 {
@@ -450,6 +454,12 @@ int run_test(){
         return -1;
     }
     PASSED("ok connection saving of new boards");
+
+    if (req_info()) {
+        PASSED("requiring info slaves failed");
+        return -1;
+    }
+    PASSED("requiring info slaves ok");
 
     if (test_saved_var()) {
         FAILED("failed test saved var");

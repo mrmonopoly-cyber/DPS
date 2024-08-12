@@ -77,6 +77,7 @@ static int req_inf_exec(CanMessage* mex){
     };
     VariableInfoName var_name;
     VariableInfoMetadata var_metadata;
+    VariableValue var_value;
     CanMessage new_mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
@@ -103,7 +104,9 @@ static int req_inf_exec(CanMessage* mex){
                 var_metadata.full_data.signe_num = var->data.signd_var;
                 new_mex.dps_payload.mext_type.type = VAR_METADATA;
                 new_mex.dps_payload.data = var_metadata.raw_data;
-                dps.send_f(&new_mex);
+                if(dps.send_f(&new_mex)){
+                    return EXIT_FAILURE;
+                }
             }
             return EXIT_SUCCESS;
         case COMMAND:
@@ -122,9 +125,26 @@ static int req_inf_exec(CanMessage* mex){
                 //metadata
                 new_mex.dps_payload.mext_type.type = COM_METADATA;
                 new_mex.dps_payload.data = com->metadata.raw_data;
-                dps.send_f(&new_mex);
+                if(dps.send_f(&new_mex)){
+                    return EXIT_FAILURE;
+                }
             }
             return EXIT_SUCCESS;
+        case VAR_VALUE:
+            if (data_mex.full_data.data_it.board_id == dps.board_id) {
+                uint8_t var_id = data_mex.full_data.data_it.data_id;
+                struct var_internal* var = c_vector_find(dps.vars, &var_id);
+                if (!var) {
+                    return EXIT_FAILURE;
+                }
+                var_value.full_data.obj_id.board_id = dps.board_id;
+                var_value.full_data.obj_id.data_id = var->var_id;
+                memcpy(var_value.full_data.value, var->data.var_ptr, var->data.size);
+                new_mex.dps_payload.data = var_value.raw_data;
+                new_mex.dps_payload.mext_type.type = GET_CURRENT_VAR_VALUE;
+                return dps.send_f(&new_mex);
+            }
+            return EXIT_FAILURE;
         default:
             return EXIT_FAILURE;
 

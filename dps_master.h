@@ -24,6 +24,8 @@ typedef struct{
 typedef struct{
     char name[NAME_MAX_SIZE];
     VariableInfoMetadata metadata;
+    uint8_t updated: 1;
+    char value[6]; //HACK: max value size: max value size
 }var_record;
 
 typedef struct{
@@ -52,6 +54,13 @@ int dps_master_init(can_send send_f);
 //EXIT_FAILURE if errors happens
 int dps_master_new_connection();
 
+enum REQUEST_INFO{
+    REQ_VAR = (1 << 0),
+    REQ_COM = (1 << 1)
+};
+//INFO: send a request info to a specific board fetching data based on argument
+int dps_master_request_info_board(uint8_t board_id, enum REQUEST_INFO data);
+
 //INFO: return a list of all the board known by the master with theirs id
 board_list_info* dps_master_list_board();
 
@@ -60,6 +69,12 @@ int dps_master_list_vars(uint8_t board_id, var_list_info** o_list);
 
 //INFO: return a list of all the coms known by the master 
 int dps_master_list_coms(com_list_info** o_list);
+
+//INFO: fetch the current value of a variable in a board in the system 
+int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id);
+
+//INFO: put the current value of a variable in a board in the system and put in in o_buffer
+int dps_master_get_value_var(uint8_t board_id, uint8_t var_i, var_record* o_var);
 
 //INFO: send and update request for a variable of a board
 //if the size is do not fit can message or is greater than the size of the variable
@@ -76,7 +91,7 @@ int dps_master_send_command(uint16_t com_dps_id, void* value, uint8_t value_size
 //EXIT_FAILURE otherwise
 int dps_master_check_mex_recv(CanMessage* mex);
 
-#ifdef __DEBUG__
+#ifdef DEBUG
 
 int dps_master_print_boards();
 int dps_master_print_coms();

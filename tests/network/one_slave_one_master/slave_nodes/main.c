@@ -33,11 +33,21 @@ int send_f_can(CanMessage* mex)
     };
     memcpy(frame.data, mex->rawMex.raw_buffer, mex->dlc);
     if(can_send_frame(can_socket, &frame)){
-        printf("failed send");
+        printf("failed send\n");
     }
     return 0;
     return 0;
 }
+
+uint8_t u8 = 1;
+uint16_t u16 = 2;
+uint32_t u32 = 3;
+
+int8_t s8 = -1;
+int16_t s16 = -2;
+int32_t s32 = -3;
+
+float fl = 5.2f;
 
 int main(void)
 {
@@ -50,11 +60,42 @@ int main(void)
     BoardName board_name = {
         .full_data.name = "SLAVE1",
     };
-    dps_init(send_f_can,&board_name);
+    if(dps_init(send_f_can,&board_name)){
+        FAILED("failed init");
+        return -1;
+    }
+    PASSED("init ok");
+
+#define MON_VAR(VAR,fun) \
+    {\
+        VariableInfoPrimitiveType pr = {\
+            .name = #VAR,\
+            .var_ptr = &VAR,\
+        };\
+        if(fun(&pr)){\
+            FAILED("failed monitor " #VAR);\
+            return -1;\
+        }\
+        PASSED("monitor ok var " #VAR);\
+    }
+
+    MON_VAR(u8,dps_monitor_var_uint8_t);
+    MON_VAR(u16,dps_monitor_var_uint16_t);
+    MON_VAR(u32,dps_monitor_var_uint32_t);
+
+    MON_VAR(s8,dps_monitor_var_int8_t);
+    MON_VAR(s16,dps_monitor_var_int16_t);
+    MON_VAR(s32,dps_monitor_var_int32_t);
+
+    MON_VAR(fl,dps_monitor_var_float_t);
+
+    printf("slave ready\n");
 
     thrd_t th;
     thrd_create(&th, check_input_mex, NULL);
 
+    print_SCORE();
     thrd_join(th, NULL);
+
     return 0;
 }
