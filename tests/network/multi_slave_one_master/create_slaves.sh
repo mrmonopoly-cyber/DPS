@@ -13,6 +13,6 @@ cd ..
 base_n_vars=3
 base_n_coms=1
 for ((i = 0; i < $num_slaves; i++)); do
-    ./slave_nodes/main $i "SLAVE$i" $[$base_n_vars+$i] $[$base_n_coms+$i] &
+    ./slave_nodes/main "SLAVE$i" $[$base_n_vars+$i] $[$base_n_coms+$i] &
 done
 

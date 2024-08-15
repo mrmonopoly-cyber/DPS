@@ -1,4 +1,7 @@
+#include <unistd.h>
+#define DEBUG
 #include "../../../../dps_master.h"
+#include "../../../test_lib.h"
 #include "../../can_lib/canlib.h"
 #include <stdio.h>
 #include <string.h>
@@ -7,43 +10,73 @@
 
 int can_socket = -1;
 
-int send_f_can(CanMessage* mex){
-    struct can_frame f = {
-        .can_dlc = mex->dlc,
-        .can_id = mex->id,
-    };
-    memcpy(f.data, mex->rawMex.raw_buffer,mex->dlc);
-    return can_send_frame(can_socket, &f);
+int send_f_can(CanMessage *mex) {
+  struct can_frame f = {
+      .can_dlc = mex->dlc,
+      .can_id = mex->id,
+  };
+  memcpy(f.data, mex->rawMex.raw_buffer, mex->dlc);
+  return can_send_frame(can_socket, &f);
 }
 
-void* check_incomming_message(void* args){
-    struct can_frame mex_lib = {0};
-    while(1){
-        if(!can_recv_frame(can_socket, &mex_lib)){
-            CanMessage mex = {
-                .dlc = mex_lib.can_dlc,
-                .id = mex_lib.can_id,
-            };
-            memcpy(mex.rawMex.raw_buffer, mex_lib.data, mex_lib.can_dlc);
-            dps_master_check_mex_recv(&mex);
-        }
-    };
-    return NULL;
-}
-
-int main(void)
-{
-    can_socket = can_init("test_can_dps");
-    if (can_socket < 0) {
-        printf("error init can\n");
-        return -1;
+void *check_incomming_message(void *args) {
+  struct can_frame mex_lib = {0};
+  while (1) {
+    if (!can_recv_frame(can_socket, &mex_lib)) {
+      CanMessage mex = {
+          .dlc = mex_lib.can_dlc,
+          .id = mex_lib.can_id,
+      };
+      memcpy(mex.rawMex.raw_buffer, mex_lib.data, mex_lib.can_dlc);
+      dps_master_check_mex_recv(&mex);
     }
-    dps_master_init(send_f_can);
+  };
+  return NULL;
+}
 
-    pthread_t new_thread = 1;
-    pthread_create(&new_thread, NULL, check_incomming_message, NULL);
-    
+int main(void) {
+  can_socket = can_init("test_can_dps");
+  if (can_socket < 0) {
+    printf("error init can\n");
+    return -1;
+  }
+  dps_master_init(send_f_can);
 
-    pthread_join(new_thread, NULL);
-    return 0;
+  pthread_t new_thread = 1;
+  pthread_create(&new_thread, NULL, check_incomming_message, NULL);
+
+  if (dps_master_new_connection()) {
+    FAILED("failed new connection slaves");
+    return -1;
+  }
+  PASSED("new connection slaves ok");
+
+  sleep(5);
+
+  if (dps_master_print_boards()) {
+    FAILED("failed print boards");
+    return -1;
+  }
+  PASSED("failed print boards");
+
+  if (dps_master_request_info_board(0, REQ_VAR)) {
+    FAILED("failed request var info");
+    return -1;
+  }
+  PASSED("passed request var info");
+
+  sleep(5);
+  if (dps_master_print_vars()) {
+    FAILED("failed print vars debug");
+    return -1;
+  }
+  PASSED("passed print vars debug");
+  if (dps_master_print_coms()) {
+    FAILED("failed print coms debug");
+    return -1;
+  }
+  PASSED("passed print coms debug");
+
+  pthread_join(new_thread, NULL);
+  return 0;
 }

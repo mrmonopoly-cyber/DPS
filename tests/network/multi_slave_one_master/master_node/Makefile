@@ -11,7 +11,7 @@ OBJ_FILE = dps_master.o c_vector.o c_check_input.o canlib.o
 all: main
 
 main: main.c $(OBJ_FILE)
-	gcc $(C_FLAGS) main.c $(OBJ_FILE) -o main
+	gcc $(C_FLAGS) $(OBJ_FILE) main.c ../../../test_lib.c -o main
 
 clean:
 	rm main
