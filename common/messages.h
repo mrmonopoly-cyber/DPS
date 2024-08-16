@@ -6,19 +6,18 @@
 
 #define DPS_CAN_MESSAGE_ID 0x512
 
+typedef struct CanMessage {
+  uint16_t id;
+  uint8_t dlc;
+  union {
+    struct {
+      mex_type_u8_t mext_type;
+      DpsPayload data;
+    } dps_payload;
+    RawPayloadCanMex rawMex;
+  };
+} CanMessage;
 
-typedef struct CanMessage{
-    uint16_t id;
-    uint8_t dlc;
-    union{
-        struct{
-            mex_type_u8_t mext_type;
-            DpsPayload data;
-        }dps_payload;
-        RawPayloadCanMex rawMex;
-    };
-}CanMessage;
-
-typedef int (*can_send) (CanMessage* mex);
+typedef int (*can_send)(CanMessage *mex);
 
 #endif // !__DPS_MESSAGES__

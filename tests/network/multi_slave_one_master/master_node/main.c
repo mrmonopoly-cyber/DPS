@@ -66,6 +66,44 @@ int main(void) {
   PASSED("passed request var info");
 
   sleep(5);
+  var_list_info *vars = NULL;
+  if (dps_master_list_vars(0, &vars)) {
+    FAILED("failed getting list of vars");
+    return -1;
+  }
+
+  for (int i = 0; i < vars->board_num; i++) {
+    var_record *var = &vars->vars[i];
+    printf("var name: %s\t", var->name);
+    if (var->metadata.full_data.float_num) {
+      printf("var float: %f\n", *(float *)var->value);
+    } else if (var->metadata.full_data.signe_num) {
+      switch (var->metadata.full_data.size) {
+      case 1:
+        printf("var int: %d\n", *(int8_t *)var->value);
+        break;
+      case 2:
+        printf("var int: %d\n", *(int16_t *)var->value);
+        break;
+      case 4:
+        printf("var int: %d\n", *(int32_t *)var->value);
+        break;
+      }
+    } else {
+      switch (var->metadata.full_data.size) {
+      case 1:
+        printf("var int: %d\n", *(uint8_t *)var->value);
+        break;
+      case 2:
+        printf("var int: %d\n", *(uint16_t *)var->value);
+        break;
+      case 4:
+        printf("var int: %d\n", *(uint32_t *)var->value);
+        break;
+      }
+    }
+  }
+
   if (dps_master_print_vars()) {
     FAILED("failed print vars debug");
     return -1;

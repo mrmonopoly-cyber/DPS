@@ -1,4 +1,5 @@
 #include "../../../../dps_slave.h"
+#include "../../../test_lib.h"
 #include "../../can_lib/canlib.h"
 #include <pthread.h>
 #include <stdint.h>
@@ -67,17 +68,88 @@ int main(int argc, char **argv) {
   pthread_create(&new_thread, NULL, check_incomming_message, NULL);
 
   VariableInfoPrimitiveType var = {
-      .name = "var_X",
+      .name = "vU1_X",
       .var_ptr = NULL,
   };
 
-  uint8_t vars[num_vars] = {};
+  uint8_t vars_u8[num_vars] = {};
+  int16_t vars_u16[num_vars] = {};
+  uint32_t vars_u32[num_vars] = {};
+  int8_t vars_s8[num_vars] = {};
+  int16_t vars_s16[num_vars] = {};
+  int32_t vars_s32[num_vars] = {};
+  float vars_float[num_vars] = {};
 
   for (int i = 0; i < num_vars; i++) {
-    vars[i] = i;
-    var.name[4] = '0' + i;
-    var.var_ptr = &vars[i];
-    dps_monitor_var_uint8_t(&var);
+    vars_u8[i] = i;
+    var.name[1] = 'u';
+    var.name[2] = '1';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_u8[i];
+    if (dps_monitor_var_uint8_t(&var)) {
+      FAILED("failed monitor u8");
+      return -1;
+    }
+
+    vars_u16[i] = i;
+    var.name[1] = 'u';
+    var.name[2] = '2';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_u16[i];
+    if (dps_monitor_var_uint16_t(&var)) {
+      FAILED("failed monitor u16");
+      return -1;
+    }
+
+    vars_u32[i] = i;
+    var.name[1] = 'u';
+    var.name[2] = '3';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_u32[i];
+    if (dps_monitor_var_uint32_t(&var)) {
+      FAILED("failed monitor u16");
+      return -1;
+    }
+
+    vars_s8[i] = i;
+    var.name[1] = 's';
+    var.name[2] = '1';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_s8[i];
+    if (dps_monitor_var_int8_t(&var)) {
+      FAILED("failed monitor s8");
+      return -1;
+    }
+
+    vars_s16[i] = i;
+    var.name[1] = 's';
+    var.name[2] = '2';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_s16[i];
+    if (dps_monitor_var_int16_t(&var)) {
+      FAILED("failed monitor s16");
+      return -1;
+    }
+
+    vars_s32[i] = i;
+    var.name[1] = 's';
+    var.name[2] = '4';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_s32[i];
+    if (dps_monitor_var_uint32_t(&var)) {
+      FAILED("failed monitor s32");
+      return -1;
+    }
+
+    vars_float[i] = i;
+    var.name[1] = 'f';
+    var.name[2] = '4';
+    var.name[4] = '1' + i;
+    var.var_ptr = &vars_float[i];
+    if (dps_monitor_var_float_t(&var)) {
+      FAILED("failed monitor float");
+      return -1;
+    }
   }
 
   pthread_join(new_thread, NULL);
