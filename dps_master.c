@@ -231,6 +231,26 @@ static int get_curr_var_value_exec(CanMessage *mex) {
   return EXIT_FAILURE;
 }
 
+static int send_refresh_req_var(uint8_t board_id, var_record *var) {
+  var->updated = 0;
+  ReqInfo req_value = {
+      .full_data.info_t = VAR_VALUE,
+      .full_data.data_it.board_id = board_id,
+      .full_data.data_it.data_id = var->metadata.full_data.obj_id.data_id,
+  };
+
+  CanMessage mex = {
+      .id = DPS_CAN_MESSAGE_ID,
+      .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
+      .dps_payload =
+          {
+              .mext_type = {GET_INFO},
+              .data = req_value.raw_data,
+          },
+  };
+  return dps.send_f(&mex);
+}
+
 // public
 int dps_master_init(can_send send_f) {
   CHECK_INPUT(send_f);
@@ -394,23 +414,22 @@ int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id) {
   if (board) {
     var_record *var = c_vector_find(board->vars, &var_id);
     if (var) {
-      var->updated = 0;
-      ReqInfo req_value = {
-          .full_data.info_t = VAR_VALUE,
-          .full_data.data_it.board_id = board_id,
-          .full_data.data_it.data_id = var_id,
-      };
+      return send_refresh_req_var(board_id, var);
+    }
+  }
+  return EXIT_FAILURE;
+}
 
-      CanMessage mex = {
-          .id = DPS_CAN_MESSAGE_ID,
-          .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-          .dps_payload =
-              {
-                  .mext_type = {GET_INFO},
-                  .data = req_value.raw_data,
-              },
-      };
-      return dps.send_f(&mex);
+// INFO: fetch the current value of all variables in a board in the system
+int dps_master_refresh_value_var_all(uint8_t board_id) {
+  board_record *board = c_vector_find(dps.boards, &board_id);
+  if (board) {
+    var_record *var = NULL;
+    for (uint8_t i = 0; i < c_vector_length(board->vars); i++) {
+      var = c_vector_get_at_index(board->vars, i);
+      if (var) {
+        return send_refresh_req_var(board_id, var);
+      }
     }
   }
   return EXIT_FAILURE;

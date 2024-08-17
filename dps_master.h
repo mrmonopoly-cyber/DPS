@@ -70,6 +70,9 @@ int dps_master_list_coms(com_list_info **o_list);
 // INFO: fetch the current value of a variable in a board in the system
 int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id);
 
+// INFO: fetch the current value of all variables in a board in the system
+int dps_master_refresh_value_var_all(uint8_t board_id);
+
 // INFO: put the current value of a variable in a board in the system and put in
 // in o_buffer
 int dps_master_get_value_var(uint8_t board_id, uint8_t var_i,

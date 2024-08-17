@@ -116,6 +116,24 @@ int main(void) {
     }
   }
 
+  for (int i = 0; i < vars->board_num; i++) {
+    uint8_t new_value = 26;
+    var_record *var = &vars->vars[i];
+    if (dps_master_update_var(0, var->metadata.full_data.obj_id.data_id,
+                              &new_value, sizeof(new_value))) {
+      FAILED("failed update request");
+      goto free;
+    }
+  }
+
+  sleep(5);
+  if (dps_master_refresh_value_var_all(0)) {
+    FAILED("failed refresh all variables");
+    goto free;
+  }
+
+  sleep(5);
+
   if (dps_master_print_vars()) {
     FAILED("failed print vars debug");
     goto free;
