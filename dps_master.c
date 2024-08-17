@@ -468,7 +468,7 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
     return EXIT_FAILURE;
   }
 
-  if (var->metadata.full_data.size > value_size) {
+  if (value_size > var->metadata.full_data.size) {
     return EXIT_FAILURE;
   }
 

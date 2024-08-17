@@ -127,6 +127,55 @@ int main(void) {
   }
 
   sleep(5);
+  {
+    var_list_info *vars = NULL;
+    if (dps_master_list_vars(0, &vars)) {
+      FAILED("failed getting list of vars");
+      goto free;
+    }
+
+    for (int i = 0; i < vars->board_num; i++) {
+      var_record *var = &vars->vars[i];
+      printf("var index: %d,var name: %s\t", i, var->name);
+      if (var->metadata.full_data.float_num) {
+        printf("var float: %f\n", *(float *)var->value);
+        continue;
+      }
+      if (var->metadata.full_data.signe_num) {
+        switch (var->metadata.full_data.size) {
+        case 1:
+          printf("var int8: %d\n", *(int8_t *)var->value);
+          break;
+        case 2:
+          printf("var int16: %d\n", *(int16_t *)var->value);
+          break;
+        case 4:
+          printf("var int32: %d\n", *(int32_t *)var->value);
+          break;
+        default:
+          FAILED("invalid size signed");
+          goto free;
+          break;
+        }
+        continue;
+      }
+      switch (var->metadata.full_data.size) {
+      case 1:
+        printf("var uint8: %d\n", *(uint8_t *)var->value);
+        break;
+      case 2:
+        printf("var uint16: %d\n", *(uint16_t *)var->value);
+        break;
+      case 4:
+        printf("var uint32: %d\n", *(uint32_t *)var->value);
+        break;
+      default:
+        FAILED("invalid size unsigned");
+        goto free;
+      }
+    }
+  }
+
   if (dps_master_refresh_value_var_all(0)) {
     FAILED("failed refresh all variables");
     goto free;
