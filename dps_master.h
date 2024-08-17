@@ -5,6 +5,7 @@
 #include "common/can_mex/base_mex_components/obj_id.h"
 #include "common/can_mex/board.h"
 #include "common/can_mex/command.h"
+#include "common/can_mex/object.h"
 #include "common/can_mex/variable.h"
 #include "common/messages.h"
 
@@ -25,7 +26,7 @@ typedef struct {
   char name[NAME_MAX_SIZE];
   VariableInfoMetadata metadata;
   uint8_t updated : 1;
-  char value[6]; // HACK: max value size: max value size
+  char value[NAME_MAX_SIZE];
 } var_record;
 
 typedef struct {
