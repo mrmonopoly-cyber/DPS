@@ -28,7 +28,10 @@ void *check_incomming_message(void *args) {
           .id = mex_lib.can_id,
       };
       memcpy(mex.rawMex.raw_buffer, mex_lib.data, mex_lib.can_dlc);
-      dps_master_check_mex_recv(&mex);
+      if (dps_master_check_mex_recv(&mex)) {
+        FAILED("failed processing message");
+        return NULL;
+      }
     }
   };
   return NULL;
@@ -38,7 +41,7 @@ int main(void) {
   can_socket = can_init("test_can_dps");
   if (can_socket < 0) {
     printf("error init can\n");
-    return -1;
+    goto free;
   }
   dps_master_init(send_f_can);
 
@@ -47,7 +50,7 @@ int main(void) {
 
   if (dps_master_new_connection()) {
     FAILED("failed new connection slaves");
-    return -1;
+    goto free;
   }
   PASSED("new connection slaves ok");
 
@@ -55,13 +58,13 @@ int main(void) {
 
   if (dps_master_print_boards()) {
     FAILED("failed print boards");
-    return -1;
+    goto free;
   }
-  PASSED("failed print boards");
+  PASSED("ok print boards");
 
   if (dps_master_request_info_board(0, REQ_VAR)) {
     FAILED("failed request var info");
-    return -1;
+    goto free;
   }
   PASSED("passed request var info");
 
@@ -69,52 +72,66 @@ int main(void) {
   var_list_info *vars = NULL;
   if (dps_master_list_vars(0, &vars)) {
     FAILED("failed getting list of vars");
-    return -1;
+    goto free;
   }
 
   for (int i = 0; i < vars->board_num; i++) {
     var_record *var = &vars->vars[i];
-    printf("var name: %s\t", var->name);
+    printf("var index: %d,var name: %s\t", i, var->name);
     if (var->metadata.full_data.float_num) {
       printf("var float: %f\n", *(float *)var->value);
-    } else if (var->metadata.full_data.signe_num) {
+      continue;
+    }
+    if (var->metadata.full_data.signe_num) {
       switch (var->metadata.full_data.size) {
       case 1:
-        printf("var int: %d\n", *(int8_t *)var->value);
+        printf("var int8: %d\n", *(int8_t *)var->value);
         break;
       case 2:
-        printf("var int: %d\n", *(int16_t *)var->value);
+        printf("var int16: %d\n", *(int16_t *)var->value);
         break;
       case 4:
-        printf("var int: %d\n", *(int32_t *)var->value);
+        printf("var int32: %d\n", *(int32_t *)var->value);
+        break;
+      default:
+        FAILED("invalid size signed");
+        goto free;
         break;
       }
-    } else {
-      switch (var->metadata.full_data.size) {
-      case 1:
-        printf("var int: %d\n", *(uint8_t *)var->value);
-        break;
-      case 2:
-        printf("var int: %d\n", *(uint16_t *)var->value);
-        break;
-      case 4:
-        printf("var int: %d\n", *(uint32_t *)var->value);
-        break;
-      }
+      continue;
+    }
+    switch (var->metadata.full_data.size) {
+    case 1:
+      printf("var uint8: %d\n", *(uint8_t *)var->value);
+      break;
+    case 2:
+      printf("var uint16: %d\n", *(uint16_t *)var->value);
+      break;
+    case 4:
+      printf("var uint32: %d\n", *(uint32_t *)var->value);
+      break;
+    default:
+      FAILED("invalid size unsigned");
+      goto free;
     }
   }
 
   if (dps_master_print_vars()) {
     FAILED("failed print vars debug");
-    return -1;
+    goto free;
   }
   PASSED("passed print vars debug");
   if (dps_master_print_coms()) {
     FAILED("failed print coms debug");
-    return -1;
+    goto free;
   }
   PASSED("passed print coms debug");
 
   pthread_join(new_thread, NULL);
+
+free:
+  if (vars) {
+    free(vars);
+  }
   return 0;
 }

@@ -41,7 +41,8 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info);
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info);
 
-// INFO: tell to dps to monitor a variable
+// INFO: tell to dps to monitor a variable, if  the name given is too long it
+// will truncate it adding a terminator
 int dps_monitor_var_general(VariableInfoGericType *var_info);
 
 // INFO: tell to dps a dps_command the board can receive

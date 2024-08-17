@@ -1,3 +1,4 @@
+#define DEBUG
 #include "../../../../dps_slave.h"
 #include "../../../test_lib.h"
 #include "../../can_lib/canlib.h"
@@ -152,6 +153,10 @@ int main(int argc, char **argv) {
     }
   }
 
+  dps_print_var();
+
   pthread_join(new_thread, NULL);
+
+free:
   return 0;
 }
