@@ -1,3 +1,6 @@
 [submodule "lib/c_vector"]
 	path = lib/c_vector
 	url = https://github.com/mrmonopoly-cyber/c_vector.git
+[submodule "tests/network/arduino/due/lib/DPS"]
+	path = tests/network/arduino/due/lib/DPS
+	url = https://github.com/mrmonopoly-cyber/DPS
