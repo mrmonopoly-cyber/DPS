@@ -1,0 +1,2 @@
+default_fqbn: arduino:sam:arduino_due_x_dbg
+default_port: /dev/ttyACM0
