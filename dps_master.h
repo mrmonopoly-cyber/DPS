@@ -1,6 +1,10 @@
 #ifndef __DPS_MASTER__
 #define __DPS_MASTER__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "common/can_mex/base_mex_components/base_payload.h"
 #include "common/can_mex/base_mex_components/obj_id.h"
 #include "common/can_mex/board.h"
@@ -104,5 +108,9 @@ int dps_master_print_coms();
 int dps_master_print_vars();
 
 #endif // __DEBUG__
+       
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !__DPS_MASTER__

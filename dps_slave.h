@@ -1,6 +1,10 @@
 #ifndef __DPS_SLAVE__
 #define __DPS_SLAVE__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #include "common/can_mex/base_mex_components/base_payload.h"
@@ -58,4 +62,9 @@ int dps_print_var();
 int dps_print_com();
 
 #endif // DEBUG
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // !__DPS_SLAVE__
