@@ -1,5 +1,4 @@
 CC = gcc
-
 C_FLAGS =-Wall -Wextra  -fsanitize=address -g
 
 dps_src_path := $(or $(DPS_ROOT), .)
