@@ -1,3 +1,5 @@
+CC = gcc
+
 C_FLAGS =-Wall -Wextra  -fsanitize=address -g
 
 dps_src_path := $(or $(DPS_ROOT), .)
@@ -15,10 +17,10 @@ master: dps_master.o
 slave : dps_slave.o
 
 dps_master.o: $(dps_master.c)
-	gcc $(C_FLAGS) $(dps_master.c) -c
+	$(CC) $(C_FLAGS) $(dps_master.c) -c
 
 dps_slave.o: $(dps_slave.c)
-	gcc $(C_FLAGS) $(dps_slave.c) -c
+	$(CC) $(C_FLAGS) $(dps_slave.c) -c
 
 dps_clean:
 	rm dps_slave.o

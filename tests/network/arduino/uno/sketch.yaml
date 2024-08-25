@@ -1,0 +1,2 @@
+default_fqbn: raceup:renesas_uno:atc
+default_port: /dev/ttyACM0

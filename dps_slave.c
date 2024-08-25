@@ -182,7 +182,7 @@ static int set_var_value_exec(CanMessage *mex) {
     uint8_t var_id = new_value.full_data.obj_id.data_id;
     struct var_internal *saved_var = c_vector_find(dps.vars, &var_id);
     if (saved_var) {
-      mempcpy(saved_var->data.var_ptr, new_value.full_data.value,
+      memcpy(saved_var->data.var_ptr, new_value.full_data.value,
               saved_var->data.size);
     }
   }
@@ -492,8 +492,8 @@ int dps_print_var() {
   CHECK_INIT();
 
   struct var_internal *var = NULL;
-  uint len = c_vector_length(dps.vars);
-  for (uint i = 0; i < len; i++) {
+  uint8_t len = c_vector_length(dps.vars);
+  for (uint8_t i = 0; i < len; i++) {
     var = c_vector_get_at_index(dps.vars, i);
     print_var(var);
   }
@@ -504,8 +504,8 @@ int dps_print_com() {
   CHECK_INIT();
 
   struct com_internal *com = NULL;
-  uint len = c_vector_length(dps.coms);
-  for (uint i = 0; i < len; i++) {
+  uint8_t len = c_vector_length(dps.coms);
+  for (uint8_t i = 0; i < len; i++) {
     com = c_vector_get_at_index(dps.coms, i);
     print_com(com);
   }

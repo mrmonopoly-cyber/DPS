@@ -1,8 +1,7 @@
-#include <cstdlib>
-#include <cstring>
-#include <due_can.h>
+#include <string.h>
+#include <Arduino_CAN.h>
 
-#include "lib/DPS/dps_slave.h"
+#include <dps_slave.h>
 
 uint8_t u8 = 1;
 uint16_t u16 = 1;
@@ -12,19 +11,30 @@ int16_t s16 = 1;
 int32_t s32 = 1;
 float float_v = 1;
 
-static int send(CanMessage *mex) {
-  CAN_FRAME mex_f;
-  mex_f.id = mex->id;
-  mex_f.length = mex->dlc;
-  memcpy(&mex_f.data.value, mex->rawMex.raw_buffer, mex->dlc);
+arduino::R7FA4M1_CAN personal_can(D14, D15);
 
-  Can0.sendFrame(mex_f);
+static int send(CanMessage *mex) {
+    CanMsg msg(CanStandardId(mex->id), mex->dlc, mex->rawMex.raw_buffer);
+    char rc = personal_can.write(msg);
+    if (rc < 0)
+    {
+        Serial.print("CAN.write(...) failed with error code ");
+        Serial.println(rc);
+    }
+    delay(10);
 }
 
 void setup() {
   Serial.begin(115200);
-  // Initialize CAN0 and CAN1, Set the proper baud rates here
-  Can0.begin(CAN_BPS_500K);
+
+  if (!personal_can.begin(CanBitRate::BR_500k))
+  {
+      Serial.println("Errore nell'inizializzazione della comunicazione CAN");
+      while (1)
+          ;
+  }
+  Serial.println("Comunicazione CAN inizializzata");
+
 
   BoardName b_name = {
       "SLAVE",
@@ -57,16 +67,14 @@ void setup() {
 }
 
 void loop() {
-  if (Can0.available()) {
-    CAN_FRAME in_mex;
-    Can0.read(in_mex);
-    Serial.print("mex received: " + String(in_mex.id) + ",");
-    Serial.print(in_mex.data.low);
-    Serial.println(in_mex.data.high);
-    CanMessage d_mex;
-    d_mex.id = in_mex.id;
-    d_mex.dlc = in_mex.length;
-    memcpy(d_mex.rawMex.raw_buffer, &in_mex.data.value, in_mex.length);
-    dps_check_can_command_recv(&d_mex);
-  }
+    if (personal_can.available())
+    {
+        CanMsg const msg = personal_can.read();
+        CanMessage d_mex;
+        d_mex.id = msg.id;
+        d_mex.dlc = msg.data_length;
+        memcpy(d_mex.rawMex.raw_buffer,msg.data,msg.data_length);
+
+        dps_check_can_command_recv(&d_mex);
+    }
 }
