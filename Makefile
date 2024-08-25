@@ -1,5 +1,6 @@
 CC = gcc
 C_FLAGS = -Wall -Wextra -g
+C_EXFLAGS = ""
 
 dps_src_path := $(or $(DPS_ROOT), .)
 dps_slave.c := $(dps_src_path)/dps_slave.c
@@ -24,10 +25,10 @@ release: compile
 compile: dps_master.o dps_slave.o
 
 dps_master.o: $(dps_master.c) 
-	$(CC) $(C_FLAGS) $(DEBUG) $(dps_master.c) -c
+	$(CC) $(C_FLAGS) $(C_EXFLAGS) $(DEBUG) $(dps_master.c) -c
 
 dps_slave.o: $(dps_slave.c) 
-	$(CC) $(C_FLAGS) $(DEBUG) $(dps_slave.c) -c
+	$(CC) $(C_FLAGS) $(C_EXFLAGS) $(DEBUG) $(dps_slave.c) -c
 
 dps_clean:
 ifeq ($(wildcard dps_slave.o), dps_slave.o)
