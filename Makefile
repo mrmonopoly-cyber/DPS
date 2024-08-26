@@ -1,6 +1,6 @@
 CC = gcc
-C_FLAGS = -Wall -Wextra -g
-C_EXFLAGS = ""
+C_FLAGS = -Wall -Wextra
+C_EXFLAGS = 
 
 dps_src_path := $(or $(DPS_ROOT), .)
 dps_slave.c := $(dps_src_path)/dps_slave.c
@@ -12,7 +12,7 @@ include $(C_VECTOR_ROOT)/Makefile
 endif
 all: release
 
-DEBUG_FLAGS = -O0 -fsanitize=address
+DEBUG_FLAGS = -O0 -fsanitize=address -g
 RELEASE_FLAGS = -O2
 
 debug: C_FLAGS += $(DEBUG_FLAGS)

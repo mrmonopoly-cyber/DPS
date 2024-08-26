@@ -206,6 +206,10 @@ static int new_connection_exec() {
 
 // public
 int dps_init(can_send send_f, BoardName *board_name) {
+    if (dps.vars || dps.coms || dps.send_f) {
+        return EXIT_FAILURE;
+    }
+
   CHECK_INPUT(send_f);
   CHECK_INPUT(board_name);
   CHECK_INPUT(board_name->full_data.name[0])
