@@ -286,6 +286,8 @@ int dps_master_init(can_send send_f) {
     dps.coms = c_vector_init(&args);
   }
   if (!dps.coms) {
+    c_vector_free(dps.boards);
+    dps.boards = NULL;
     return EXIT_FAILURE;
   }
 
