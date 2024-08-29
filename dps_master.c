@@ -253,7 +253,7 @@ static int send_refresh_req_var(uint8_t board_id, var_record *var) {
 
 // public
 int dps_master_init(can_send send_f) {
-  if (dps.coms || dps.boards || dps.send_f) {
+  if (dps.coms && dps.boards && dps.send_f) {
     return EXIT_FAILURE;
   }
 
