@@ -61,7 +61,7 @@ int dps_master_new_connection();
 
 enum REQUEST_INFO { REQ_VAR = (1 << 0), REQ_COM = (1 << 1) };
 // INFO: send a request info to a specific board fetching data based on argument
-int dps_master_request_info_board(uint8_t board_id, enum REQUEST_INFO data);
+int dps_master_request_info_board(uint8_t board_id, uint8_t data);
 
 // INFO: return a list of all the board known by the master with theirs id
 board_list_info *dps_master_list_board();

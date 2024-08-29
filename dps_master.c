@@ -162,10 +162,10 @@ static int get_var_metadata_exec(CanMessage *mex) {
     var_record *new_var = c_vector_find(board->vars, &var_id);
     if (new_var) {
       new_var->metadata = var_metadata;
-      dps_master_refresh_value_var(board_id, var_id);
-      return EXIT_SUCCESS;
+      if(dps_master_refresh_value_var(board_id, var_id)){
+          return EXIT_FAILURE;
+      }
     }
-
     return EXIT_SUCCESS;
   }
 
@@ -306,7 +306,7 @@ int dps_master_new_connection() {
 }
 
 // INFO: send a request info to a specific board fetching variables and commands
-int dps_master_request_info_board(uint8_t board_id, enum REQUEST_INFO data) {
+int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,

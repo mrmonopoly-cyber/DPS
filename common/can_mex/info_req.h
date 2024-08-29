@@ -11,7 +11,7 @@ enum INFO_TYPES{
 #include "base_mex_components/base_payload.h"
 DPS_TYPEDEF(struct {
     ObjectId data_it;
-    enum INFO_TYPES info_t;
+    uint8_t info_t;
 },ReqInfo);
 
 

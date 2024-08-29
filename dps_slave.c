@@ -44,10 +44,10 @@ static uint16_t object_id_slave = 0;
 static void dummy_fun(void *e) {}
 
 static int found_var(const void *list_ele, const void *key) {
-  struct var_internal *ele_l = (struct var_internal *)list_ele;
-  uint8_t id = *(uint8_t *)key;
+  const struct var_internal *ele_l = list_ele;
+  const uint8_t *id = key;
 
-  return ele_l->var_id == id;
+  return ele_l->var_id == *id;
 }
 
 static int found_com(const void *list_ele, const void *key) {
@@ -120,6 +120,7 @@ static int req_inf_exec(CanMessage *mex) {
       }
     }
     return EXIT_SUCCESS;
+    break;
   case COMMAND:
     for (uint8_t i = 0; i < c_vector_length(dps.coms); i++) {
       CommandInfo *com = c_vector_get_at_index(dps.coms, i);
@@ -141,6 +142,7 @@ static int req_inf_exec(CanMessage *mex) {
       }
     }
     return EXIT_SUCCESS;
+    break;
   case VAR_VALUE:
     if (data_mex.full_data.data_it.board_id == dps.board_id) {
       uint8_t var_id = data_mex.full_data.data_it.data_id;
@@ -156,8 +158,10 @@ static int req_inf_exec(CanMessage *mex) {
       return dps.send_f(&new_mex);
     }
     return EXIT_FAILURE;
+    break;
   default:
     return EXIT_FAILURE;
+    break;
   }
   return EXIT_FAILURE;
 }
