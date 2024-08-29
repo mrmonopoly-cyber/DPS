@@ -132,7 +132,9 @@ static int req_inf_exec(CanMessage *mex) {
       memcpy(com_name.full_data.name, com->name, sizeof(com->name));
       new_mex.dps_payload.mext_type.type = COM_NAME;
       new_mex.dps_payload.data = com_name.raw_data;
-      dps.send_f(&new_mex);
+      if(dps.send_f(&new_mex)){
+          return EXIT_FAILURE;
+      }
 
       // metadata
       new_mex.dps_payload.mext_type.type = COM_METADATA;
