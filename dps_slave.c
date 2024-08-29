@@ -137,6 +137,7 @@ static int req_inf_exec(CanMessage *mex) {
       }
 
       // metadata
+      com->metadata.full_data.board_id = dps.board_id;
       new_mex.dps_payload.mext_type.type = COM_METADATA;
       new_mex.dps_payload.data = com->metadata.raw_data;
       if (dps.send_f(&new_mex)) {
