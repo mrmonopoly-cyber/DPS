@@ -177,9 +177,17 @@ static int get_com_name_exec(CanMessage *mex) {
       .raw_data = mex->dps_payload.data,
   };
 
+  com_record *old_com = NULL;
   com_record new_com = {
       .metadata.full_data.com_id = com_name.full_data.com_id,
   };
+
+  old_com = c_vector_find(dps.coms, &new_com.metadata.full_data.com_id);
+  if (old_com) {
+      memcpy(old_com->name, com_name.full_data.name, NAME_MAX_SIZE);
+      return EXIT_FAILURE;
+  }
+
   memcpy(new_com.name, com_name.full_data.name, NAME_MAX_SIZE);
 
   if (!c_vector_push(&dps.coms, &new_com)) {

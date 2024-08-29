@@ -67,7 +67,7 @@ int main(void) {
   }
 
   BoardName board_name = {
-      .full_data.name = "SLAVE1",
+      .full_data.name = "SLAVE",
   };
   if (dps_init(send_f_can, &board_name)) {
     FAILED("failed init");

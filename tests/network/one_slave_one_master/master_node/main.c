@@ -53,7 +53,7 @@ int get_boards(){
         return -1;
     }
     if (boards->board_num != 1 ||
-        strcmp(boards->boards[0].name, "SLAVE1") ||
+        strcmp(boards->boards[0].name, "SLAVE") ||
         boards->boards[0].id != 0){
         FAILED("finded slave differ from what exepected");
         return -1;
@@ -141,9 +141,12 @@ void run_test(){
 }
 
 
-int main(void)
+int main(int argc,char **argv)
 {
-    can_socket = can_init("test_can_dps");
+    if (!argv[1]) {
+        return -1;
+    }
+    can_socket = can_init(argv[1]);
     if (can_socket < 0) {
         printf("error init can\n");
         return -1;
