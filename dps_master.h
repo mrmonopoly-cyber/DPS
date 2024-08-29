@@ -89,6 +89,9 @@ int dps_master_get_value_var(uint8_t board_id, uint8_t var_i,
 int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
                           uint8_t value_size);
 
+// INFO:: return the info about a command
+int dps_master_get_command_info(uint8_t command_id, com_info* o_com);
+
 // INFO: send a command with a payload
 // if value size is > then the bound of the command metadata or greater to CAN
 // payload buffer message is not sent. If value is NULL or value_size is 0
