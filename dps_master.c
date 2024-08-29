@@ -90,6 +90,15 @@ static int get_board_name_exec(CanMessage *mex) {
       .raw_data = mex->dps_payload.data,
   };
 
+  uint8_t board_num = c_vector_length(dps.boards);
+  board_record* board = NULL;
+  for (int i=0; i<board_num; i++) {
+    board = c_vector_get_at_index(dps.boards, i);
+    if (board && !strcmp(board->board_name, b_name.full_data.name)) {
+        return EXIT_FAILURE;
+    }
+  }
+
   struct c_vector_input_init args = {
       .capacity = 10,
       .ele_size = sizeof(var_record),
