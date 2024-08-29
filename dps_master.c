@@ -272,7 +272,7 @@ int dps_master_init(can_send send_f) {
   }
 
   if (!dps.boards) {
-    return EXIT_FAILURE;
+      goto exit;
   }
 
   {
@@ -286,12 +286,16 @@ int dps_master_init(can_send send_f) {
     dps.coms = c_vector_init(&args);
   }
   if (!dps.coms) {
-    c_vector_free(dps.boards);
-    dps.boards = NULL;
-    return EXIT_FAILURE;
+      goto free_coms;
   }
 
   return EXIT_SUCCESS;
+
+free_coms:
+  c_vector_free(dps.boards);
+  dps.boards = NULL;
+exit:
+  return EXIT_FAILURE;
 }
 
 int dps_master_new_connection() {
