@@ -327,13 +327,17 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
   };
 
   if (data & REQ_VAR) {
-    ReqInfo info = {
-        .full_data.data_it.board_id = board_id,
-        .full_data.info_t = VAR,
-    };
-    mex.dps_payload.data = info.raw_data;
-    if (dps.send_f(&mex)) {
-      return EXIT_FAILURE;
+    board_record *board = c_vector_find(dps.boards, &board_id);
+    if (board) {
+        c_vector_clear(board->vars);
+        ReqInfo info = {
+            .full_data.data_it.board_id = board_id,
+            .full_data.info_t = VAR,
+        };
+        mex.dps_payload.data = info.raw_data;
+        if (dps.send_f(&mex)) {
+            return EXIT_FAILURE;
+        }
     }
   }
 
