@@ -83,7 +83,7 @@ static void print_com(const void *ele) {
 
 static void dummy_func_const(const void *ele) {}
 
-static void dummy_fun(void *ele) {}
+static void dummy_fun(const void *ele) {}
 
 static int get_board_name_exec(CanMessage *mex) {
   BoardName b_name = {
@@ -92,9 +92,10 @@ static int get_board_name_exec(CanMessage *mex) {
 
   uint8_t board_num = c_vector_length(dps.boards);
   board_record* board = NULL;
+  const void* board_ptr = board;
   for (int i=0; i<board_num; i++) {
-    board = c_vector_get_at_index(dps.boards, i);
-    if (board && !strcmp(board->board_name, b_name.full_data.name)) {
+    if(c_vector_get_at_index(dps.boards, i, &board_ptr) ||
+            !strcmp(board->board_name, b_name.full_data.name)) {
         return EXIT_FAILURE;
     }
   }
@@ -109,11 +110,13 @@ static int get_board_name_exec(CanMessage *mex) {
 
   board_record new_board = {
       .id = new_id(),
-      .vars = c_vector_init(&args),
   };
+  if(c_vector_init(&args, &new_board.vars)){
+      return EXIT_FAILURE;
+  }
   memcpy(new_board.board_name, b_name.full_data.name, BOARD_NAME_LENGTH);
 
-  if (!c_vector_push(&dps.boards, &new_board)) {
+  if (!c_vector_push(&dps.boards, &new_board,NULL)) {
     return EXIT_FAILURE;
   }
 
@@ -141,21 +144,17 @@ static int get_var_name_exec(CanMessage *mex) {
   };
 
   uint8_t board_id = var_name.full_data.obj_id.board_id;
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    var_record new_var = {
-        .metadata.full_data.obj_id = var_name.full_data.obj_id,
-    };
-    memcpy(new_var.name, var_name.full_data.name,
-           sizeof(var_name.full_data.name));
+  board_record *board = NULL;
+  const void* board_ptr = board;  
+  if(!c_vector_find(dps.boards, &board_id,&board_ptr)){
+      var_record new_var = {
+          .metadata.full_data.obj_id = var_name.full_data.obj_id,
+      };
+      memcpy(new_var.name, var_name.full_data.name,
+              sizeof(var_name.full_data.name));
 
-    if (!c_vector_push(&board->vars, &new_var)) {
-      return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+      return c_vector_push(&board->vars, &new_var,NULL);
   }
-
   return EXIT_FAILURE;
 }
 
@@ -165,19 +164,17 @@ static int get_var_metadata_exec(CanMessage *mex) {
   };
 
   uint8_t board_id = var_metadata.full_data.obj_id.board_id;
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    uint8_t var_id = var_metadata.full_data.obj_id.data_id;
-    var_record *new_var = c_vector_find(board->vars, &var_id);
-    if (new_var) {
-      new_var->metadata = var_metadata;
-      if(dps_master_refresh_value_var(board_id, var_id)){
-          return EXIT_FAILURE;
+  board_record *board = NULL;
+  const void* board_ptr = board;
+  if(!c_vector_find(dps.boards, &board_id,&board_ptr)){
+      uint8_t var_id = var_metadata.full_data.obj_id.data_id;
+      var_record *new_var =NULL;
+      const void* new_var_ptr = new_var;
+      if(!c_vector_find(board->vars, &var_id, &new_var_ptr)){
+          new_var->metadata = var_metadata;
+          return dps_master_refresh_value_var(board_id, var_id);
       }
-    }
-    return EXIT_SUCCESS;
   }
-
   return EXIT_FAILURE;
 }
 
@@ -187,23 +184,19 @@ static int get_com_name_exec(CanMessage *mex) {
   };
 
   com_record *old_com = NULL;
+  const void* old_com_ptr = old_com;
   com_record new_com = {
       .metadata.full_data.com_id = com_name.full_data.com_id,
   };
 
-  old_com = c_vector_find(dps.coms, &new_com.metadata.full_data.com_id);
-  if (old_com) {
+  if(!c_vector_find(dps.coms, &new_com.metadata.full_data.com_id, &old_com_ptr)){
       memcpy(old_com->name, com_name.full_data.name, NAME_MAX_SIZE);
       return EXIT_FAILURE;
   }
 
   memcpy(new_com.name, com_name.full_data.name, NAME_MAX_SIZE);
 
-  if (!c_vector_push(&dps.coms, &new_com)) {
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.coms, &new_com,NULL);
 }
 
 static int get_com_metadata_exec(CanMessage *mex) {
@@ -212,20 +205,22 @@ static int get_com_metadata_exec(CanMessage *mex) {
   };
 
   uint8_t b_id = com_metadata.full_data.board_id;
-  board_record *board = c_vector_find(dps.boards, &b_id);
-  if (!board) {
-    return EXIT_FAILURE;
+  board_record *board =NULL;
+  const void* board_ptr = board;
+  if(c_vector_find(dps.boards, &b_id, &board_ptr)){
+      return EXIT_FAILURE;
   }
 
   uint16_t id = com_metadata.full_data.com_id;
-  com_record *saved_com = c_vector_find(dps.coms, &id);
-  if (!saved_com) {
-    return EXIT_FAILURE;
+  com_record *saved_com = NULL;
+  const void* saved_com_ptr = saved_com;
+  if(!c_vector_find(dps.coms, &id,&saved_com_ptr)){
+      saved_com->board = board;
+      saved_com->metadata = com_metadata;
+      return EXIT_SUCCESS;
   }
-  saved_com->board = board;
-  saved_com->metadata = com_metadata;
 
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
 
 static int get_curr_var_value_exec(CanMessage *mex) {
@@ -234,17 +229,18 @@ static int get_curr_var_value_exec(CanMessage *mex) {
   };
 
   uint8_t board_id = var_val.full_data.obj_id.board_id;
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    uint8_t var_id = var_val.full_data.obj_id.data_id;
-    var_record *var = c_vector_find(board->vars, &var_id);
-    if (var) {
-      memcpy(var->value, var_val.full_data.value, var->metadata.full_data.size);
-      var->updated = 1;
-      return EXIT_SUCCESS;
-    }
+  board_record *board = NULL;
+  const void* board_ptr= board;
+  if(!c_vector_find(dps.boards, &board_id, &board_ptr)){
+      uint8_t var_id = var_val.full_data.obj_id.data_id;
+      var_record *var = NULL;
+      const void* var_ptr = var;
+      if(!c_vector_find(board->vars, &var_id,&var_ptr)){
+          memcpy(var->value, var_val.full_data.value, var->metadata.full_data.size);
+          var->updated = 1;
+          return EXIT_SUCCESS;
+      }
   }
-
   return EXIT_FAILURE;
 }
 
@@ -285,11 +281,9 @@ int dps_master_init(can_send send_f) {
         .free_fun = dummy_fun,
         .print_fun = dummy_func_const,
     };
-    dps.boards = c_vector_init(&args);
-  }
-
-  if (!dps.boards) {
-      goto exit;
+    if(c_vector_init(&args,&dps.boards)){
+        goto exit;
+    }
   }
 
   {
@@ -300,10 +294,9 @@ int dps_master_init(can_send send_f) {
         .free_fun = dummy_fun,
         .print_fun = print_com,
     };
-    dps.coms = c_vector_init(&args);
-  }
-  if (!dps.coms) {
-      goto free_coms;
+    if(c_vector_init(&args,&dps.coms)){
+        goto free_coms;
+    }
   }
 
   return EXIT_SUCCESS;
@@ -344,8 +337,9 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
   };
 
   if (data & REQ_VAR) {
-    board_record *board = c_vector_find(dps.boards, &board_id);
-    if (board) {
+    board_record *board = NULL;
+    const void* board_ptr = board;
+    if(!c_vector_find(dps.boards, &board_id,&board_ptr)){
         c_vector_clear(board->vars);
         ReqInfo info = {
             .full_data.data_it.board_id = board_id,
@@ -378,10 +372,11 @@ board_list_info *dps_master_list_board() {
       calloc(1, sizeof(board_list_info) + (sizeof(board_info) * len));
   res->board_num = len;
   for (uint8_t i = 0; i < len; i++) {
-    board_record *board = c_vector_get_at_index(dps.boards, i);
-    if (!board) {
-      free(res);
-      return NULL;
+    board_record *board = NULL;
+    const void* board_ptr = board;
+    if(c_vector_get_at_index(dps.boards, i, &board_ptr)){
+        free(res);
+        return NULL;
     }
     res->boards[i].id = board->id;
     res->boards[i].name = board->board_name;
@@ -395,22 +390,23 @@ int dps_master_list_vars(uint8_t board_id, var_list_info **o_list) {
   CHECK_INIT();
   CHECK_INPUT(o_list);
 
-  board_record *board = c_vector_find(dps.boards, &board_id);
+  board_record *board = NULL;
+  const void* board_ptr = board;
   var_list_info *list = NULL;
-  if (board) {
-    uint8_t len = c_vector_length(board->vars);
-    *o_list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
-    list = *o_list;
+  if(!c_vector_find(dps.boards, &board_id, &board_ptr)){
+      uint8_t len = c_vector_length(board->vars);
+      *o_list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
+      list = *o_list;
 
-    for (uint8_t i = 0; i < len; i++) {
-      var_record *var = c_vector_get_at_index(board->vars, i);
-      if (var) {
-        list->vars[i] = *var;
+      for (uint8_t i = 0; i < len; i++) {
+          var_record *var = NULL;
+          const void* var_ptr = var;
+          if(!c_vector_get_at_index(board->vars, i,&var_ptr)){
+              list->vars[i] = *var;
+          }
       }
-    }
-    (*o_list)->board_num = len;
-
-    return EXIT_SUCCESS;
+      (*o_list)->board_num = len;
+      return EXIT_SUCCESS;
   }
 
   return EXIT_FAILURE;
@@ -426,10 +422,11 @@ int dps_master_list_coms(com_list_info **o_list) {
   com_list_info *list = *o_list;
 
   for (uint8_t i = 0; i < len; i++) {
-    com_record *com = c_vector_get_at_index(dps.coms, i);
-    if (!com) {
-      free(list);
-      return EXIT_FAILURE;
+    com_record *com = NULL;
+    const void* com_ptr = com;
+    if(c_vector_get_at_index(dps.coms, i, &com_ptr)){
+        free(list);
+        return EXIT_FAILURE;
     }
     memcpy(list->coms[i].name, com->name, NAME_MAX_SIZE);
     list->coms[i].metadata.full_data = com->metadata.full_data;
@@ -441,27 +438,30 @@ int dps_master_list_coms(com_list_info **o_list) {
 
 // INFO: fetch the current value of a variable in a board in the system
 int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id) {
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    var_record *var = c_vector_find(board->vars, &var_id);
-    if (var) {
-      return send_refresh_req_var(board_id, var);
-    }
+  board_record *board = NULL;
+  const void* board_ptr = board;
+  if(!c_vector_find(dps.boards, &board_id, &board_ptr)){
+      var_record *var = NULL;
+      const void* var_ptr = var;
+      if(!c_vector_find(board->vars, &var_id,&var_ptr)){
+          return send_refresh_req_var(board_id, var);
+      }
   }
   return EXIT_FAILURE;
 }
 
 // INFO: fetch the current value of all variables in a board in the system
 int dps_master_refresh_value_var_all(uint8_t board_id) {
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    var_record *var = NULL;
-    for (uint8_t i = 0; i < c_vector_length(board->vars); i++) {
-      var = c_vector_get_at_index(board->vars, i);
-      if (var) {
-        return send_refresh_req_var(board_id, var);
+  board_record *board = NULL;
+  var_record *var = NULL;
+  const void* board_ptr = board;
+  const void* var_ptr = var;
+  if(!c_vector_find(dps.boards, &board_id,&board_ptr)){
+      for (uint8_t i = 0; i < c_vector_length(board->vars); i++) {
+          if(!c_vector_get_at_index(board->vars, i, &var_ptr)){
+              return send_refresh_req_var(board_id, var);
+          }
       }
-    }
   }
   return EXIT_FAILURE;
 }
@@ -470,13 +470,15 @@ int dps_master_refresh_value_var_all(uint8_t board_id) {
 // in in o_buffer
 int dps_master_get_value_var(uint8_t board_id, uint8_t var_i,
                              var_record *o_var) {
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (board) {
-    var_record *var = c_vector_find(board->vars, &var_i);
-    if (var && var->updated) {
+  board_record *board = NULL;
+  var_record *var = NULL;
+  const void* var_ptr = var;
+  const void* board_ptr = board;
+  if(!c_vector_find(dps.boards, &board_id, &board_ptr) && 
+          !c_vector_find(board->vars, &var_i,&var_ptr) && var->updated)
+  {
       *o_var = *var;
       return EXIT_SUCCESS;
-    }
   }
   return EXIT_FAILURE;
 }
@@ -490,16 +492,13 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
   CHECK_INPUT(value);
   CHECK_INPUT(value_size);
 
-  board_record *board = c_vector_find(dps.boards, &board_id);
-  if (!board) {
-    return EXIT_FAILURE;
-  }
-  var_record *var = c_vector_find(board->vars, &var_id);
-  if (!var) {
-    return EXIT_FAILURE;
-  }
-
-  if (value_size > var->metadata.full_data.size) {
+  board_record *board = NULL;
+  var_record *var = NULL;
+  const void* board_ptr = board;
+  const void* var_ptr = var;
+  if(c_vector_find(dps.boards, &board_id, &board_ptr) || 
+          c_vector_find(board->vars, &var_id, &var_ptr) ||
+          value_size > var->metadata.full_data.size) {
     return EXIT_FAILURE;
   }
 
@@ -522,8 +521,9 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
 
 int dps_master_get_command_info(uint8_t command_id, com_info* o_com)
 {
-    com_record *com = c_vector_find(dps.coms, &command_id);
-    if (com) {
+    com_record *com = NULL;
+    const void* com_ptr = com;
+    if(!c_vector_find(dps.coms, &command_id,&com_ptr)){
         o_com->metadata = com->metadata;
         memcpy(o_com->name, com->name, NAME_MAX_SIZE);
         return EXIT_SUCCESS;
@@ -537,12 +537,10 @@ int dps_master_get_command_info(uint8_t command_id, com_info* o_com)
 // message is not sent
 int dps_master_send_command(uint16_t com_dps_id, void *value,
                             uint8_t value_size) {
-  com_record *com = c_vector_find(dps.coms, &com_dps_id);
-  if (!com) {
-    return EXIT_FAILURE;
-  }
-
-  if (com->metadata.full_data.size < value_size ||
+  com_record *com = NULL;
+  const void* com_ptr = com;
+  if(c_vector_find(dps.coms, &com_dps_id, &com_ptr) || 
+          com->metadata.full_data.size < value_size ||
       value_size > CAN_PROTOCOL_MAX_PAYLOAD_SIZE) {
     return EXIT_FAILURE;
   }
@@ -586,9 +584,10 @@ int dps_master_check_mex_recv(CanMessage *mex) {
 int dps_master_print_boards() {
   int len = c_vector_length(dps.boards);
   for (int i = 0; i < len; i++) {
-    board_record *board = c_vector_get_at_index(dps.boards, i);
-    if (!board) {
-      return EXIT_FAILURE;
+    board_record *board = NULL;
+    const void* board_ptr = board;
+    if(c_vector_get_at_index(dps.boards, i,&board_ptr)){
+        return EXIT_FAILURE;
     }
     printf("board id: %d,", board->id);
     printf("board name: %s\n", board->board_name);
@@ -605,23 +604,25 @@ int dps_master_print_coms() {
 int dps_master_print_vars() {
   uint8_t len = c_vector_length(dps.boards);
   for (uint8_t i = 0; i < len; i++) {
-    board_record *board = c_vector_get_at_index(dps.boards, i);
-    if (board) {
-      uint8_t vars = c_vector_length(board->vars);
-      for (uint8_t j = 0; j < vars; j++) {
-        var_record *var = c_vector_get_at_index(board->vars, j);
-        if (var) {
-          printf("var name: %s,", var->name);
-          printf("board id: %d,", var->metadata.full_data.obj_id.board_id);
-          printf("var id: %d,", var->metadata.full_data.obj_id.data_id);
-          printf("var size: %d,", var->metadata.full_data.size);
-          printf("var signed: %d,", var->metadata.full_data.signe_num);
-          printf("var float: %d,", var->metadata.full_data.float_num);
-          printf("var value: %ld,", (long)*var->value);
-          printf("var board: %s\n", board->board_name);
+    board_record *board = NULL;
+    const void* board_ptr = board;
+    if(!c_vector_get_at_index(dps.boards, i, &board_ptr)){
+        uint8_t vars = c_vector_length(board->vars);
+        for (uint8_t j = 0; j < vars; j++) {
+            var_record *var =NULL;
+            const void* var_ptr = NULL;
+            if(!c_vector_get_at_index(board->vars, j, &var_ptr)){
+                printf("var name: %s,", var->name);
+                printf("board id: %d,", var->metadata.full_data.obj_id.board_id);
+                printf("var id: %d,", var->metadata.full_data.obj_id.data_id);
+                printf("var size: %d,", var->metadata.full_data.size);
+                printf("var signed: %d,", var->metadata.full_data.signe_num);
+                printf("var float: %d,", var->metadata.full_data.float_num);
+                printf("var value: %ld,", (long)*var->value);
+                printf("var board: %s\n", board->board_name);
+            }
         }
-      }
     }
   }
-  return 0;
+  return EXIT_SUCCESS;
 }

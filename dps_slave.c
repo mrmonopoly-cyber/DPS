@@ -41,7 +41,7 @@ struct var_internal {
 static struct slave_dps dps;
 static uint16_t object_id_slave = 0;
 
-static void dummy_fun(void *e) {}
+static void dummy_fun(const void *e) {}
 
 static int found_var(const void *list_ele, const void *key) {
   const struct var_internal *ele_l = list_ele;
@@ -97,12 +97,17 @@ static int req_inf_exec(CanMessage *mex) {
   switch (data_mex.full_data.info_t) {
   case VAR:
     for (uint8_t i = 0; i < c_vector_length(dps.vars); i++) {
-      struct var_internal *var = c_vector_get_at_index(dps.vars, i);
+        const void *var_ptr = NULL;
+      const struct var_internal *var = NULL;
+      if(c_vector_get_at_index(dps.vars, i, &var_ptr)){
+          return EXIT_FAILURE;
+      }
 
+      var = var_ptr;
       // var name
       var_name.full_data.obj_id.board_id = dps.board_id;
       var_name.full_data.obj_id.data_id = var->var_id;
-      memcpy(var_name.full_data.name, var->data.name, sizeof(var->data.name));
+      memcpy(var_name.full_data.name, var->data.name, NAME_MAX_SIZE);
       new_mex.dps_payload.mext_type.type = VAR_NAME;
       new_mex.dps_payload.data = var_name.raw_data;
       dps.send_f(&new_mex);
@@ -123,7 +128,13 @@ static int req_inf_exec(CanMessage *mex) {
     break;
   case COMMAND:
     for (uint8_t i = 0; i < c_vector_length(dps.coms); i++) {
-      CommandInfo *com = c_vector_get_at_index(dps.coms, i);
+      CommandInfo *com = NULL;
+      const void* com_ptr = NULL;
+      if(c_vector_get_at_index(dps.coms, i, &com_ptr)){
+          return EXIT_FAILURE;
+      }
+
+      com = (CommandInfo *) com_ptr;
 
       // name
       CommandInfoName com_name = {
@@ -149,9 +160,10 @@ static int req_inf_exec(CanMessage *mex) {
   case VAR_VALUE:
     if (data_mex.full_data.data_it.board_id == dps.board_id) {
       uint8_t var_id = data_mex.full_data.data_it.data_id;
-      struct var_internal *var = c_vector_find(dps.vars, &var_id);
-      if (!var) {
-        return EXIT_FAILURE;
+      struct var_internal *var = NULL;
+      const void* var_ptr = var;
+      if(c_vector_find(dps.vars, &var_id,&var_ptr)){
+          return EXIT_FAILURE;
       }
       var_value.full_data.obj_id.board_id = dps.board_id;
       var_value.full_data.obj_id.data_id = var->var_id;
@@ -187,14 +199,17 @@ static int set_var_value_exec(CanMessage *mex) {
 
   if (new_value.full_data.obj_id.board_id == dps.board_id) {
     uint8_t var_id = new_value.full_data.obj_id.data_id;
-    struct var_internal *saved_var = c_vector_find(dps.vars, &var_id);
-    if (saved_var) {
-      memcpy(saved_var->data.var_ptr, new_value.full_data.value,
-              saved_var->data.size);
+    const struct var_internal *saved_var = NULL;
+    const void* saved_var_ptr = NULL;
+    if(!c_vector_find(dps.vars, &var_id,&saved_var_ptr)){
+        saved_var = saved_var_ptr;
+        memcpy(saved_var->data.var_ptr, new_value.full_data.value,
+                saved_var->data.size);
+        return EXIT_SUCCESS;
     }
   }
 
-  return EXIT_SUCCESS;
+  return EXIT_FAILURE;
 }
 
 static int new_connection_exec() {
@@ -240,13 +255,13 @@ int dps_init(can_send send_f, BoardName *board_name) {
         .print_fun = print_com,
         .found_f = found_com,
     };
-    dps.vars = c_vector_init(&vars);
-    if (!dps.vars) {
-      return EXIT_FAILURE;
+    dps.vars = NULL;
+    if(c_vector_init(&vars,&dps.vars)){
+        return EXIT_FAILURE;
     }
-    dps.coms = c_vector_init(&coms);
-    if (!dps.coms) {
-      return EXIT_FAILURE;
+    dps.coms = NULL;
+    if(c_vector_init(&coms,&dps.coms)){
+        return EXIT_FAILURE;
     }
   }
   return EXIT_SUCCESS;
@@ -271,12 +286,9 @@ int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var, NULL);
 }
+
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
 
@@ -296,11 +308,9 @@ int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var, NULL);
 }
+
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
 
@@ -320,10 +330,7 @@ int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
 
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
@@ -345,10 +352,7 @@ int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
@@ -369,11 +373,9 @@ int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
+
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
 
@@ -393,10 +395,7 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
@@ -418,10 +417,7 @@ int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
 
 // INFO: tell to dps to monitor a variable
@@ -438,10 +434,7 @@ int dps_monitor_var_general(VariableInfoGericType *var_info) {
   };
   memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.vars, &new_var,NULL);
 }
 
 /*
@@ -461,11 +454,7 @@ int dps_monitor_command(CommandInfo *com) {
     return EXIT_FAILURE;
   }
 
-  if (!c_vector_push(&dps.coms, com)) {
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return c_vector_push(&dps.coms, com,NULL);
 }
 
 // INFO: check if a can message is for the dps and if it's the case it executes
@@ -502,11 +491,13 @@ int dps_get_id() {
 int dps_print_var() {
   CHECK_INIT();
 
-  struct var_internal *var = NULL;
+  const void* var_ptr = NULL;
   uint8_t len = c_vector_length(dps.vars);
   for (uint8_t i = 0; i < len; i++) {
-    var = c_vector_get_at_index(dps.vars, i);
-    print_var(var);
+    if(c_vector_get_at_index(dps.vars, i,&var_ptr)){
+        return EXIT_FAILURE;
+    }
+    print_var(var_ptr);
   }
   return EXIT_SUCCESS;
 }
@@ -514,11 +505,13 @@ int dps_print_var() {
 int dps_print_com() {
   CHECK_INIT();
 
-  struct com_internal *com = NULL;
+  const void* com_ptr = NULL;
   uint8_t len = c_vector_length(dps.coms);
   for (uint8_t i = 0; i < len; i++) {
-    com = c_vector_get_at_index(dps.coms, i);
-    print_com(com);
+    if(c_vector_get_at_index(dps.coms, i, &com_ptr)){
+        return EXIT_FAILURE;
+    }
+    print_com(com_ptr);
   }
   return EXIT_SUCCESS;
 }
