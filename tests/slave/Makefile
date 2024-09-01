@@ -4,7 +4,7 @@ DPS_ROOT = ../..
 
 include $(DPS_ROOT)/Makefile
 
-OBJ_FILE = dps_slave.o c_vector.o c_check_input.o
+OBJ_FILE = dps_slave.o c_vector.o
 
 all: main
 
