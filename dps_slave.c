@@ -132,8 +132,8 @@ static int req_inf_exec(CanMessage *mex) {
       memcpy(com_name.full_data.name, com->name, sizeof(com->name));
       new_mex.dps_payload.mext_type.type = COM_NAME;
       new_mex.dps_payload.data = com_name.raw_data;
-      if(dps.send_f(&new_mex)){
-          return EXIT_FAILURE;
+      if (dps.send_f(&new_mex)) {
+        return EXIT_FAILURE;
       }
 
       // metadata
@@ -190,7 +190,7 @@ static int set_var_value_exec(CanMessage *mex) {
     struct var_internal *saved_var = c_vector_find(dps.vars, &var_id);
     if (saved_var) {
       memcpy(saved_var->data.var_ptr, new_value.full_data.value,
-              saved_var->data.size);
+             saved_var->data.size);
     }
   }
 
@@ -213,9 +213,9 @@ static int new_connection_exec() {
 
 // public
 int dps_init(can_send send_f, BoardName *board_name) {
-    if (dps.vars || dps.coms || dps.send_f) {
-        return EXIT_FAILURE;
-    }
+  if (dps.vars || dps.coms || dps.send_f) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(send_f);
   CHECK_INPUT(board_name);
