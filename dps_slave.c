@@ -201,7 +201,6 @@ static int new_connection_exec() {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload.data = resp_payload.raw_data,
   };
   memcpy(&mex.dps_payload.data, resp_payload.raw_data.raw_buffer,
          sizeof(resp_payload.raw_data.raw_buffer));
