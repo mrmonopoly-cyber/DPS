@@ -28,8 +28,8 @@
 struct slave_dps {
   char board_name[BOARD_NAME_LENGTH];
   can_send send_f;
-  c_vector *vars;
-  c_vector *coms;
+  c_vector_h vars;
+  c_vector_h coms;
   int8_t board_id;
 };
 
@@ -41,21 +41,19 @@ struct var_internal {
 static struct slave_dps dps;
 static uint16_t object_id_slave = 0;
 
-static void dummy_fun(void *e) {}
+static int found_com(const void *list_ele, const void *key) {
+  const CommandInfo *com = list_ele;
+  const uint16_t *id = key;
+  return !(com->metadata.full_data.com_id == *id);
+}
 
 static int found_var(const void *list_ele, const void *key) {
-  const struct var_internal *ele_l = list_ele;
+  const struct var_internal *var = list_ele;
   const uint8_t *id = key;
-
-  return ele_l->var_id == *id;
+  return !(var->var_id == *id);
 }
 
-static int found_com(const void *list_ele, const void *key) {
-  const CommandInfo *ele_l = list_ele;
-  const uint16_t *id = key;
-
-  return ele_l->metadata.full_data.com_id == *id;
-}
+static void dummy_fun(void *e) {}
 
 static void print_var(const void *ele) {
   const struct var_internal *var = ele;
@@ -230,7 +228,7 @@ int dps_init(can_send send_f, BoardName *board_name) {
         .ele_size = sizeof(struct var_internal),
         .free_fun = dummy_fun,
         .print_fun = print_var,
-        .found_f = found_var,
+        .comp_fun = found_var,
     };
 
     struct c_vector_input_init coms = {
@@ -238,7 +236,7 @@ int dps_init(can_send send_f, BoardName *board_name) {
         .ele_size = sizeof(CommandInfo),
         .free_fun = dummy_fun,
         .print_fun = print_com,
-        .found_f = found_com,
+        .comp_fun = found_com,
     };
     dps.vars = c_vector_init(&vars);
     if (!dps.vars) {
