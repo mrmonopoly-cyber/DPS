@@ -87,7 +87,7 @@ static int get_board_name_exec(CanMessage *mex) {
       .raw_data = mex->dps_payload.data,
   };
 
-  uint8_t board_num = c_vector_length(dps.boards);
+  uint16_t board_num = c_vector_length(dps.boards);
   board_record *board = NULL;
   for (int i = 0; i < board_num; i++) {
     board = c_vector_get_at_index(dps.boards, i);
@@ -141,7 +141,9 @@ static int get_var_name_exec(CanMessage *mex) {
   board_record *board = c_vector_find(dps.boards, &board_id);
   if (board) {
     var_record new_var = {
-        .metadata.full_data.obj_id = var_name.full_data.obj_id,
+        .metadata.full_data.obj_id.board_id =
+            var_name.full_data.obj_id.board_id,
+        .metadata.full_data.obj_id.data_id = var_name.full_data.obj_id.data_id,
     };
     memcpy(new_var.name, var_name.full_data.name,
            sizeof(var_name.full_data.name));
@@ -315,7 +317,7 @@ exit:
 int dps_master_new_connection() {
   CHECK_INIT();
 
-  new_connection conn = {};
+  new_connection conn = {{0}};
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
@@ -370,7 +372,7 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
 }
 
 board_list_info *dps_master_list_board() {
-  uint8_t len = c_vector_length(dps.boards);
+  uint16_t len = c_vector_length(dps.boards);
   board_list_info *res =
       calloc(1, sizeof(board_list_info) + (sizeof(board_info) * len));
   res->board_num = len;
@@ -395,7 +397,7 @@ int dps_master_list_vars(uint8_t board_id, var_list_info **o_list) {
   board_record *board = c_vector_find(dps.boards, &board_id);
   var_list_info *list = NULL;
   if (board) {
-    uint8_t len = c_vector_length(board->vars);
+    uint16_t len = c_vector_length(board->vars);
     *o_list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
     list = *o_list;
 
@@ -418,7 +420,7 @@ int dps_master_list_coms(com_list_info **o_list) {
   CHECK_INIT();
   CHECK_INPUT(o_list);
 
-  uint8_t len = c_vector_length(dps.coms);
+  uint16_t len = c_vector_length(dps.coms);
   *o_list = calloc(1, sizeof(**o_list) + (len * sizeof(*(**o_list).coms)));
   com_list_info *list = *o_list;
 
@@ -501,7 +503,8 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
   }
 
   VariableModify new_value = {
-      .full_data.obj_id = {.board_id = board_id, .data_id = var_id},
+      .full_data.obj_id.board_id = board_id,
+      .full_data.obj_id.data_id = var_id,
   };
   memcpy(new_value.full_data.value, value, value_size);
   CanMessage mex = {
@@ -599,11 +602,11 @@ int dps_master_print_coms() {
 }
 
 int dps_master_print_vars() {
-  uint8_t len = c_vector_length(dps.boards);
+  uint16_t len = c_vector_length(dps.boards);
   for (uint8_t i = 0; i < len; i++) {
     board_record *board = c_vector_get_at_index(dps.boards, i);
     if (board) {
-      uint8_t vars = c_vector_length(board->vars);
+      uint16_t vars = c_vector_length(board->vars);
       for (uint8_t j = 0; j < vars; j++) {
         var_record *var = c_vector_get_at_index(board->vars, j);
         if (var) {

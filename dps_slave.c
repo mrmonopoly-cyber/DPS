@@ -203,6 +203,8 @@ static int new_connection_exec() {
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
       .dps_payload.data = resp_payload.raw_data,
   };
+  memcpy(&mex.dps_payload.data, resp_payload.raw_data.raw_buffer,
+         sizeof(resp_payload.raw_data.raw_buffer));
   if (dps.send_f(&mex)) {
     return EXIT_FAILURE;
   }
@@ -501,7 +503,7 @@ int dps_print_var() {
   CHECK_INIT();
 
   struct var_internal *var = NULL;
-  uint8_t len = c_vector_length(dps.vars);
+  uint16_t len = c_vector_length(dps.vars);
   for (uint8_t i = 0; i < len; i++) {
     var = c_vector_get_at_index(dps.vars, i);
     print_var(var);
@@ -513,7 +515,7 @@ int dps_print_com() {
   CHECK_INIT();
 
   struct com_internal *com = NULL;
-  uint8_t len = c_vector_length(dps.coms);
+  uint16_t len = c_vector_length(dps.coms);
   for (uint8_t i = 0; i < len; i++) {
     com = c_vector_get_at_index(dps.coms, i);
     print_com(com);
