@@ -372,7 +372,7 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
 }
 
 board_list_info *dps_master_list_board() {
-  uint16_t len = c_vector_length(dps.boards);
+  uint8_t len = c_vector_length(dps.boards);
   board_list_info *res =
       calloc(1, sizeof(board_list_info) + (sizeof(board_info) * len));
   res->board_num = len;
@@ -397,7 +397,7 @@ int dps_master_list_vars(uint8_t board_id, var_list_info **o_list) {
   board_record *board = c_vector_find(dps.boards, &board_id);
   var_list_info *list = NULL;
   if (board) {
-    uint16_t len = c_vector_length(board->vars);
+    uint8_t len = c_vector_length(board->vars);
     *o_list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
     list = *o_list;
 
@@ -420,7 +420,7 @@ int dps_master_list_coms(com_list_info **o_list) {
   CHECK_INIT();
   CHECK_INPUT(o_list);
 
-  uint16_t len = c_vector_length(dps.coms);
+  uint8_t len = c_vector_length(dps.coms);
   *o_list = calloc(1, sizeof(**o_list) + (len * sizeof(*(**o_list).coms)));
   com_list_info *list = *o_list;
 
@@ -602,11 +602,11 @@ int dps_master_print_coms() {
 }
 
 int dps_master_print_vars() {
-  uint16_t len = c_vector_length(dps.boards);
+  uint8_t len = c_vector_length(dps.boards);
   for (uint8_t i = 0; i < len; i++) {
     board_record *board = c_vector_get_at_index(dps.boards, i);
     if (board) {
-      uint16_t vars = c_vector_length(board->vars);
+      uint8_t vars = c_vector_length(board->vars);
       for (uint8_t j = 0; j < vars; j++) {
         var_record *var = c_vector_get_at_index(board->vars, j);
         if (var) {
