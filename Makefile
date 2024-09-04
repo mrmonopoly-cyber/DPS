@@ -16,10 +16,10 @@ DEBUG_FLAGS = -O0 -fsanitize=address -g
 RELEASE_FLAGS = -O2
 
 debug: C_FLAGS += $(DEBUG_FLAGS)
-debug: compile
+debug: clean compile
 
 release: C_FLAGS += $(RELEASE_FLAGS)
-release: compile
+release: clean compile
 
 
 compile: dps_master.o dps_slave.o
