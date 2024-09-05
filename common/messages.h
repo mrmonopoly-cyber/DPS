@@ -15,7 +15,7 @@ typedef struct CanMessage {
       DpsPayload data;
     } dps_payload;
     RawPayloadCanMex rawMex;
-  };
+  } GenericPayload;
 } CanMessage;
 
 typedef int (*can_send)(CanMessage *mex);

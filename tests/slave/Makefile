@@ -1,4 +1,6 @@
-C_FLAGS= -Wall -Wextra -g -fsanitize=address
+CC = gcc
+C_FLAGS = -Wall -Wextra
+C_EXFLAGS = 
 
 DPS_ROOT = ../..
 
@@ -24,4 +26,6 @@ main: main.c $(OBJ_FILE)
 	gcc $(C_FLAGS) main.c $(OBJ_FILE) ../test_lib.c -o main
 
 clean:
+ifeq ($(wildcard main),main)
 	rm main
+endif

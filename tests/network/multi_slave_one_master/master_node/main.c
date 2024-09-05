@@ -15,7 +15,7 @@ int send_f_can(CanMessage *mex) {
       .can_dlc = mex->dlc,
       .can_id = mex->id,
   };
-  memcpy(f.data, mex->rawMex.raw_buffer, mex->dlc);
+  memcpy(f.data, mex->GenericPayload.rawMex.raw_buffer, mex->dlc);
   return can_send_frame(can_socket, &f);
 }
 
@@ -27,7 +27,8 @@ void *check_incomming_message(void *args) {
           .dlc = mex_lib.can_dlc,
           .id = mex_lib.can_id,
       };
-      memcpy(mex.rawMex.raw_buffer, mex_lib.data, mex_lib.can_dlc);
+      memcpy(mex.GenericPayload.rawMex.raw_buffer, mex_lib.data,
+             mex_lib.can_dlc);
       if (dps_master_check_mex_recv(&mex)) {
         FAILED("failed processing message");
         return NULL;

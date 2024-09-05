@@ -84,7 +84,7 @@ static void dummy_fun(void *ele) {}
 
 static int get_board_name_exec(CanMessage *mex) {
   BoardName b_name = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   uint16_t board_num = c_vector_length(dps.boards);
@@ -122,7 +122,7 @@ static int get_board_name_exec(CanMessage *mex) {
   CanMessage mex_id = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {SET_BOARD_ID},
               .data = board_id.raw_data,
@@ -134,7 +134,7 @@ static int get_board_name_exec(CanMessage *mex) {
 
 static int get_var_name_exec(CanMessage *mex) {
   VariableInfoName var_name = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   uint8_t board_id = var_name.full_data.obj_id.board_id;
@@ -160,7 +160,7 @@ static int get_var_name_exec(CanMessage *mex) {
 
 static int get_var_metadata_exec(CanMessage *mex) {
   VariableInfoMetadata var_metadata = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   uint8_t board_id = var_metadata.full_data.obj_id.board_id;
@@ -182,7 +182,7 @@ static int get_var_metadata_exec(CanMessage *mex) {
 
 static int get_com_name_exec(CanMessage *mex) {
   CommandInfoName com_name = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   com_record *old_com = NULL;
@@ -207,7 +207,7 @@ static int get_com_name_exec(CanMessage *mex) {
 
 static int get_com_metadata_exec(CanMessage *mex) {
   CommandInfoMetadata com_metadata = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   uint8_t b_id = com_metadata.full_data.board_id;
@@ -229,7 +229,7 @@ static int get_com_metadata_exec(CanMessage *mex) {
 
 static int get_curr_var_value_exec(CanMessage *mex) {
   VariableValue var_val = {
-      .raw_data = mex->dps_payload.data,
+      .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
   uint8_t board_id = var_val.full_data.obj_id.board_id;
@@ -258,7 +258,7 @@ static int send_refresh_req_var(uint8_t board_id, var_record *var) {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {GET_INFO},
               .data = req_value.raw_data,
@@ -321,7 +321,7 @@ int dps_master_new_connection() {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {NEW_CONNECTION},
               .data = conn.raw_data,
@@ -336,7 +336,7 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {GET_INFO},
           },
@@ -350,7 +350,7 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
           .full_data.data_it.board_id = board_id,
           .full_data.info_t = VAR,
       };
-      mex.dps_payload.data = info.raw_data;
+      mex.GenericPayload.dps_payload.data = info.raw_data;
       if (dps.send_f(&mex)) {
         return EXIT_FAILURE;
       }
@@ -362,7 +362,7 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
         .full_data.data_it.board_id = board_id,
         .full_data.info_t = COMMAND,
     };
-    mex.dps_payload.data = info.raw_data;
+    mex.GenericPayload.dps_payload.data = info.raw_data;
     if (dps.send_f(&mex)) {
       return EXIT_FAILURE;
     }
@@ -510,7 +510,7 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {SET_CURRENT_VAR_VALUE},
               .data = new_value.raw_data,
@@ -550,7 +550,7 @@ int dps_master_send_command(uint16_t com_dps_id, void *value,
       .id = com->metadata.full_data.com_id,
       .dlc = com->metadata.full_data.size,
   };
-  memcpy(&mex.rawMex.raw_buffer, value, value_size);
+  memcpy(&mex.GenericPayload.rawMex.raw_buffer, value, value_size);
 
   return dps.send_f(&mex);
 }
@@ -561,7 +561,7 @@ int dps_master_check_mex_recv(CanMessage *mex) {
   CHECK_INPUT(mex);
 
   if (mex->id == DPS_CAN_MESSAGE_ID) {
-    switch (mex->dps_payload.mext_type.type) {
+    switch (mex->GenericPayload.dps_payload.mext_type.type) {
     case GET_BOARD_NAME:
       return get_board_name_exec(mex);
     case VAR_NAME:

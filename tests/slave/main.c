@@ -131,8 +131,8 @@ int check_update_var() {
     CanMessage mex = {                                                         \
         .id = DPS_CAN_MESSAGE_ID,                                              \
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,                                  \
-        .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},                      \
-        .dps_payload.data = var.raw_data,                                      \
+        .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},       \
+        .GenericPayload.dps_payload.data = var.raw_data,                       \
     };                                                                         \
     if (dps_check_can_command_recv(&mex)) {                                    \
       FAILED("update mex not recognized");                                     \
@@ -159,8 +159,8 @@ int check_update_var() {
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-        .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
-        .dps_payload.data = var.raw_data,
+        .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
+        .GenericPayload.dps_payload.data = var.raw_data,
     };
     if (dps_check_can_command_recv(&mex)) {
       FAILED("update mex not recognized");
@@ -183,8 +183,8 @@ int check_update_var() {
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-        .dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
-        .dps_payload.data = var.raw_data,
+        .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
+        .GenericPayload.dps_payload.data = var.raw_data,
     };
     if (dps_check_can_command_recv(&mex)) {
       FAILED("update mex not recognized");
@@ -222,7 +222,7 @@ int send_com_info_master() {
   CanMessage com_info_req = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {GET_INFO},
               .data = req.raw_data,
@@ -247,7 +247,7 @@ int send_var_info_master() {
   CanMessage com_info_req = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload =
+      .GenericPayload.dps_payload =
           {
               .mext_type = {GET_INFO},
               .data = req.raw_data,
@@ -285,8 +285,8 @@ int get_cur_values() {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload.mext_type = {GET_INFO},
-      .dps_payload.data = req_val_wrong.raw_data,
+      .GenericPayload.dps_payload.mext_type = {GET_INFO},
+      .GenericPayload.dps_payload.data = req_val_wrong.raw_data,
   };
 
   if (!dps_check_can_command_recv(&mex)) {
@@ -295,7 +295,7 @@ int get_cur_values() {
   }
   PASSED("wrong variable read refused");
 
-  mex.dps_payload.data = req_val_right.raw_data;
+  mex.GenericPayload.dps_payload.data = req_val_right.raw_data;
   if (dps_check_can_command_recv(&mex)) {
     FAILED("correct variable read failed");
     return -1;
@@ -310,8 +310,8 @@ int check_link_req() {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .dps_payload.mext_type = {NEW_CONNECTION},
-      .dps_payload.data = conn.raw_data,
+      .GenericPayload.dps_payload.mext_type = {NEW_CONNECTION},
+      .GenericPayload.dps_payload.data = conn.raw_data,
   };
 
   if (dps_check_can_command_recv(&mex)) {
@@ -336,8 +336,8 @@ int check_id_assign() {
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-        .dps_payload.mext_type = {SET_BOARD_ID},
-        .dps_payload.data = correct_assign.raw_data,
+        .GenericPayload.dps_payload.mext_type = {SET_BOARD_ID},
+        .GenericPayload.dps_payload.data = correct_assign.raw_data,
     };
     if (dps_check_can_command_recv(&mex)) {
       FAILED("can message for id assignment not recognized");
@@ -355,8 +355,8 @@ int check_id_assign() {
     CanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-        .dps_payload.mext_type = {SET_BOARD_ID},
-        .dps_payload.data = wrong_assign.raw_data,
+        .GenericPayload.dps_payload.mext_type = {SET_BOARD_ID},
+        .GenericPayload.dps_payload.data = wrong_assign.raw_data,
     };
     if (dps_check_can_command_recv(&mex)) {
       FAILED("can message for id assignment not recognized");
