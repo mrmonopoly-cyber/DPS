@@ -6,19 +6,20 @@
 #include "object.h"
 
 DPS_TYPEDEF(
-        struct {
-        ObjectId obj_id;
-        union{
-            uint8_t value[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
-        };
-        },VariableValue);
+    struct {
+      ObjectId obj_id;
+      uint8_t value[CAN_MAX_SIZE_MEX - sizeof(ObjectId)];
+    },
+    VariableValue);
 
-DPS_TYPEDEF(struct{
-        ObjectId obj_id;
-        uint8_t size;
-        uint8_t float_num :1;
-        uint8_t signe_num :1;
-        }, VariableInfoMetadata);
+DPS_TYPEDEF(
+    struct {
+      ObjectId obj_id;
+      uint8_t size;
+      uint8_t float_num : 1;
+      uint8_t signe_num : 1;
+    },
+    VariableInfoMetadata);
 typedef VariableValue VariableModify;
 typedef ObjName VariableInfoName;
 

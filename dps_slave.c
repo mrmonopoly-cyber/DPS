@@ -39,7 +39,7 @@ struct var_internal {
 };
 
 static struct slave_dps dps;
-static uint16_t object_id_slave = 0;
+static uint8_t object_id_slave = 0;
 
 static int found_com(const void *list_ele, const void *key) {
   const CommandInfo *com = list_ele;
@@ -502,7 +502,7 @@ int dps_print_var() {
   CHECK_INIT();
 
   struct var_internal *var = NULL;
-  uint16_t len = c_vector_length(dps.vars);
+  uint8_t len = c_vector_length(dps.vars);
   for (uint8_t i = 0; i < len; i++) {
     var = c_vector_get_at_index(dps.vars, i);
     print_var(var);
@@ -514,7 +514,7 @@ int dps_print_com() {
   CHECK_INIT();
 
   struct com_internal *com = NULL;
-  uint16_t len = c_vector_length(dps.coms);
+  uint8_t len = c_vector_length(dps.coms);
   for (uint8_t i = 0; i < len; i++) {
     com = c_vector_get_at_index(dps.coms, i);
     print_com(com);
