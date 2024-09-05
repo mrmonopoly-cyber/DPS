@@ -331,11 +331,8 @@ int dps_master_request_info_board(uint8_t board_id, uint8_t data) {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .GenericPayload.dps_payload =
-          {
-              .mext_type = {GET_INFO},
-          },
   };
+  mex.GenericPayload.dps_payload.mext_type.type = GET_INFO;
 
   if (data & REQ_VAR) {
     board_record *board = c_vector_find(dps.boards, &board_id);
