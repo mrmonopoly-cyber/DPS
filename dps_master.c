@@ -87,9 +87,9 @@ static int get_board_name_exec(CanMessage *mex) {
       .raw_data = mex->GenericPayload.dps_payload.data,
   };
 
-  uint16_t board_num = c_vector_length(dps.boards);
+  uint8_t board_num = c_vector_length(dps.boards);
   board_record *board = NULL;
-  for (int i = 0; i < board_num; i++) {
+  for (uint8_t i = 0; i < board_num; i++) {
     board = c_vector_get_at_index(dps.boards, i);
     if (board && !strcmp(board->board_name, b_name.full_data.name)) {
       return EXIT_FAILURE;
@@ -122,12 +122,10 @@ static int get_board_name_exec(CanMessage *mex) {
   CanMessage mex_id = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .GenericPayload.dps_payload =
-          {
-              .mext_type = {SET_BOARD_ID},
-              .data = board_id.raw_data,
-          },
   };
+  mex_id.GenericPayload.dps_payload.mext_type.type = SET_BOARD_ID;
+  memcpy(&mex_id.GenericPayload.dps_payload.data, board_id.raw_data.raw_buffer,
+         sizeof(board_id.raw_data.raw_buffer));
 
   return dps.send_f(&mex_id);
 }
@@ -258,12 +256,10 @@ static int send_refresh_req_var(uint8_t board_id, var_record *var) {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .GenericPayload.dps_payload =
-          {
-              .mext_type = {GET_INFO},
-              .data = req_value.raw_data,
-          },
   };
+  mex.GenericPayload.dps_payload.mext_type.type = GET_INFO;
+  memcpy(&mex.GenericPayload.dps_payload.data, req_value.raw_data.raw_buffer,
+         sizeof(req_value.raw_data.raw_buffer));
   return dps.send_f(&mex);
 }
 
@@ -321,12 +317,11 @@ int dps_master_new_connection() {
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .GenericPayload.dps_payload =
-          {
-              .mext_type = {NEW_CONNECTION},
-              .data = conn.raw_data,
-          },
   };
+
+  mex.GenericPayload.dps_payload.mext_type.type = NEW_CONNECTION;
+  memcpy(&mex.GenericPayload.dps_payload.data, conn.raw_data.raw_buffer,
+         sizeof(conn.raw_data.raw_buffer));
 
   return dps.send_f(&mex);
 }
@@ -510,12 +505,11 @@ int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
   CanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
-      .GenericPayload.dps_payload =
-          {
-              .mext_type = {SET_CURRENT_VAR_VALUE},
-              .data = new_value.raw_data,
-          },
   };
+
+  mex.GenericPayload.dps_payload.mext_type.type = SET_CURRENT_VAR_VALUE;
+  memcpy(&mex.GenericPayload.dps_payload.data, new_value.raw_data.raw_buffer,
+         sizeof(new_value.raw_data.raw_buffer));
 
   return dps.send_f(&mex);
 }
@@ -583,8 +577,8 @@ int dps_master_check_mex_recv(CanMessage *mex) {
 // debug
 
 int dps_master_print_boards() {
-  int len = c_vector_length(dps.boards);
-  for (int i = 0; i < len; i++) {
+  uint8_t len = c_vector_length(dps.boards);
+  for (uint8_t i = 0; i < len; i++) {
     board_record *board = c_vector_get_at_index(dps.boards, i);
     if (!board) {
       return EXIT_FAILURE;
