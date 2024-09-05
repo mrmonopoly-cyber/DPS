@@ -385,6 +385,12 @@ int run_test() {
   }
   PASSED("init completed");
 
+  if (dps_slave_start()) {
+    FAILED("failed dps not started");
+    return -2;
+  }
+  PASSED("passed dps started");
+
   if (check_link_req()) {
     FAILED("failed to receive link request");
     return -2;
@@ -399,6 +405,18 @@ int run_test() {
     FAILED("failed saving vars");
     return -4;
   }
+
+  if (dps_slave_disable()) {
+    FAILED("failed dsp disable");
+    return -1;
+  }
+  PASSED("passed dsp disable");
+
+  if (dps_slave_start()) {
+    FAILED("failed dps start");
+    return -1;
+  }
+  PASSED("passed dsp start");
 
   if (check_monitor_com()) {
     FAILED("failed saving coms");

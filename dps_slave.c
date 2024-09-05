@@ -20,6 +20,7 @@
   if (!dps.vars || !dps.coms) {                                                \
     return EXIT_FAILURE;                                                       \
   }
+
 #define CHECK_INPUT(input)                                                     \
   if (!input) {                                                                \
     return EXIT_FAILURE;                                                       \
@@ -31,6 +32,7 @@ struct slave_dps {
   c_vector_h vars;
   c_vector_h coms;
   int8_t board_id;
+  uint8_t enable : 1;
 };
 
 struct var_internal {
@@ -212,7 +214,7 @@ static int new_connection_exec() {
 
 // public
 int dps_init(can_send send_f, BoardName *board_name) {
-  if (dps.vars || dps.coms || dps.send_f) {
+  if (dps.vars || dps.coms || dps.send_f || dps.enable) {
     return EXIT_FAILURE;
   }
 
@@ -248,11 +250,27 @@ int dps_init(can_send send_f, BoardName *board_name) {
       return EXIT_FAILURE;
     }
   }
+
+  dps.enable = 0;
+  return EXIT_SUCCESS;
+}
+
+int dps_slave_start() {
+  CHECK_INIT();
+  if (dps.enable) {
+    return EXIT_FAILURE;
+  }
+
+  dps.enable = 1;
+
   return EXIT_SUCCESS;
 }
 
 int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -278,6 +296,9 @@ int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info) {
 }
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -302,6 +323,9 @@ int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
 }
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -327,6 +351,9 @@ int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
 
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -351,6 +378,9 @@ int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
 }
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -375,6 +405,9 @@ int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
 }
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -400,6 +433,9 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -426,6 +462,9 @@ int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
 // INFO: tell to dps to monitor a variable
 int dps_monitor_var_general(VariableInfoGericType *var_info) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(var_info);
   CHECK_INPUT(var_info->var_ptr);
@@ -449,6 +488,9 @@ int dps_monitor_var_general(VariableInfoGericType *var_info) {
  */
 int dps_monitor_command(CommandInfo *com) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(com);
   CHECK_INPUT(com->name);
@@ -471,6 +513,9 @@ int dps_monitor_command(CommandInfo *com) {
 // the message
 int dps_check_can_command_recv(CanMessage *mex) {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   CHECK_INPUT(mex);
 
@@ -494,12 +539,18 @@ int dps_check_can_command_recv(CanMessage *mex) {
 // debug
 int dps_get_id() {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   return dps.board_id;
 }
 
 int dps_print_var() {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   struct var_internal *var = NULL;
   uint8_t len = c_vector_length(dps.vars);
@@ -512,6 +563,9 @@ int dps_print_var() {
 
 int dps_print_com() {
   CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
 
   struct com_internal *com = NULL;
   uint8_t len = c_vector_length(dps.coms);
@@ -519,5 +573,16 @@ int dps_print_com() {
     com = c_vector_get_at_index(dps.coms, i);
     print_com(com);
   }
+  return EXIT_SUCCESS;
+}
+
+int dps_slave_disable() {
+  CHECK_INIT();
+  if (!dps.enable) {
+    return EXIT_FAILURE;
+  }
+
+  dps.enable = 0;
+
   return EXIT_SUCCESS;
 }
