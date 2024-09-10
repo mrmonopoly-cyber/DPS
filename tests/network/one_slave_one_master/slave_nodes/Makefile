@@ -14,4 +14,6 @@ main: main.c $(OBJ_FILE)
 	gcc $(C_FLAGS) main.c ../../../test_lib.c $(OBJ_FILE) -o main
 
 clean:
+ifeq ($(wildcard main), main)
 	rm main
+endif

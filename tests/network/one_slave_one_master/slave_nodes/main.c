@@ -75,6 +75,8 @@ int main(void) {
   }
   PASSED("init ok");
 
+  dps_slave_start();
+
 #define MON_VAR(VAR, fun)                                                      \
   {                                                                            \
     VariableInfoPrimitiveType pr = {                                           \

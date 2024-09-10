@@ -66,6 +66,8 @@ int main(int argc, char **argv) {
   memcpy(board_name.full_data.name, board_name_orig, NAME_MAX_SIZE);
   dps_init(send_f_can, &board_name);
 
+  dps_slave_start();
+
   pthread_t new_thread = 1;
   pthread_create(&new_thread, NULL, check_incomming_message, NULL);
 
