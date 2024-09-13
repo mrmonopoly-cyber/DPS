@@ -191,6 +191,9 @@ static int set_var_value_exec(CanMessage *mex) {
     if (saved_var) {
       memcpy(saved_var->data.var_ptr, new_value.full_data.value,
              saved_var->data.size);
+      if (saved_var->data.post_update_f) {
+          saved_var->data.post_update_f(new_value.full_data.value);
+      }
     }
   }
 
@@ -276,24 +279,19 @@ int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(uint8_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 0,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(uint8_t),
+      .float_var = 0,
+      .signd_var = 0,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
 
-  return EXIT_SUCCESS;
+  return dps_monitor_var_general(&new_var);
 }
+
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
   if (!dps.enable) {
@@ -304,23 +302,19 @@ int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(uint16_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 0,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(uint16_t),
+      .float_var = 0,
+      .signd_var = 0,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
+
+  return dps_monitor_var_general(&new_var);
 }
+
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
   if (!dps.enable) {
@@ -331,22 +325,17 @@ int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(uint32_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 0,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(uint32_t),
+      .float_var = 0,
+      .signd_var = 0,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
+
+  return dps_monitor_var_general(&new_var);
 }
 
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
@@ -359,23 +348,19 @@ int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(uint8_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 1,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(int8_t),
+      .float_var = 0,
+      .signd_var = 1,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
+
+  return dps_monitor_var_general(&new_var);
 }
+
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
   if (!dps.enable) {
@@ -386,23 +371,19 @@ int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(int16_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 1,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(int16_t),
+      .float_var = 0,
+      .signd_var = 1,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
+
+  return dps_monitor_var_general(&new_var);
 }
+
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
   if (!dps.enable) {
@@ -413,23 +394,19 @@ int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(int32_t),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 0,
-              .signd_var = 1,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(int32_t),
+      .float_var = 0,
+      .signd_var = 1,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
+
+  return dps_monitor_var_general(&new_var);
 }
+
 
 int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INIT();
@@ -441,22 +418,16 @@ int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info) {
   CHECK_INPUT(var_info->var_ptr);
   CHECK_INPUT(var_info->name);
 
-  struct var_internal new_var = {
-      .var_id = new_id(),
-      .data =
-          {
-              .size = sizeof(float),
-              .var_ptr = var_info->var_ptr,
-              .float_var = 1,
-              .signd_var = 1,
-          },
+  VariableInfoGericType new_var = {
+      .var_ptr = var_info->var_ptr,
+      .size = sizeof(float),
+      .float_var = 1,
+      .signd_var = 1,
+      .post_update_f = var_info->post_update_f,
   };
-  memcpy(new_var.data.name, var_info->name, sizeof(new_var.data.name) - 1);
+  memcpy(new_var.name, var_info->name, sizeof(new_var.name) - 1);
 
-  if (!c_vector_push(&dps.vars, &new_var)) {
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+  return dps_monitor_var_general(&new_var);
 }
 
 // INFO: tell to dps to monitor a variable

@@ -36,6 +36,13 @@ int64_t s64_1 = 0;
 
 float fdata_1 = 0;
 
+uint8_t u8_special = 17;
+uint8_t u8_post = 0;
+
+void u8_post_update(const void* args){
+    memcpy(&u8_post, args, sizeof(u8_post));
+}
+
 typedef struct {
   uint8_t a;
   uint16_t b;
@@ -88,6 +95,17 @@ int check_monitor_var() {
     return -2;
   }
   PASSED("check ok save var gen_t");
+
+  VariableInfoPrimitiveType new_var = {
+      .post_update_f = u8_post_update,
+      .var_ptr = &u8_special,
+      .name = "u8_s",
+  };
+  if(dps_monitor_var_uint8_t(&new_var)){
+      FAILED("monitor error special u8");
+      return -2;
+  }
+  PASSED("monitor error special u8");
 
   return 0;
 }
@@ -149,6 +167,8 @@ int check_update_var() {
   update_var(4, int16_t, -2);
   update_var(5, int32_t, -3);
 
+  update_var(15, uint8_t, 29);
+
   {
     float new_value = 2.5f;
     VariableModify var = {
@@ -193,7 +213,6 @@ int check_update_var() {
     PASSED("update mex recognized");
   }
 
-#define check_variable(var, value_expected)                                    \
   u8 == 1 ? PASSED("u8 updated correctly") : FAILED("u8 update failed");
   u16 == 2 ? PASSED("u16 updated correctly") : FAILED("u16 update failed");
   u32 == 3 ? PASSED("u32 updated correctly") : FAILED("u32 update failed");
@@ -205,11 +224,15 @@ int check_update_var() {
   fdata == 2.5f ? PASSED("fdata updated correctly")
                 : FAILED("fdata update failed");
 
+  (u8_special == 29 && u8_post == 29) ? PASSED("u8_special updated correctly") : FAILED("u8_special update failed");
+
   if (gen_t.a != 4 || gen_t.b != 12 || gen_t.c != 24) {
     FAILED("generic type update failed");
     return -1;
   }
   PASSED("generic type update ok");
+
+
   return 0;
 }
 
