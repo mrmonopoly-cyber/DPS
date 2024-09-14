@@ -39,7 +39,7 @@ typedef struct {
 // send_f : function to send through CAN the data to the external controller
 int dps_init(can_send send_f, BoardName *board_name);
 
-int dps_slave_start();
+int dps_slave_start(void);
 
 int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info);
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info);
@@ -62,7 +62,7 @@ int dps_monitor_command(CommandInfo *comm_name);
 // the message
 int dps_check_can_command_recv(CanMessage *mex);
 
-int dps_slave_disable();
+int dps_slave_disable(void);
 
 #ifdef DEBUG
 int dps_get_id();

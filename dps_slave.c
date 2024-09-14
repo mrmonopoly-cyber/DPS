@@ -258,7 +258,7 @@ int dps_init(can_send send_f, BoardName *board_name) {
   return EXIT_SUCCESS;
 }
 
-int dps_slave_start() {
+int dps_slave_start(void) {
   CHECK_INIT();
   if (dps.enable) {
     return EXIT_FAILURE;
@@ -547,7 +547,7 @@ int dps_print_com() {
   return EXIT_SUCCESS;
 }
 
-int dps_slave_disable() {
+int dps_slave_disable(void) {
   CHECK_INIT();
   if (!dps.enable) {
     return EXIT_FAILURE;
