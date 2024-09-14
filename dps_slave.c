@@ -192,7 +192,7 @@ static int set_var_value_exec(CanMessage *mex) {
       memcpy(saved_var->data.var_ptr, new_value.full_data.value,
              saved_var->data.size);
       if (saved_var->data.post_update_f) {
-          saved_var->data.post_update_f(new_value.full_data.value);
+          saved_var->data.post_update_f(saved_var->data.name, new_value.full_data.value);
       }
     }
   }

@@ -13,7 +13,7 @@ extern "C" {
 #include "common/can_mex/object.h"
 #include "common/messages.h"
 
-typedef void (*post_update_f) (const void* new_var_value);
+typedef void (*post_update_f) (const char* var_name, const void* new_var_value);
 
 typedef struct {
   char name[NAME_MAX_SIZE];
