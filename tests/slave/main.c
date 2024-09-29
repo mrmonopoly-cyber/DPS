@@ -39,7 +39,7 @@ float fdata_1 = 0;
 uint8_t u8_special = 17;
 uint8_t u8_post = 0;
 
-void u8_post_update(const void* args){
+void u8_post_update(const char* name, const void* args){
     memcpy(&u8_post, args, sizeof(u8_post));
 }
 
