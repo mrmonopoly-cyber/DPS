@@ -38,6 +38,7 @@ typedef struct {
 // INFO: create dps manager
 // send_f : function to send through CAN the data to the external controller
 int dps_init(can_send send_f, BoardName *board_name);
+int dps_is_init_done();
 
 int dps_slave_start(void);
 
