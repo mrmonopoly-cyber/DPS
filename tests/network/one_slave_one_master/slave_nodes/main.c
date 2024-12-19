@@ -13,7 +13,7 @@ int can_socket = -1;
 int check_input_mex(void *args) {
   while (1) {
     struct can_frame frame;
-    CanMessage dps_mex;
+    DPSCanMessage dps_mex;
     if (can_recv_frame(can_socket, &frame)) {
       return EXIT_FAILURE;
     }
@@ -26,7 +26,7 @@ int check_input_mex(void *args) {
   }
 }
 
-int send_f_can(CanMessage *mex) {
+int send_f_can(DPSCanMessage *mex) {
   struct can_frame frame = {
       .can_dlc = mex->dlc,
       .can_id = mex->id,

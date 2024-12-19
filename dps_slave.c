@@ -82,14 +82,14 @@ static uint8_t new_id() {
   return object_id_slave - 1;
 }
 
-static int req_inf_exec(CanMessage *mex) {
+static int req_inf_exec(DPSCanMessage *mex) {
   ReqInfo data_mex = {
       .raw_data = mex->GenericPayload.dps_payload.data,
   };
   VariableInfoName var_name;
   VariableInfoMetadata var_metadata;
   VariableValue var_value;
-  CanMessage new_mex = {
+  DPSCanMessage new_mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
   };
@@ -169,7 +169,7 @@ static int req_inf_exec(CanMessage *mex) {
   return EXIT_FAILURE;
 }
 
-static int set_board_id_exec(CanMessage *mex) {
+static int set_board_id_exec(DPSCanMessage *mex) {
   AssignBoarId board_payload = {
       .raw_data = mex->GenericPayload.dps_payload.data,
   };
@@ -180,7 +180,7 @@ static int set_board_id_exec(CanMessage *mex) {
   return EXIT_SUCCESS;
 }
 
-static int set_var_value_exec(CanMessage *mex) {
+static int set_var_value_exec(DPSCanMessage *mex) {
   VariableModify new_value = {
       .raw_data = mex->GenericPayload.dps_payload.data,
   };
@@ -203,7 +203,7 @@ static int set_var_value_exec(CanMessage *mex) {
 static int new_connection_exec() {
   BoardName resp_payload;
   memcpy(resp_payload.full_data.name, dps.board_name, BOARD_NAME_LENGTH);
-  CanMessage mex = {
+  DPSCanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
   };
@@ -482,7 +482,7 @@ int dps_monitor_command(CommandInfo *com) {
 
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
-int dps_check_can_command_recv(CanMessage *mex) {
+int dps_check_can_command_recv(DPSCanMessage *mex) {
   CHECK_INIT();
   if (!dps.enable) {
     return EXIT_FAILURE;

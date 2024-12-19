@@ -6,7 +6,7 @@
 
 #define DPS_CAN_MESSAGE_ID 0x512
 
-typedef struct CanMessage {
+typedef struct DPSCanMessage {
   uint16_t id;
   uint8_t dlc;
   union {
@@ -16,8 +16,8 @@ typedef struct CanMessage {
     } dps_payload;
     RawPayloadCanMex rawMex;
   } GenericPayload;
-} CanMessage;
+} DPSCanMessage;
 
-typedef int (*can_send)(CanMessage *mex);
+typedef int (*can_send)(DPSCanMessage *mex);
 
 #endif // !__DPS_MESSAGES__

@@ -146,7 +146,7 @@ int check_update_var() {
         .full_data.obj_id.board_id = BOARD_ID,                                 \
     };                                                                         \
     memcpy(var.full_data.value, &mod, sizeof(mod));                            \
-    CanMessage mex = {                                                         \
+    DPSCanMessage mex = {                                                         \
         .id = DPS_CAN_MESSAGE_ID,                                              \
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,                                  \
         .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},       \
@@ -176,7 +176,7 @@ int check_update_var() {
         .full_data.obj_id.board_id = BOARD_ID,
     };
     mempcpy(var.full_data.value, &new_value, sizeof(new_value));
-    CanMessage mex = {
+    DPSCanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
         .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
@@ -200,7 +200,7 @@ int check_update_var() {
         .full_data.obj_id.board_id = BOARD_ID,
     };
     mempcpy(var.full_data.value, &new_value, sizeof(new_value));
-    CanMessage mex = {
+    DPSCanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
         .GenericPayload.dps_payload.mext_type = {SET_CURRENT_VAR_VALUE},
@@ -242,7 +242,7 @@ int send_com_info_master() {
       .full_data.info_t = COMMAND,
   };
 
-  CanMessage com_info_req = {
+  DPSCanMessage com_info_req = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
       .GenericPayload.dps_payload =
@@ -267,7 +267,7 @@ int send_var_info_master() {
       .full_data.info_t = VAR,
   };
 
-  CanMessage com_info_req = {
+  DPSCanMessage com_info_req = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
       .GenericPayload.dps_payload =
@@ -305,7 +305,7 @@ int get_cur_values() {
           },
   };
 
-  CanMessage mex = {
+  DPSCanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
       .GenericPayload.dps_payload.mext_type = {GET_INFO},
@@ -330,7 +330,7 @@ int get_cur_values() {
 
 int check_link_req() {
   new_connection conn = {};
-  CanMessage mex = {
+  DPSCanMessage mex = {
       .id = DPS_CAN_MESSAGE_ID,
       .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
       .GenericPayload.dps_payload.mext_type = {NEW_CONNECTION},
@@ -356,7 +356,7 @@ int check_id_assign() {
       .full_data.name = "WRONG",
   };
   {
-    CanMessage mex = {
+    DPSCanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
         .GenericPayload.dps_payload.mext_type = {SET_BOARD_ID},
@@ -375,7 +375,7 @@ int check_id_assign() {
   }
 
   {
-    CanMessage mex = {
+    DPSCanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
         .GenericPayload.dps_payload.mext_type = {SET_BOARD_ID},
@@ -395,7 +395,7 @@ int check_id_assign() {
   return 0;
 }
 
-int send(CanMessage *mex) { return 0; }
+int send(DPSCanMessage *mex) { return 0; }
 
 int run_test() {
   BoardName board_name = {

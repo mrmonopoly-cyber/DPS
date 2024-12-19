@@ -15,13 +15,13 @@ char boards[NUMBER_SLAVES][BOARD_NAME_LENGTH + 1] = {
     "SLAVE1", "SLAVE2", "SLAVE3", "SLAVE4", "SLAVE5",
 };
 
-int debug_send(CanMessage *mex) { return 0; }
+int debug_send(DPSCanMessage *mex) { return 0; }
 
 int new_board_connection() {
   for (long unsigned int i = 0; i < NUMBER_SLAVES; i++) {
     BoardName new_board_name = {};
     memcpy(new_board_name.full_data.name, boards[i], BOARD_NAME_LENGTH);
-    CanMessage mex = {
+    DPSCanMessage mex = {
         .id = DPS_CAN_MESSAGE_ID,
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,
         .GenericPayload.dps_payload =
@@ -57,7 +57,7 @@ int test_saved_var() {
 
 #define ADD_NEW_VAR(BOARD_ID, VAR, VAR_ID, SIGNED, FLOAT)                      \
   {                                                                            \
-    CanMessage mex = {                                                         \
+    DPSCanMessage mex = {                                                         \
         .id = DPS_CAN_MESSAGE_ID,                                              \
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,                                  \
     };                                                                         \
@@ -283,7 +283,7 @@ int test_saved_com() {
 
 #define ADD_NEW_COM(BOARD_ID, COM, COM_ID, SIGNED, FLOAT, SIZE)                \
   {                                                                            \
-    CanMessage mex = {                                                         \
+    DPSCanMessage mex = {                                                         \
         .id = DPS_CAN_MESSAGE_ID,                                              \
         .dlc = CAN_PROTOCOL_MAX_PAYLOAD_SIZE,                                  \
     };                                                                         \

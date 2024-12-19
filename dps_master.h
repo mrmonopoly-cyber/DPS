@@ -102,7 +102,7 @@ int dps_master_send_command(uint16_t com_dps_id, void *value,
 // INFO: check if a message in input is for the library and operate if can
 // return EXIT_SUCCESS if the message belongs to the library
 // EXIT_FAILURE otherwise
-int dps_master_check_mex_recv(CanMessage *mex);
+int dps_master_check_mex_recv(DPSCanMessage *mex);
 
 #ifdef DEBUG
 

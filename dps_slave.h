@@ -60,7 +60,7 @@ int dps_monitor_command(CommandInfo *comm_name);
 
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
-int dps_check_can_command_recv(CanMessage *mex);
+int dps_check_can_command_recv(DPSCanMessage *mex);
 
 int dps_slave_disable(void);
 

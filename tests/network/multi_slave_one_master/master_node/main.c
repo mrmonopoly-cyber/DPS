@@ -10,7 +10,7 @@
 
 int can_socket = -1;
 
-int send_f_can(CanMessage *mex) {
+int send_f_can(DPSCanMessage *mex) {
   struct can_frame f = {
       .can_dlc = mex->dlc,
       .can_id = mex->id,
@@ -23,7 +23,7 @@ void *check_incomming_message(void *args) {
   struct can_frame mex_lib = {0};
   while (1) {
     if (!can_recv_frame(can_socket, &mex_lib)) {
-      CanMessage mex = {
+      DPSCanMessage mex = {
           .dlc = mex_lib.can_dlc,
           .id = mex_lib.can_id,
       };

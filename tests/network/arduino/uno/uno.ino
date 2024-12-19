@@ -13,7 +13,7 @@ int32_t s32 = 1;
 float float_v = 1;
 
 
-static int send(CanMessage *mex) {
+static int send(DPSCanMessage *mex) {
     CanMsg msg(CanStandardId(mex->id), mex->dlc, mex->rawMex.raw_buffer);
     char rc = CAN.write(msg);
     if (rc < 0)
@@ -137,7 +137,7 @@ void loop() {
     if (CAN.available())
     {
         CanMsg const msg = CAN.read();
-        CanMessage d_mex;
+        DPSCanMessage d_mex;
         d_mex.id = msg.id;
         d_mex.dlc = msg.data_length;
         memcpy(d_mex.rawMex.raw_buffer,msg.data,msg.data_length);
