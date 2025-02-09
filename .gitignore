@@ -3,3 +3,4 @@ main
 *.so
 dps_slave.a
 dps_slave.so
+.clangd

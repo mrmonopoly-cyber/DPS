@@ -4,3 +4,6 @@
 [submodule "tests/network/arduino/due/lib/DPS"]
 	path = tests/network/arduino/due/lib/DPS
 	url = https://github.com/mrmonopoly-cyber/DPS
+[submodule "lib/dbcc"]
+	path = lib/dbcc
+	url = https://github.com/howerj/dbcc.git
