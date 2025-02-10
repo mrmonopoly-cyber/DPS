@@ -4,8 +4,6 @@
 
 - [Cmake](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
 - [GCC](https://gcc.gnu.org/)
-- [libgpiod](https://github.com/brgl/libgpiod)
-- [gpio\-mockup](https://docs.kernel.org/admin-guide/gpio/gpio-mockup.html)
 - [socketcan](https://docs.kernel.org/networking/can.html)
 
 ## Run
