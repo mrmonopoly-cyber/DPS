@@ -91,6 +91,107 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
   return -1;
 }
 
+static int8_t
+_get_board_name(struct DpsMaster_t* const restrict self,
+    const struct SlaveMode0* const restrict mex_master)
+{
+  struct c_vector_input_init args =
+  {
+    .capacity = 10,
+    .comp_fun = found_var,
+    .ele_size = sizeof(VarRecordInternal),
+    .free_fun = _dummy_fun,
+    .print_fun = _dummy_func_const,
+  };
+  BoardRecordInternal new_board =
+  {
+    .id = new_id(self),
+    .vars = c_vector_init(&args),
+  };
+  memcpy(new_board.board_name, &mex_master->name, BOARD_NAME_LENGTH);
+  return !!c_vector_push(&self->board_vec, &new_board);
+}
+
+static int8_t
+_get_var_name(struct DpsMaster_t* const restrict self,
+    const struct DpsSlaveMex* const restrict mex_slave)
+{
+  BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
+  if (board)
+  {
+    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->Mode_1.var_id);
+    if (!var)
+    {
+      VarRecordInternal new_var = {
+        .var_id = mex_slave->Mode_1.var_id,
+      };
+      memcpy(new_var.var_specification.name, &mex_slave->Mode_1.name, sizeof(VAR_NAME_LENGTH));
+      if(!c_vector_push(board->vars, &new_var))
+      {
+        return -2;
+      }
+      return 0;
+    }
+    memcpy(var->var_specification.name, &mex_slave->Mode_1.name, sizeof(VAR_NAME_LENGTH));
+    return 0;
+  }
+  return -1;
+}
+
+static int8_t
+_get_var_metadata(struct DpsMaster_t* const restrict self,
+    const struct DpsSlaveMex* const restrict mex_slave)
+{
+  BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
+  if (board)
+  {
+    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->Mode_2.var_id);
+    if (!var)
+    {
+      VarRecordInternal new_var = {
+        .var_id = mex_slave->Mode_2.var_id,
+        .var_specification.size = mex_slave->Mode_2.size,
+        .var_specification.type = mex_slave->Mode_2.type,
+      };
+      if(!c_vector_push(board->vars, &new_var))
+      {
+        return -2;
+      }
+      return 0;
+    }
+    var->var_specification.type = mex_slave->Mode_2.type;
+    var->var_specification.size = mex_slave->Mode_2.size;
+    return 0;
+  }
+  return -1;
+}
+
+static int8_t
+_get_var_value(struct DpsMaster_t* const restrict self,
+    const struct DpsSlaveMex* const restrict mex_slave)
+{
+  BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
+  if (board)
+  {
+    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->Mode_3.var_id);
+    if (!var)
+    {
+      VarRecordInternal new_var = {
+        .var_id = mex_slave->Mode_3.var_id,
+      };
+      memcpy(&new_var.var_specification.value, &mex_slave->Mode_3.value, sizeof(mex_slave->Mode_3.value));
+      if(!c_vector_push(board->vars, &new_var))
+      {
+        return -2;
+      }
+      return 0;
+    }
+    memcpy(&var->var_specification.value, &mex_slave->Mode_3.value, var->var_specification.size);
+    return 0;
+  }
+  return -1;
+}
+
 #ifdef DEBUG
 char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
 #endif /* ifdef DEBUG */
@@ -364,11 +465,11 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
       case 0:
         return _get_board_name(p_self, &o.dps_slave_mex.Mode_0);
       case 1:
-        return _get_var_name(p_self, &o.dps_slave_mex.Mode_1);
+        return _get_var_name(p_self, &o.dps_slave_mex);
       case 2:
-        return _get_var_metadata(p_self, &o.dps_slave_mex.Mode_2);
+        return _get_var_metadata(p_self, &o.dps_slave_mex);
       case 3:
-        return _get_var_value(p_self, &o.dps_slave_mex.Mode_3);
+        return _get_var_value(p_self, &o.dps_slave_mex);
       default:
         return -1;
     }
