@@ -1,2 +1,0 @@
-default_fqbn: raceup:renesas_uno:smu
-default_port: /dev/ttyACM0
