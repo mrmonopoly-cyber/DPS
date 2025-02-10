@@ -352,8 +352,6 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
   struct DpsMessagesObj o;
   CHECK_INIT(p_self);
 
-  CHECK_INPUT(mex);
-
   dps_messages_unpack(&o, DPS_MESSAGES_SLAVE, &mex->full_word);
 
   if (mex->id == p_self->slages_id)
