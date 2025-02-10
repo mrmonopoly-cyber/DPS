@@ -8,6 +8,8 @@ extern "C" {
 #include <stdint.h>
 #include "../common/common.h"
 
+typedef int8_t (*post_update) (const void* const var);
+
 typedef struct DpsSlave_h{
     const uint8_t private_data[32];
 }DpsSlave_h;
@@ -32,6 +34,7 @@ int8_t
 dps_monitor_primitive_var(DpsSlave_h* const restrict self,
         const enum DPS_PRIMITIVE_TYPES type,
         void* const p_data,
+        post_update post_update_f,
         const char name[VAR_NAME_LENGTH]);
 
 // INFO: check if a can message is for the dps and if it's the case it executes

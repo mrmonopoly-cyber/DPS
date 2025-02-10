@@ -23,6 +23,7 @@ struct DpsSlave_t{
 struct VarInternal
 {
   void* p_var;
+  post_update post_update_fun;
   char var_name[VAR_NAME_LENGTH];
   uint8_t size;
   uint8_t var_id : DATA_ID_SIZE_BIT;
@@ -151,6 +152,10 @@ static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
     if (var && var->var_id == update_value_mex->var_id)
     {
       memcpy(var->p_var, &update_value_mex->value, var->size);
+      if (var->post_update_fun)
+      {
+        var->post_update_fun(var->p_var);
+      }
       return 0;
     }
   }
@@ -270,6 +275,7 @@ int8_t
 dps_monitor_primitive_var(DpsSlave_h* const restrict self,
         const enum DPS_PRIMITIVE_TYPES type,
         void* const p_data,
+        post_update post_update_f,
         const char name[VAR_NAME_LENGTH])
 {
   union DpsSlave_h_t_conv conv = {self};
@@ -290,6 +296,7 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
   struct VarInternal new_var = {
       .var_id = new_id(p_self),
       .p_var = p_data,
+      .post_update_fun = post_update_f,
   };
   switch (type)
   {
