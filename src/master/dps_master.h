@@ -10,7 +10,7 @@ extern "C" {
 #include "../common/common.h"
 
 typedef struct DpsMaster_h{
-    const uint8_t private_data[32];
+    const uint8_t private_data[24];
 }DpsMaster_h;
 
 typedef struct{

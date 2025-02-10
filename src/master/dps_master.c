@@ -91,6 +91,9 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
   return -1;
 }
 
+#ifdef DEBUG
+char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
+#endif /* ifdef DEBUG */
 
 // public
 int8_t
