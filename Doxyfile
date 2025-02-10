@@ -1,0 +1,9 @@
+PROJECT_NAME           = "Debug Peripheral System (DPS)"
+OUTPUT_DIRECTORY       = doc/doxygen/
+EXTRACT_ALL            = YES
+HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+RECURSIVE              = YES
+INPUT                  = .
+DOT_IMAGE_FORMAT       = png           # (Recommended: svg, png, or pdf)
