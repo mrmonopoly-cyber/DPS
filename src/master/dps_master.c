@@ -520,7 +520,7 @@ dps_master_print_vars(DpsMaster_h* const restrict self)
           printf("var board: %s\n", board->board_name);
           printf("var id: %d,", var->var_id);
           printf("var name: %s,", var->var_specification.name);
-          printf("var size: %d,", var->var_specification.size);
+          printf("var size: %d bit,", var->var_specification.size);
           printf("var type: ");
           switch (var->var_specification.size)
           {

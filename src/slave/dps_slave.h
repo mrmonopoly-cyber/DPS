@@ -8,7 +8,7 @@ extern "C" {
 #include <stdint.h>
 #include "../common/common.h"
 
-typedef int8_t (*post_update) (const void* const var);
+typedef int8_t (*post_update) (const char* const var_name, const void* const var);
 
 typedef struct DpsSlave_h{
     const uint8_t private_data[32];

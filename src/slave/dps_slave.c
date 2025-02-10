@@ -154,7 +154,7 @@ static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
       memcpy(var->p_var, &update_value_mex->value, var->size);
       if (var->post_update_fun)
       {
-        var->post_update_fun(var->p_var);
+        var->post_update_fun(var->var_name, var->p_var);
       }
       return 0;
     }
@@ -183,8 +183,19 @@ static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
     struct VarInternal* var = c_vector_get_at_index(self->vars,i);
     if (var)
     {
+      switch (var->size)
+      {
+        case 0:
+          o.dps_slave_mex.Mode_2.size = 8;
+          break;
+        case 1:
+          o.dps_slave_mex.Mode_2.size = 16;
+          break;
+        case 2:
+          o.dps_slave_mex.Mode_2.size = 32;
+          break;
+      }
       o.dps_slave_mex.Mode_2.var_id = var->var_id;
-      o.dps_slave_mex.Mode_2.size = var->size;
       o.dps_slave_mex.Mode_2.type = var->type;
       mex.dlc = dps_messages_pack(&o, DPS_MESSAGES_SLAVE, &mex.full_word);
       self->send_f(&mex);
