@@ -16,7 +16,7 @@ typedef struct DpsSlave_h{
 // send_f : function to send through CAN the data to the external controller
 int8_t
 dps_init(DpsSlave_h* const restrict self,
-        can_send send_f,
+        const can_send send_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
         const uint16_t dps_can_id_master,

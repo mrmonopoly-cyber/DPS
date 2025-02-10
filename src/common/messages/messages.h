@@ -53,7 +53,7 @@ struct DpsMasterMex{
   struct MasterMode3{ //Mode = 3 Update var value Board
     uint8_t board_id;//4,4
     uint8_t var_id;//8,4
-    uint8_t value;//16,32
+    uint32_t value;//16,32
   }Mode_3;
 };
 

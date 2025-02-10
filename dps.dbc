@@ -65,16 +65,16 @@ BO_ 651 DpsMasterMex: 8 SLAVE
 
 
  //Mode = 1 Request Infos Board
- SG_ board_id : 4|4@1+ (1,0) [0|15] "slave board id" M0
+ SG_ board_id : 4|4@1+ (1,0) [0|15] "slave board id" M1
 
  //Mode = 2 Request var value Board
  SG_ board_id : 4|4@1+ (1,0) [0|15] "slave board id" M2
  SG_ var_id : 8|4@1+ (1,0) [0|15] "slave var id" M2
 
  //Mode = 3 Update var value Board
- SG_ board_id : 4|4@1+ (1,4) [0|15] "slave board id" SLAVE 
- SG_ var_id : 8|4@1+ (1,0) [0|15] "slave var id" SLAVE
- SG_ value: 16|32@1+ (1,0) [0|0] "slave var id" SLAVE
+ SG_ board_id : 4|4@1+ (1,4) [0|15] "slave board id" M3
+ SG_ var_id : 8|4@1+ (1,0) [0|15] "slave var id" M3
+ SG_ value: 16|32@1+ (1,0) [0|0] "slave var id" M3
 
 
 VAL_ 650 Mode 0 "BoardName" 1 "VarName" 2 "VarMetadata" 3 "VarValue"

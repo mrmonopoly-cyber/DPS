@@ -5,111 +5,100 @@
 extern "C" {
 #endif
 
-#include "common/can_mex/base_mex_components/base_payload.h"
-#include "common/can_mex/base_mex_components/obj_id.h"
-#include "common/can_mex/board.h"
-#include "common/can_mex/command.h"
-#include "common/can_mex/object.h"
-#include "common/can_mex/variable.h"
-#include "common/messages.h"
 
-#include "lib/c_vector/c_vector.h"
 #include <stdint.h>
+#include "../common/common.h"
 
-typedef struct {
-  char *name;
+typedef struct DpsMaster_h{
+    const uint8_t private_data[32];
+}DpsMaster_h;
+
+typedef struct{
+  const char* name;
   uint8_t id;
-} board_info;
+}BoardInfo;
 
-typedef struct {
-  char name[NAME_MAX_SIZE];
-  CommandInfoMetadata metadata;
-} com_info;
-
-typedef struct {
-  char name[NAME_MAX_SIZE];
-  VariableInfoMetadata metadata;
+typedef struct{
+  char name[VAR_NAME_LENGTH];
+  uint32_t value;
+  uint8_t size;
+  enum DATA_GENERIC_TYPE type:2;
   uint8_t updated : 1;
-  char value[NAME_MAX_SIZE];
-} var_record;
+}VarRecord;
 
-typedef struct {
+typedef struct{
   uint8_t board_num;
-  board_info boards[];
-} board_list_info;
+  BoardInfo boards[];
+}BoardListInfo;
 
-typedef struct {
-  uint8_t board_num;
-  var_record vars[];
-} var_list_info;
+typedef struct{
+  uint8_t var_num;
+  VarRecord vars[];
+}VarListInfo;
 
-typedef struct {
-  uint8_t board_num;
-  com_info coms[];
-} com_list_info;
+enum REQUEST_INFO
+{
+  REQ_VAR = (1 << 0)
+};
 
 // INFO: init the master
 // send_f : function needed to send a can message
 // return EXIT_SUCCESS if success
 // EXIT_FAILURE if errors happens
-int dps_master_init(can_send send_f);
+int8_t dps_master_init(DpsMaster_h* const restrict self,
+    const uint16_t master_id,
+    const uint16_t slaves_id,
+    const can_send send_f);
 
-// INFO: establish  connection between master and slaves
+// INFO: establish connection between master and slaves
 // return EXIT_SUCCESS if success
 // EXIT_FAILURE if errors happens
-int dps_master_new_connection();
+int8_t dps_master_new_connection(DpsMaster_h* const restrict self);
 
-enum REQUEST_INFO { REQ_VAR = (1 << 0), REQ_COM = (1 << 1) };
 // INFO: send a request info to a specific board fetching data based on argument
-int dps_master_request_info_board(uint8_t board_id, uint8_t data);
+int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
+    const uint8_t board_id, const uint8_t data);
 
 // INFO: return a list of all the board known by the master with theirs id
-board_list_info *dps_master_list_board();
+const BoardListInfo *dps_master_list_board(const DpsMaster_h* const restrict self);
 
 // INFO: return a list of all the vars known by the master in a board
-int dps_master_list_vars(uint8_t board_id, var_list_info **o_list);
-
-// INFO: return a list of all the coms known by the master
-int dps_master_list_coms(com_list_info **o_list);
+int8_t dps_master_list_vars(DpsMaster_h* const restrict self,
+    const uint8_t board_id,VarListInfo **o_list);
 
 // INFO: fetch the current value of a variable in a board in the system
-int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id);
+int8_t dps_master_refresh_value_var(DpsMaster_h* const restrict self,
+    const uint8_t board_id, const uint8_t var_id);
 
 // INFO: fetch the current value of all variables in a board in the system
-int dps_master_refresh_value_var_all(uint8_t board_id);
+int8_t dps_master_refresh_value_var_all(DpsMaster_h* const restrict self,
+    const uint8_t board_id);
 
 // INFO: put the current value of a variable in a board in the system and put in
 // in o_buffer
-int dps_master_get_value_var(uint8_t board_id, uint8_t var_i,
-                             var_record *o_var);
+int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
+    const uint8_t board_id,
+    const uint8_t var_i,
+    VarRecord *const restrict o_var);
 
 // INFO: send and update request for a variable of a board
 // if the size is do not fit can message or is greater than the size of the
 // variable the message will not be sent and return EXIT_FAILURE
-int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
-                          uint8_t value_size);
-
-// INFO:: return the info about a command
-int dps_master_get_command_info(uint8_t command_id, com_info* o_com);
-
-// INFO: send a command with a payload
-// if value size is > then the bound of the command metadata or greater to CAN
-// payload buffer message is not sent. If value is NULL or value_size is 0
-// message is not sent
-int dps_master_send_command(uint16_t com_dps_id, void *value,
-                            uint8_t value_size);
+int8_t dps_master_update_var(DpsMaster_h* const restrict self,
+    const uint8_t board_id,
+    const uint8_t var_id,
+    const void* const restrict value,
+    const uint8_t value_size);
 
 // INFO: check if a message in input is for the library and operate if can
 // return EXIT_SUCCESS if the message belongs to the library
 // EXIT_FAILURE otherwise
-int dps_master_check_mex_recv(CanMessage *mex);
+int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
+    const struct DpsCanMessage* const restrict mex);
 
 #ifdef DEBUG
-
-int dps_master_print_boards();
-int dps_master_print_coms();
-int dps_master_print_vars();
-
+int8_t dps_master_print_boards(DpsMaster_h* const restrict self);
+int8_t dps_master_print_vars(DpsMaster_h* const restrict self);
 #endif // __DEBUG__
        
 #ifdef __cplusplus
