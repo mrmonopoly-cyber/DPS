@@ -363,7 +363,7 @@ dps_check_can_command_recv(DpsSlave_h* const restrict self,
   }
   if (mex->id == p_self->master_id)
   {
-    dps_messages_unpack(&o, DPS_MESSAGES_MASTER, &mex->full_word);
+    dps_messages_unpack(&o, DPS_MESSAGES_MASTER, mex->full_word);
     switch (o.dps_master_mex.Mode)
     {
       case 0: //discover board

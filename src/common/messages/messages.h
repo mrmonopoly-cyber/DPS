@@ -25,7 +25,7 @@ struct DpsSlaveMex
   struct SlaveMode2{//Mode = 2 var metadata 
     uint8_t var_id;//8,4
     uint8_t type;//12,2
-    uint8_t size;//14,3
+    uint8_t size;//14,2
   }Mode_2;
 
   struct SlaveMode3{//Mode = 3 var value
@@ -65,11 +65,11 @@ struct DpsMessagesObj{
 int8_t
 dps_messages_pack(struct DpsMessagesObj* const restrict self,
     const enum DpsMessages mex_type,
-    const uint64_t* const restrict o_buffer);
+    uint64_t* const restrict o_buffer);
 
 int8_t
 dps_messages_unpack(struct DpsMessagesObj* const restrict o_self,
     const enum DpsMessages mex_type,
-    const uint64_t* const restrict buffer);
+    const uint64_t buffer);
 
 #endif // !__DPS_CAN_MESSAGES__
