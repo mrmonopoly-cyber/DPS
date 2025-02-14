@@ -1,0 +1,78 @@
+VERSION "1.0"
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: MASTER SLAVE
+
+BO_ 650 DpsSlaveMex: 8 SLAVE
+ SG_ board_id: 0|4@1+ (1,0) [0|15] "slave board id" M1
+ SG_ Mode M : 4|4@1+ (1,0) [0|15] "slave mex type" M
+ SG_ id m0M : 8|4@1+ (1,0) [0|15] "slave board id" M0
+ SG_ board_name m0M : 16|56@1+ (1,0) [0|0] "slave board name" M0
+ SG_ info_var_id m1M : 8|4@1+ (1,0) [0|15] "slave var id" M1
+ SG_ var_name m1M : 16|48@1+ (1,0) [0|0] "slave var name" M1
+ SG_ value_var_id m2M : 8|4@1+ (1,0) [0|15] "slave var id" M2
+ SG_ type m2M : 12|2@1+ (1,0) [0|2] "slave var type" M2
+ SG_ size m2M : 14|2@1+ (1,0) [0|2] "slave var size" M2
+ SG_ var_id m3M : 8|4@1+ (1,0) [0|15] "slave var id" M3
+ SG_ value m3M : 16|32@1+ (1,0) [0|2] "slave var value" M3
+
+BO_ 651 DpsMasterMex: 8 SLAVE
+ SG_ Mode M : 0|4@1+ (1,0) [0|15] "slave mex type" M
+ SG_ reserved m0M : 4|1@1+ (1,0) [0|0] "" M0
+ SG_ var_name_board_id m1M : 4|4@1+ (1,0) [0|15] "slave board id" M1
+ SG_ var_metadata_board_id m2M : 4|4@1+ (1,0) [0|15] "slave board id" M2
+ SG_ var_metadata_var_id m2M : 8|4@1+ (1,0) [0|15] "slave var id" M2
+ SG_ var_value_board_id m3M : 4|4@1+ (1,0) [0|15] "slave board id" M3
+ SG_ var_value_var_id m3M : 8|4@1+ (1,0) [0|15] "slave var id" M3
+ SG_ value m3M : 16|32@1+ (1,0) [0|0] "slave var value" M3
+
+VAL_ 650 Mode 0 "BoardName" 1 "VarName" 2 "VarMetadata" 3 "VarValue"
+VAL_ 651 Mode 0 "Discover Boards" 1 "Request Infos Board" 2 "Req var value" 3 "Update var value"
+VAL_ 650 type 0 "Integer" 1 "Float" 2 "String"
+VAL_ 650 size 0 "8-bit" 1 "16-bit" 2 "32-bit"
+
+
+
+SG_MUL_VAL_ 650 id Mode 0-0;
+SG_MUL_VAL_ 650 board_name Mode 0-0;
+SG_MUL_VAL_ 650 board_id Mode 3-3;
+SG_MUL_VAL_ 650 var_id Mode 3-3;
+SG_MUL_VAL_ 650 var_name Mode 1-1;
+SG_MUL_VAL_ 650 type Mode 2-2;
+SG_MUL_VAL_ 650 size Mode 2-2;
+SG_MUL_VAL_ 650 value Mode 3-3;
+SG_MUL_VAL_ 651 reserved Mode 0-0;
+SG_MUL_VAL_ 651 board_id Mode 3-3;
+SG_MUL_VAL_ 651 var_id Mode 3-3;
+SG_MUL_VAL_ 651 value Mode 3-3;
