@@ -9,9 +9,9 @@
 
 // private
 
-#define CHECK_INPUT(IN)                                                        \
+#define CHECK_INPUT(IN,err)                                                        \
   if (!IN)                                                                     \
-    return EXIT_FAILURE;
+    return err;
 
 struct DpsMaster_t{
   can_send send_f;
@@ -63,9 +63,17 @@ static int found_var(const void *list_ele, const void *key) {
   return !(var->var_id == *id);
 }
 
-static void _dummy_func_const(const void *ele) {}
+static void _dummy_func_const(const void *ele __attribute__((__unused__))) {}
 
-static void _dummy_fun(void *ele) {}
+static void _dummy_fun(void *ele __attribute__((__unused__))) {}
+
+static void _free_board(void* ele)
+{
+  BoardRecordInternal* board = ele;
+  printf("free board %p\n",ele);
+  c_vector_free(board->vars);
+  return;
+}
 
 static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const restrict self,
     const BoardRecordInternal* const restrict board, const uint8_t var_id)
@@ -207,7 +215,7 @@ dps_master_init(DpsMaster_h* const restrict self,
   if (p_self->board_vec || p_self->send_f) {
     return EXIT_FAILURE;
   }
-  CHECK_INPUT(send_f);
+  CHECK_INPUT(send_f,-1);
 
   p_self->send_f = send_f;
   p_self->master_id = master_id;
@@ -216,7 +224,7 @@ dps_master_init(DpsMaster_h* const restrict self,
   struct c_vector_input_init args = {
     .capacity = 10,
     .ele_size = sizeof(BoardRecordInternal),
-    .free_fun = _dummy_fun,
+    .free_fun = _free_board,
     .print_fun = _dummy_func_const,
     .comp_fun = found_board,
   };
@@ -283,7 +291,7 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
 #ifdef DEBUG
-  CHECK_INPUT(self);
+  CHECK_INPUT(self,NULL);
 #endif /* ifdef DEBUG */
 
   const uint8_t len = c_vector_length(p_self->board_vec);
@@ -309,8 +317,8 @@ int8_t dps_master_list_vars(DpsMaster_h* const restrict self,
     const uint8_t board_id,VarListInfo **o_list)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self);
-  CHECK_INPUT(o_list);
+  CHECK_INPUT(self,-1);
+  CHECK_INPUT(o_list,-2);
 #endif /* ifdef DEBUG */
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -343,7 +351,7 @@ int8_t dps_master_refresh_value_var(DpsMaster_h* const restrict self,
     const uint8_t board_id, const uint8_t var_id)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self);
+  CHECK_INPUT(self,-1);
 #endif /* ifdef DEBUG */
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -359,7 +367,7 @@ int8_t dps_master_refresh_value_var_all(DpsMaster_h* const restrict self,
     const uint8_t board_id)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self);
+  CHECK_INPUT(self,-1);
 #endif /* ifdef DEBUG */
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -383,7 +391,7 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
     VarRecord *const restrict o_var)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self);
+  CHECK_INPUT(self,-1);
 #endif /* ifdef DEBUG */
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -413,8 +421,8 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
     const uint8_t value_size)
 {
 #ifdef DEBUG
-  CHECK_INPUT(value);
-  CHECK_INPUT(value_size);
+  // CHECK_INPUT(value,-1);
+  // CHECK_INPUT(value_size,-1);
 #endif /* ifdef DEBUG */
 
   union DpsMaster_h_t_conv conv = {self};
@@ -433,7 +441,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
     {
       o.can_0x28b_DpsMasterMex.var_value_board_id = board->id;
       o.can_0x28b_DpsMasterMex.var_value_var_id = var->var_id;
-      o.can_0x28b_DpsMasterMex.value = var->var_specification.value;
+      memcpy(&o.can_0x28b_DpsMasterMex.value, value, var->var_specification.size);
       mex.id = p_self->master_id;
       mex.dlc = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
       return p_self->send_f(&mex);
@@ -446,8 +454,8 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
     const struct DpsCanMessage* const restrict mex)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self);
-  CHECK_INPUT(mex);
+  CHECK_INPUT(self,-1);
+  CHECK_INPUT(mex,-1);
 #endif /* ifdef DEBUG */
 
   union DpsMaster_h_t_conv conv = {self};
@@ -475,6 +483,14 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
   }
 
   return EXIT_FAILURE;
+}
+
+int8_t dps_master_destroy(DpsMaster_h* const restrict self)
+{
+  union DpsMaster_h_t_conv conv = {self};
+  struct DpsMaster_t* const restrict p_self = conv.clear;
+  c_vector_free(p_self->board_vec);
+  return 0;
 }
 
 

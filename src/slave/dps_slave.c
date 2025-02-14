@@ -49,7 +49,7 @@ char __assert_size_dps_slave[(sizeof(struct DpsSlave_h) == sizeof(struct DpsSlav
 
 #endif /* ifdef DEBUG */
 
-static void dummy_fun(void* ele)
+static void dummy_fun(void* ele __attribute__((__unused__)))
 {
 }
 
@@ -207,7 +207,7 @@ static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
 
 // public
 int8_t
-dps_init(DpsSlave_h* const restrict self,
+dps_slave_init(DpsSlave_h* const restrict self,
         can_send send_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
@@ -392,6 +392,15 @@ dps_check_can_command_recv(DpsSlave_h* const restrict self,
   }
 
   return -1;
+}
+
+int8_t
+dps_slave_destroy(DpsSlave_h* const restrict self)
+{
+  union DpsSlave_h_t_conv conv = {self};
+  struct DpsSlave_t* const restrict p_self = conv.clear;
+  c_vector_free(p_self->vars);
+  return 0;
 }
 
 #ifdef DEBUG

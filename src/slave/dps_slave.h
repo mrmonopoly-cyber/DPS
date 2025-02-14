@@ -17,7 +17,7 @@ typedef struct DpsSlave_h{
 // INFO: create dps manager
 // send_f : function to send through CAN the data to the external controller
 int8_t
-dps_init(DpsSlave_h* const restrict self,
+dps_slave_init(DpsSlave_h* const restrict self,
         const can_send send_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
@@ -42,6 +42,9 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 int8_t
 dps_check_can_command_recv(DpsSlave_h* const restrict self,
         const struct DpsCanMessage* const mex);
+
+int8_t
+dps_slave_destroy(DpsSlave_h* const restrict self);
 
 
 #ifdef DEBUG

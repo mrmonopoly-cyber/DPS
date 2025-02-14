@@ -45,7 +45,8 @@ enum REQUEST_INFO
 // send_f : function needed to send a can message
 // return EXIT_SUCCESS if success
 // EXIT_FAILURE if errors happens
-int8_t dps_master_init(DpsMaster_h* const restrict self,
+int8_t
+dps_master_init(DpsMaster_h* const restrict self,
     const uint16_t master_id,
     const uint16_t slaves_id,
     const can_send send_f);
@@ -95,6 +96,8 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
 // EXIT_FAILURE otherwise
 int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
     const struct DpsCanMessage* const restrict mex);
+
+int8_t dps_master_destroy(DpsMaster_h* const restrict self);
 
 #ifdef DEBUG
 int8_t dps_master_print_boards(DpsMaster_h* const restrict self);

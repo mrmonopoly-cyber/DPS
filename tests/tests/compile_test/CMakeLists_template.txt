@@ -10,13 +10,19 @@ pkg_check_modules(GPIOD REQUIRED libgpiod)
 
 # Gather source files recursively
 file(GLOB_RECURSE PROJECT_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/*.c"
+    "${CMAKE_SOURCE_DIR}/linux_board/*.c"
+    "${CMAKE_SOURCE_DIR}/car_component/*.c"
     "${CMAKE_SOURCE_DIR}/score_lib/*.c"
     "${CMAKE_SOURCE_DIR}/main.c"
-    "${CMAKE_SOURCE_DIR}/src/*.c"
 )
 
 file(GLOB_RECURSE PROJECT_LIBS
-    "${CMAKE_SOURCE_DIR}/lib/c_vector/*c"
+    "${CMAKE_SOURCE_DIR}/lib/board_dbc/dbc/out_lib/*c"
+    "${CMAKE_SOURCE_DIR}/lib/DPS/dps_*.c"
+    "${CMAKE_SOURCE_DIR}/lib/DPS/lib/c_vector/c_vector.c"
+    "${CMAKE_SOURCE_DIR}/lib/rigen_fun_simulink22_ert_rtw/*.c"
+    "${CMAKE_SOURCE_DIR}/lib/TV/*.c"
 )
 
 # Add executable
