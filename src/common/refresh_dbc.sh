@@ -5,11 +5,14 @@ if [[ ! -e ./common.h ]]; then
   exit 1
 fi
 
+git pull --recurse-submodules=yes
+git submodule update --init --recursive --rebase --remote
+
 cd ../../lib/dbcc
 
+make clean
 make
 
 cd -
 
 ../../lib/dbcc/dbcc ../../dps_mesages.dbc
-
