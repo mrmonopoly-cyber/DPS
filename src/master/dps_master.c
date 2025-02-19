@@ -15,7 +15,7 @@
 
 struct DpsMaster_t{
   can_send send_f;
-  c_vector_h board_vec;
+  c_vector_h* board_vec;
   uint16_t master_id;
   uint16_t slages_id;
   uint8_t obj_ids:4;
@@ -34,7 +34,7 @@ union DpsMaster_h_t_conv_const{
 typedef struct {
   uint8_t id;
   char board_name[BOARD_NAME_LENGTH];
-  c_vector_h vars;
+  c_vector_h* vars;
 }BoardRecordInternal;
 
 typedef struct{

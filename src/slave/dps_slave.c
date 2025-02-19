@@ -11,7 +11,7 @@
 struct DpsSlave_t{
   char board_name[BOARD_NAME_LENGTH];
   can_send send_f;
-  c_vector_h vars;
+  c_vector_h* vars;
   int8_t board_id;
   uint8_t obj_ids;
   uint16_t master_id;
