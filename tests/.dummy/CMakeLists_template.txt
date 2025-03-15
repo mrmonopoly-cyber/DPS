@@ -36,7 +36,7 @@ target_include_directories(lib_sources PRIVATE
 )
 
 target_compile_options(lib_sources PRIVATE
-    $<$<CONFIG:Debug>:-O0 -fsanitize=address -g>
+    $<$<CONFIG:Debug>:-O0 -fsanitize=address,undefine -g>
     $<$<CONFIG:Release>:-O2>
 )
 
@@ -54,12 +54,12 @@ target_link_libraries(main PRIVATE lib_sources)
 
 # Set compile options based on build type
 target_compile_options(main PRIVATE
-    $<$<CONFIG:Debug>:-DDEBUG -Wall -Wextra -Werror -O0 -fsanitize=address -g>
+    $<$<CONFIG:Debug>:-DDEBUG -Wall -Wextra -Werror -O0 -fsanitize=address,undefine,undefine -g>
     $<$<CONFIG:Release>:-DDEBUG -Wall -Wextra -Werror -O2>
 )
 
 target_link_options(main PRIVATE
-    $<$<CONFIG:Debug>:-Wall -Wextra -Werror -O0 -fsanitize=address -g>
+    $<$<CONFIG:Debug>:-Wall -Wextra -Werror -O0 -fsanitize=address,undefine -g>
     $<$<CONFIG:Release>:-Wall -Wextra -Werror -O2>
 )
 
