@@ -9,7 +9,7 @@ extern "C" {
 #include <stdint.h>
 #include "../common/common.h"
 
-typedef struct DpsMaster_h{
+typedef struct __attribute__((aligned(8))){
     const uint8_t private_data[24];
 }DpsMaster_h;
 

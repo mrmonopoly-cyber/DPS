@@ -10,7 +10,7 @@ extern "C" {
 
 typedef int8_t (*post_update) (const char* const var_name, const void* const var);
 
-typedef struct DpsSlave_h{
+typedef struct __attribute__((aligned(8))){
     const uint8_t private_data[32];
 }DpsSlave_h;
 

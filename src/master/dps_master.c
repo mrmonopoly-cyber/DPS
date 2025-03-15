@@ -22,13 +22,13 @@ struct DpsMaster_t{
 };
 
 union DpsMaster_h_t_conv{
-  struct DpsMaster_h* const restrict hidden;
-  struct DpsMaster_t* const restrict clear;
+  DpsMaster_h* const hidden;
+  struct DpsMaster_t* const clear;
 };
 
 union DpsMaster_h_t_conv_const{
-  const struct DpsMaster_h* const restrict hidden;
-  const struct DpsMaster_t* const restrict clear;
+  const DpsMaster_h* const hidden;
+  const struct DpsMaster_t* const clear;
 };
 
 typedef struct {
@@ -41,6 +41,13 @@ typedef struct{
   VarRecord var_specification;
   uint8_t var_id:4;
 }VarRecordInternal;
+
+#ifdef DEBUG
+char __assert_size_dps_slave[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
+char __assert_align_dps_slave[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
+#endif /* ifdef DEBUG */
+
+//private
 
 static inline uint8_t new_id(struct DpsMaster_t* const restrict self)
 {

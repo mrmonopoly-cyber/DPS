@@ -31,22 +31,22 @@ struct VarInternal
 
 union DpsSlave_h_t_conv
 {
-  struct DpsSlave_h* hidden;
-  struct DpsSlave_t* clear;
+  DpsSlave_h* const hidden;
+  struct DpsSlave_t* const clear;
 };
 
 union DpsSlave_h_t_conv_const
 {
-  const struct DpsSlave_h* hidden;
-  const struct DpsSlave_t* clear;
+  const DpsSlave_h* const hidden;
+  const struct DpsSlave_t* const clear;
 };
 
 #define CHECK_INIT(self)if (!self->vars) return -1;
 #define CHECK_INPUT(input) if (!input) return EXIT_FAILURE;
 
 #ifdef DEBUG
-char __assert_size_dps_slave[(sizeof(struct DpsSlave_h) == sizeof(struct DpsSlave_t))?1:-1];
-
+char __assert_size_dps_slave[(sizeof(DpsSlave_h) == sizeof(struct DpsSlave_t))?1:-1];
+char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 static void dummy_fun(void* ele __attribute__((__unused__)))
@@ -99,7 +99,8 @@ static int8_t discover_board(const struct DpsSlave_t* const restrict self)
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
   memcpy(&o.can_0x28a_DpsSlaveMex.board_name, self->board_name, BOARD_NAME_LENGTH);
-  mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
+  mex.id = CAN_ID_DPSSLAVEMEX;
+  mex.dlc = pack_message(&o, mex.id, &mex.full_word);
 
   return self->send_f(&mex);
 }
