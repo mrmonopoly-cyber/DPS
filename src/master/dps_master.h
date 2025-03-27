@@ -23,7 +23,6 @@ typedef struct{
   uint32_t value;
   uint8_t size;
   enum DATA_GENERIC_TYPE type:2;
-  uint8_t updated : 1;
 }VarRecord;
 
 typedef struct{
