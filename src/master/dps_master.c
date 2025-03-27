@@ -43,8 +43,8 @@ typedef struct{
 }VarRecordInternal;
 
 #ifdef DEBUG
-char __assert_size_dps_slave[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
-char __assert_align_dps_slave[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
+char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
+char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 //private
