@@ -324,7 +324,7 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
 }
 
 // INFO: return a list of all the vars known by the master in a board
-VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
+const VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
 {
 #ifdef DEBUG
   CHECK_INPUT(self,NULL);

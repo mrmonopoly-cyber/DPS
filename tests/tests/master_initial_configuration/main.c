@@ -1,6 +1,5 @@
 #include "score_lib/test_lib.h"
 #include "src/master/dps_master.h"
-#include "src/slave/dps_slave.h"
 #include "can/can.h"
 
 #include <stdint.h>
@@ -46,6 +45,7 @@ int main(void)
   const uint16_t slaves_id = 0x129;
 
   CHECK_TEST(dps_master_init(&master, master_id, slaves_id, can_send_test), "master init");
+  CHECK_TEST(dps_master_init(&master, master_id, slaves_id, can_send_test) == -1, "master double init failed");
 
   CHECK_TEST(dps_master_list_board(&master), "master info board empty");
   CHECK_TEST(dps_master_list_vars(&master,0), "master info vars empty");
