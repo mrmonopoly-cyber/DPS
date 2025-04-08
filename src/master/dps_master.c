@@ -54,9 +54,9 @@ static inline uint8_t new_id(struct DpsMaster_t* const restrict self)
   return  self->obj_ids++;;
 }
 
-#define CHECK_INIT(self)                                                           \
+#define CHECK_INIT(self, err)                                                           \
   if (!self->send_f || !self->board_vec)                                 \
-    return EXIT_FAILURE;
+    return err;
 
 static int found_board(const void *list_ele, const void *key) {
   const BoardRecordInternal *board = list_ele;
@@ -246,8 +246,7 @@ dps_master_init(DpsMaster_h* const restrict self,
 }
 
 
-int8_t
-dps_master_new_connection(DpsMaster_h* const restrict self)
+int8_t dps_master_new_connection(DpsMaster_h* const restrict self)
 {
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -255,7 +254,7 @@ dps_master_new_connection(DpsMaster_h* const restrict self)
   struct DpsCanMessage mex;
 
 #ifdef DEBUG
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
 #endif
 
   o.can_0x28b_DpsMasterMex.Mode =0;
@@ -303,6 +302,11 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
 
   const uint8_t len = c_vector_length(p_self->board_vec);
 
+  if (!len)
+  {
+    return NULL;
+  }
+
   BoardListInfo *res = calloc(1, sizeof(BoardListInfo) + (sizeof(BoardInfo) * len));
   res->board_num = len;
 
@@ -320,24 +324,21 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
 }
 
 // INFO: return a list of all the vars known by the master in a board
-int8_t dps_master_list_vars(DpsMaster_h* const restrict self,
-    const uint8_t board_id,VarListInfo **o_list)
+VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
 {
 #ifdef DEBUG
-  CHECK_INPUT(self,-1);
-  CHECK_INPUT(o_list,-2);
+  CHECK_INPUT(self,NULL);
 #endif /* ifdef DEBUG */
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, NULL);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   VarListInfo *list = NULL;
   if (board)
   {
     uint8_t len = c_vector_length(board->vars);
-    *o_list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
-    list = *o_list;
+    list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
 
     for (uint8_t i = 0; i < len; i++) {
       VarRecordInternal *var = c_vector_get_at_index(board->vars, i);
@@ -345,12 +346,12 @@ int8_t dps_master_list_vars(DpsMaster_h* const restrict self,
         list->vars[i] = var->var_specification;
       }
     }
-    (*o_list)->var_num = len;
+    list->var_num = len;
 
     return 0;
   }
 
-  return -1;
+  return NULL;
 }
 
 // INFO: fetch the current value of a variable in a board in the system
@@ -362,7 +363,7 @@ int8_t dps_master_refresh_value_var(DpsMaster_h* const restrict self,
 #endif /* ifdef DEBUG */
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
 
   const BoardRecordInternal* board = c_vector_find(p_self->board_vec, &board_id);
   
@@ -378,7 +379,7 @@ int8_t dps_master_refresh_value_var_all(DpsMaster_h* const restrict self,
 #endif /* ifdef DEBUG */
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
 
   if (board) {
@@ -402,7 +403,7 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
 #endif /* ifdef DEBUG */
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
 
   const BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
 
@@ -438,7 +439,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
     .can_0x28b_DpsMasterMex.Mode = 3,
   };
   struct DpsCanMessage mex;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   if (board)
@@ -468,7 +469,7 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
   can_obj_dps_mesages_h_t o;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
 
   unpack_message(&o, CAN_ID_DPSSLAVEMEX, mex->dlc, mex->full_word,0);
 
@@ -507,7 +508,7 @@ dps_master_print_boards(DpsMaster_h* const restrict self)
 {
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
   
   for (uint8_t i = 0; i < c_vector_length(p_self->board_vec); i++) {
     BoardRecordInternal *board = c_vector_get_at_index(p_self->board_vec, i);
@@ -525,12 +526,11 @@ dps_master_print_boards(DpsMaster_h* const restrict self)
   return EXIT_SUCCESS;
 }
 
-int8_t
-dps_master_print_vars(DpsMaster_h* const restrict self)
+int8_t dps_master_print_vars(DpsMaster_h* const restrict self)
 {
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self);
+  CHECK_INIT(p_self, -1);
   for (uint8_t i = 0; i < c_vector_length(p_self->board_vec); i++) {
     BoardRecordInternal *board = c_vector_get_at_index(p_self->board_vec, i);
     if (board) {

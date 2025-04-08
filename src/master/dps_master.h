@@ -63,8 +63,7 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
 const BoardListInfo *dps_master_list_board(const DpsMaster_h* const restrict self);
 
 // INFO: return a list of all the vars known by the master in a board
-int8_t dps_master_list_vars(DpsMaster_h* const restrict self,
-    const uint8_t board_id,VarListInfo **o_list);
+VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id);
 
 // INFO: fetch the current value of a variable in a board in the system
 int8_t dps_master_refresh_value_var(DpsMaster_h* const restrict self,
