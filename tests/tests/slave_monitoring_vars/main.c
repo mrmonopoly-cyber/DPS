@@ -4,6 +4,7 @@
 #include "can/can.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/cdefs.h>
 #include <threads.h>
 #include <unistd.h>
@@ -29,7 +30,19 @@ int8_t can_send_test(const struct DpsCanMessage* const restrict self)
 
 int main(void)
 {
-  PASSED("compilation and basic init passed");
+  uint8_t u8_var = 0;
+  DpsSlave_h slave;
+  const uint16_t master_id = 16;
+  const uint16_t slaves_id = 16;
+
+  if(dps_slave_init(&slave,can_send_test, "board 1",1, master_id, slaves_id)<0)
+  {
+    FAILED("slave init failed");
+  }
+
+  printf("destroying slave\n");
+  dps_slave_destroy(&slave);
+
   print_SCORE();
   return 0;
 }
