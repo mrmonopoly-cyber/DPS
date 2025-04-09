@@ -67,13 +67,9 @@ int can_send_frame(int socket, struct can_frame *frame) {
 int can_recv_frame(int socket, struct can_frame *frame) {
   int nbytes;
 
-  do{
-    nbytes = read(socket, frame, sizeof(*frame));
-    if (nbytes < 0)
-    {
-      errno = EINTR;
-    }
-  }while (errno == EINTR);
+  fcntl(socket, F_SETFL, fcntl(socket, F_GETFL,0) | O_NONBLOCK);
+
+  nbytes = read(socket, frame, sizeof(*frame));
   return nbytes;
 }
 

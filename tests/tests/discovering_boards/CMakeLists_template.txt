@@ -10,9 +10,10 @@ pkg_check_modules(GPIOD REQUIRED libgpiod)
 
 # Gather source files recursively
 file(GLOB_RECURSE PROJECT_SOURCES
-    "${CMAKE_SOURCE_DIR}/test_utility/*c"
+    "${CMAKE_SOURCE_DIR}/score_lib/*.c"
     "${CMAKE_SOURCE_DIR}/main.c"
     "${CMAKE_SOURCE_DIR}/src/*.c"
+    "${CMAKE_SOURCE_DIR}/can/*.c"
 )
 
 file(GLOB_RECURSE PROJECT_LIBS

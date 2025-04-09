@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct{
+typedef struct __attribute__((aligned(4))){
   const uint8_t private_data[4];
 }DpsCanInterface_h;
 
@@ -24,5 +24,8 @@ dps_can_interface_send(DpsCanInterface_h* const restrict self,
 int8_t 
 dps_can_interface_read(DpsCanInterface_h* const restrict self,
     DpsCanInterfaceMex* const restrict o_mex);
+
+int8_t 
+dps_can_interface_shutdown(DpsCanInterface_h* const restrict self);
 
 #endif // !__DPS_CAN_INTERFACE__

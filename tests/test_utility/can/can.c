@@ -2,6 +2,8 @@
 #include "can_lib/canlib.h"
 #include <linux/can.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 struct DpsCanInterface_t{
   int can_fd;
@@ -14,6 +16,7 @@ union DpsCanInterface_h_t_conv{
 
 #ifdef DEBUG
 char __assert_size_dps_can[(sizeof(DpsCanInterface_h)==sizeof(struct DpsCanInterface_t))?1:-1];
+char __assert_align_dps_can[(_Alignof(DpsCanInterface_h)==_Alignof(struct DpsCanInterface_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 //public
@@ -57,13 +60,29 @@ dps_can_interface_read(DpsCanInterface_h* const restrict self,
   struct DpsCanInterface_t* const p_self = conv.clear;
   struct can_frame frame={0};
 
+  if (p_self->can_fd<0){
+    return -2;
+  }
 
-  can_recv_frame(p_self->can_fd, &frame);
 
-  memset(o_mex, 0, sizeof(*o_mex));
+  if(!can_recv_frame(p_self->can_fd, &frame))
+  {
+    return -1;
+  }
+
   o_mex->id = frame.can_id;
   o_mex->dlc = frame.can_dlc;
   memcpy(&o_mex->data, frame.data, sizeof(frame.data));
 
+  return 0;
+}
+
+int8_t dps_can_interface_shutdown(DpsCanInterface_h* const restrict self)
+{
+  union DpsCanInterface_h_t_conv conv = {self};
+  struct DpsCanInterface_t* const p_self = conv.clear;
+
+  shutdown(p_self->can_fd, SHUT_RDWR);
+  p_self->can_fd=-1;
   return 0;
 }
