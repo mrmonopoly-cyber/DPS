@@ -51,6 +51,7 @@ char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_
 
 static void dummy_fun(void* ele __attribute__((__unused__)))
 {
+  printf("dummy free\n");
 }
 
 static int cmp_fun_var(const void* ele_list, const void* key)
@@ -92,7 +93,7 @@ static inline uint8_t new_id(struct DpsSlave_t* const restrict self)
 
 static int8_t discover_board(const struct DpsSlave_t* const restrict self)
 {
- struct DpsCanMessage mex;
+ DpsCanMessage mex;
  can_obj_dps_mesages_h_t o = 
   {
     .can_0x28a_DpsSlaveMex.Mode = 0,
@@ -113,7 +114,7 @@ static int8_t request_infos(struct DpsSlave_t* const restrict self,
     .can_0x28a_DpsSlaveMex.Mode = 1,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
-  struct DpsCanMessage mex;
+  DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
 
   if (req_mex->var_name_board_id!= self->board_id)
@@ -145,7 +146,7 @@ static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
     .can_0x28a_DpsSlaveMex.Mode = 2,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
-  struct DpsCanMessage mex;
+  DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
   if (req_value_mex->var_value_board_id!= self->board_id)
   {
@@ -182,7 +183,7 @@ static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
 static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict update_value_mex)
 {
-  struct DpsCanMessage mex;
+  DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
   if (update_value_mex->var_value_board_id != self->board_id)
   {
@@ -357,8 +358,8 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
 int8_t
-dps_check_can_command_recv(DpsSlave_h* const restrict self,
-        const struct DpsCanMessage* const mex)
+dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
+        const DpsCanMessage* const mex)
 {
   union DpsSlave_h_t_conv conv = {self};
   struct DpsSlave_t* const restrict p_self = conv.clear;
@@ -395,8 +396,7 @@ dps_check_can_command_recv(DpsSlave_h* const restrict self,
   return -1;
 }
 
-int8_t
-dps_slave_destroy(DpsSlave_h* const restrict self)
+int8_t dps_slave_destroy(DpsSlave_h* const restrict self)
 {
   union DpsSlave_h_t_conv conv = {self};
   struct DpsSlave_t* const restrict p_self = conv.clear;

@@ -88,7 +88,7 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
   can_obj_dps_mesages_h_t o = {
     .can_0x28b_DpsMasterMex.Mode = 2,
   };
-  struct DpsCanMessage mex;
+  DpsCanMessage mex={0};
   if (board)
   {
     const VarRecordInternal *var = c_vector_find(board->vars, &var_id);
@@ -250,8 +250,8 @@ int8_t dps_master_new_connection(DpsMaster_h* const restrict self)
 {
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
-  can_obj_dps_mesages_h_t o;
-  struct DpsCanMessage mex;
+  can_obj_dps_mesages_h_t o={0};
+  DpsCanMessage mex={0};
 
 #ifdef DEBUG
   CHECK_INIT(p_self, -1);
@@ -274,7 +274,7 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
   {
     .can_0x28b_DpsMasterMex.Mode =1,
   };
-  struct DpsCanMessage mex;
+  DpsCanMessage mex;
 
   if (data & REQ_VAR) {
     BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
@@ -324,7 +324,8 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
 }
 
 // INFO: return a list of all the vars known by the master in a board
-const VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
+const VarListInfo*
+dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
 {
 #ifdef DEBUG
   CHECK_INPUT(self,NULL);
@@ -438,7 +439,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
   can_obj_dps_mesages_h_t o = {
     .can_0x28b_DpsMasterMex.Mode = 3,
   };
-  struct DpsCanMessage mex;
+  DpsCanMessage mex={0};
   CHECK_INIT(p_self, -1);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
@@ -459,7 +460,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
 }
 
 int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
-    const struct DpsCanMessage* const restrict mex)
+    const DpsCanMessage* const restrict mex)
 {
 #ifdef DEBUG
   CHECK_INPUT(self,-1);

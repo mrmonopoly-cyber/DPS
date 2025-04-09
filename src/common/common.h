@@ -38,12 +38,12 @@ struct ObjId
   uint8_t mex_type:4;
 };
 
-struct DpsCanMessage{
+typedef struct{
   uint16_t id;
   uint8_t dlc;
   uint64_t full_word;
-};
+}DpsCanMessage;
 
-typedef int8_t (*can_send) (const struct DpsCanMessage* const restrict);
+typedef int8_t (*can_send) (const DpsCanMessage* const restrict);
  
 #endif // !__DPS_MESSAGES__

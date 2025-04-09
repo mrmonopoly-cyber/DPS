@@ -40,8 +40,8 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
 int8_t
-dps_check_can_command_recv(DpsSlave_h* const restrict self,
-        const struct DpsCanMessage* const mex);
+dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
+        const DpsCanMessage* const mex);
 
 int8_t
 dps_slave_destroy(DpsSlave_h* const restrict self);
