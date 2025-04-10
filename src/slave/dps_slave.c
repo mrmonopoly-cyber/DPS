@@ -100,8 +100,8 @@ static int8_t discover_board(const struct DpsSlave_t* const restrict self)
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
   memcpy(&o.can_0x28a_DpsSlaveMex.board_name, self->board_name, BOARD_NAME_LENGTH);
-  mex.id = CAN_ID_DPSSLAVEMEX;
-  mex.dlc = pack_message(&o, mex.id, &mex.full_word);
+  mex.id = self->slave_id;
+  mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
 
   return self->send_f(&mex);
 }
@@ -130,6 +130,7 @@ static int8_t request_infos(struct DpsSlave_t* const restrict self,
       o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
+      mex.id = self->slave_id;
       self->send_f(&mex);
     }
   }
@@ -173,6 +174,7 @@ static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
       o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
       o.can_0x28a_DpsSlaveMex.type = var->type;
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
+      mex.id = self->slave_id;
       self->send_f(&mex);
     }
   }
@@ -376,7 +378,10 @@ dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
   }
   if (mex->id == p_self->master_id)
   {
-    unpack_message(&o, mex->id, CAN_ID_DPSMASTERMEX, mex->dlc, 0);
+    if(unpack_message(&o, CAN_ID_DPSMASTERMEX, mex->full_word, mex->dlc, 0)<0)
+    {
+      return -1;
+    }
     switch (o.can_0x28b_DpsMasterMex.Mode)
     {
       case 0: //discover board
@@ -423,8 +428,7 @@ dps_get_id(const DpsSlave_h* const restrict self)
   return p_self->board_id;
 }
 
-int
-dps_print_var(const DpsSlave_h* const restrict self)
+int dps_print_var(const DpsSlave_h* const restrict self)
 {
   union DpsSlave_h_t_conv_const conv = {self};
   const struct DpsSlave_t* const restrict p_self = conv.clear;

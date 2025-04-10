@@ -21,8 +21,7 @@ char __assert_align_dps_can[(_Alignof(DpsCanInterface_h)==_Alignof(struct DpsCan
 
 //public
 
-int8_t
-dps_can_interface_init(DpsCanInterface_h* const restrict self,
+int8_t dps_can_interface_init(DpsCanInterface_h* const restrict self,
     const char* can_interface)
 {
   union DpsCanInterface_h_t_conv conv = {self};
@@ -52,8 +51,7 @@ dps_can_interface_send(DpsCanInterface_h* const restrict self,
   return can_send_frame(p_self->can_fd, &frame);
 }
 
-int8_t 
-dps_can_interface_read(DpsCanInterface_h* const restrict self,
+int8_t dps_can_interface_read(DpsCanInterface_h* const restrict self,
     DpsCanInterfaceMex* const restrict o_mex)
 {
   union DpsCanInterface_h_t_conv conv = {self};
@@ -65,7 +63,7 @@ dps_can_interface_read(DpsCanInterface_h* const restrict self,
   }
 
 
-  if(!can_recv_frame(p_self->can_fd, &frame))
+  if(can_recv_frame(p_self->can_fd, &frame)<=0)
   {
     return -1;
   }
@@ -74,7 +72,7 @@ dps_can_interface_read(DpsCanInterface_h* const restrict self,
   o_mex->dlc = frame.can_dlc;
   memcpy(&o_mex->data, frame.data, sizeof(frame.data));
 
-  return 0;
+  return o_mex->id;
 }
 
 int8_t dps_can_interface_shutdown(DpsCanInterface_h* const restrict self)

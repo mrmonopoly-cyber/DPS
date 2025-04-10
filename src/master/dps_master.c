@@ -17,7 +17,7 @@ struct DpsMaster_t{
   can_send send_f;
   c_vector_h* board_vec;
   uint16_t master_id;
-  uint16_t slages_id;
+  uint16_t slaves_id;
   uint8_t obj_ids:4;
 };
 
@@ -105,8 +105,7 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
   return -1;
 }
 
-static int8_t
-_get_board_name(struct DpsMaster_t* const restrict self,
+static int8_t _get_board_name(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_master)
 {
   struct c_vector_input_init args =
@@ -119,7 +118,7 @@ _get_board_name(struct DpsMaster_t* const restrict self,
   };
   BoardRecordInternal new_board =
   {
-    .id = new_id(self),
+    .id = mex_master->board_id,
     .vars = c_vector_init(&args),
   };
   memcpy(new_board.board_name, &mex_master->board_name, BOARD_NAME_LENGTH);
@@ -226,7 +225,7 @@ dps_master_init(DpsMaster_h* const restrict self,
 
   p_self->send_f = send_f;
   p_self->master_id = master_id;
-  p_self->slages_id = slaves_id;
+  p_self->slaves_id = slaves_id;
 
   struct c_vector_input_init args = {
     .capacity = 10,
@@ -469,13 +468,15 @@ int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
 
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
-  can_obj_dps_mesages_h_t o;
+  can_obj_dps_mesages_h_t o={0};
   CHECK_INIT(p_self, -1);
 
-  unpack_message(&o, CAN_ID_DPSSLAVEMEX, mex->dlc, mex->full_word,0);
-
-  if (mex->id == p_self->slages_id)
+  if (mex->id == p_self->slaves_id)
   {
+    if(unpack_message(&o, CAN_ID_DPSSLAVEMEX, mex->full_word, mex->dlc, 0)<0)
+    {
+      return -1;
+    }
     switch (o.can_0x28a_DpsSlaveMex.Mode)
     {
       case 0:

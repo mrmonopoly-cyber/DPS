@@ -28,6 +28,13 @@ typedef struct {
   thrd_t thread;
   uint8_t running:1;
   DpsCanInterface_h m_can_interface;
+}BoardMaster_t;
+
+typedef struct {
+  DpsMaster_h m_dps_master;
+  thrd_t thread;
+  uint8_t running:1;
+  DpsCanInterface_h m_can_interface;
 }MasterBoard_t;
 
 #define NEW_BOARD(vars)\
@@ -36,8 +43,13 @@ typedef struct {
     vars\
   }
 
+int8_t start_board_full(Board_t* const board, const char* const can_interface);
 int8_t start_board(Board_t* const board);
 int8_t stop_board(Board_t* const board);
+
+int8_t start_master_board_full(MasterBoard_t* const board, const char* const can_interface);
+int8_t start_master_board(MasterBoard_t* const board);
+int8_t stop_master_board(MasterBoard_t* const board);
 
 #endif // !_DPS_TEST_UTILITY_
 
