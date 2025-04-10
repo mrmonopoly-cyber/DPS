@@ -290,8 +290,7 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
   return 0;
 }
 
-const BoardListInfo*
-dps_master_list_board(const DpsMaster_h* const restrict self)
+BoardListInfo* dps_master_list_board(const DpsMaster_h* const restrict self)
 {
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
@@ -323,8 +322,7 @@ dps_master_list_board(const DpsMaster_h* const restrict self)
 }
 
 // INFO: return a list of all the vars known by the master in a board
-const VarListInfo*
-dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
+VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id)
 {
 #ifdef DEBUG
   CHECK_INPUT(self,NULL);
@@ -505,8 +503,7 @@ int8_t dps_master_destroy(DpsMaster_h* const restrict self)
 
 
 #ifdef DEBUG
-int8_t
-dps_master_print_boards(DpsMaster_h* const restrict self)
+int8_t dps_master_print_boards(DpsMaster_h* const restrict self)
 {
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;

@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/cdefs.h>
 #include <threads.h>
@@ -16,11 +17,17 @@ int main(void)
   NEW_BOARD()board2 ={0};
   NEW_BOARD()board3 ={0};
   MasterBoard_t master = {0};
+  MasterBoard_t master_unsed = {0};
 
   const uint16_t slaves_id = 0x128;
-  const uint16_t master_id = 0x129;
+  const uint16_t master_id = 0x149;
 
   if (dps_master_init(&master.m_dps_master, master_id, slaves_id, can_send_test)<0) 
+  {
+    FAILED("init dps master failed");
+  }
+
+  if (dps_master_init(&master_unsed.m_dps_master, master_id+1, slaves_id+1, can_send_test)<0) 
   {
     FAILED("init dps master failed");
   }
@@ -60,9 +67,15 @@ int main(void)
     FAILED("failed start master board");
   }
 
+  if (start_master_board(&master_unsed)<0)
+  {
+    FAILED("failed start master board unused");
+  }
+
   TEST_EXPR(dps_master_new_connection(&master.m_dps_master)<0,"master new connection request sent");
+  TEST_EXPR(dps_master_new_connection(&master_unsed.m_dps_master)<0,"master unused new connection request sent");
   sleep(1);
-  const BoardListInfo* boards =  dps_master_list_board(&master.m_dps_master);
+  BoardListInfo* boards =  dps_master_list_board(&master.m_dps_master);
   if (boards)
   {
     printf("boards: %d\n",boards->board_num);
@@ -90,12 +103,28 @@ int main(void)
     BOARD_SEARCH(3,"board3");
   }
 
+  free(boards);
+
+  boards = dps_master_list_board(&master_unsed.m_dps_master);
+  TEST_EXPR(boards, "unused master list board");
+  if (boards)
+  {
+    printf("boards master unused len: %d\n",boards->board_num);
+    for (uint8_t i=0; i<boards->board_num; i++)
+    {
+      printf("board: %i, id: %d, name: %s\n",i,boards->boards[i].id,boards->boards[i].name);
+    }
+    free(boards);
+    boards=NULL;
+  }
+
 
   printf("cleaning\n");
   stop_board(&board1.core);
   stop_board(&board2.core);
   stop_board(&board3.core);
   stop_master_board(&master);
+  stop_master_board(&master_unsed);
 
   print_SCORE();
   return 0;

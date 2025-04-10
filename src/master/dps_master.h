@@ -62,11 +62,11 @@ dps_master_request_info_board(DpsMaster_h* const restrict self,
     const uint8_t board_id, const uint8_t data);
 
 // INFO: return a list of all the board known by the master with theirs id
-const BoardListInfo*
+BoardListInfo*
 dps_master_list_board(const DpsMaster_h* const restrict self);
 
 // INFO: return a list of all the vars known by the master in a board
-const VarListInfo*
+VarListInfo*
 dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_t board_id);
 
 // INFO: fetch the current value of a variable in a board in the system
