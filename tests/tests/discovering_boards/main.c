@@ -148,9 +148,9 @@ int main(void)
     {
       PASSED("excluded board not added");
     }
+    free(boards);
   }
 
-  free(boards);
 
   boards = dps_master_list_board(&master_unsed.m_dps_master);
   TEST_EXPR(boards, "unused master list board");
