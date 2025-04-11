@@ -11,7 +11,7 @@ extern "C" {
 typedef int8_t (*post_update) (const char* const var_name, const void* const var);
 
 typedef struct __attribute__((aligned(8))){
-    const uint8_t private_data[32];
+    const uint8_t private_data[800];
 }DpsSlave_h;
 
 // INFO: create dps manager
@@ -43,7 +43,7 @@ int8_t
 dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
         const DpsCanMessage* const mex);
 
-int8_t
+void
 dps_slave_destroy(DpsSlave_h* const restrict self);
 
 

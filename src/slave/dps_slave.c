@@ -1,4 +1,3 @@
-#include "../../lib/c_vector/c_vector.h"
 #include "dps_slave.h"
 
 #include <stdint.h>
@@ -7,17 +6,6 @@
 #include <string.h>
 
 // private
-
-struct DpsSlave_t{
-  char board_name[BOARD_NAME_LENGTH];
-  can_send send_f;
-  c_vector_h* vars;
-  int8_t board_id;
-  uint8_t obj_ids;
-  uint16_t master_id;
-  uint16_t slave_id;
-  uint8_t enable : 1;
-};
 
 struct VarInternal
 {
@@ -28,6 +16,20 @@ struct VarInternal
   uint8_t var_id : DATA_ID_SIZE_BIT;
   enum DATA_GENERIC_TYPE type: 2;
 };
+
+struct DpsSlave_t{
+  char board_name[BOARD_NAME_LENGTH];
+  can_send send_f;
+  struct VarInternal vars[2 << 4];
+  uint8_t vars_len;
+  uint32_t var_bit_map;
+  int8_t board_id;
+  uint8_t obj_ids;
+  uint16_t master_id;
+  uint16_t slave_id;
+  uint8_t enable : 1;
+};
+
 
 union DpsSlave_h_t_conv
 {
@@ -42,25 +44,12 @@ union DpsSlave_h_t_conv_const
 };
 
 #define CHECK_INIT(self)if (!self->vars) return -1;
-#define CHECK_INPUT(input) if (!input) return EXIT_FAILURE;
+#define CHECK_INPUT(input) if (!input) return -1;
 
 #ifdef DEBUG
 char __assert_size_dps_slave[(sizeof(DpsSlave_h) == sizeof(struct DpsSlave_t))?1:-1];
 char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_t))?1:-1];
 #endif /* ifdef DEBUG */
-
-static void dummy_fun(void* ele __attribute__((__unused__)))
-{
-  printf("dummy free\n");
-}
-
-static int cmp_fun_var(const void* ele_list, const void* key)
-{
-  const struct VarInternal* l_var = ele_list;
-  const struct VarInternal* k_var = key;
-  
-  return !(l_var->var_id == k_var->var_id);
-}
 
 static void print_var(const void *ele)
 {
@@ -89,6 +78,23 @@ static void print_var(const void *ele)
 static inline uint8_t _new_id(struct DpsSlave_t* const restrict self)
 {
   return self->obj_ids++;
+}
+
+static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
+    const struct VarInternal* new_var)
+{
+  uint32_t bit_map = self->var_bit_map;
+  uint32_t cursor = 0;
+  while (bit_map & (1 >> cursor))
+  {
+    cursor = cursor >> 1;
+  }
+
+  if (cursor < sizeof(bit_map))
+  {
+    self->vars[cursor] = *new_var;
+  }
+  return cursor;
 }
 
 static int8_t _discover_board(const struct DpsSlave_t* const restrict self)
@@ -124,9 +130,9 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
   }
 
   printf("processing req: %s\n",self->board_name);
-  for (uint8_t i=0; i<c_vector_length(self->vars); i++)
+  for (uint8_t i=0; i<self->vars_len; i++)
   {
-    struct VarInternal* var = c_vector_get_at_index(self->vars,i);
+    struct VarInternal* var = &self->vars[i];
     if (var)
     {
       o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
@@ -157,9 +163,9 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
     return -1;
   }
 
-  for (uint8_t i=0; i<c_vector_length(self->vars); i++)
+  for (uint8_t i=0; i<self->vars_len; i++)
   {
-    struct VarInternal* var = c_vector_get_at_index(self->vars,i);
+    const struct VarInternal* var = &self->vars[i];
     if (var)
     {
       switch (var->size)
@@ -195,9 +201,9 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
     return -1;
   }
 
-  for (uint8_t i=0; i<c_vector_length(self->vars); i++)
+  for (uint8_t i=0; i<self->vars_len; i++)
   {
-    struct VarInternal* var = c_vector_get_at_index(self->vars,i);
+    const struct VarInternal* var = &self->vars[i];
     if (var && var->var_id == update_value_mex->var_value_var_id)
     {
       memcpy(var->p_var, &update_value_mex->value, var->size);
@@ -224,9 +230,9 @@ int8_t dps_slave_init(DpsSlave_h* const restrict self,
   struct DpsSlave_t* const restrict p_self = conv.clear;
 #ifdef DEBUG
   CHECK_INPUT(self);
-  if (p_self->vars || p_self->send_f || p_self->enable)
+  if (p_self->send_f || p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 #endif /* ifdef DEBUG */
 
@@ -235,28 +241,16 @@ int8_t dps_slave_init(DpsSlave_h* const restrict self,
     return -1;
   }
 
+  memset(self, 0, sizeof(*self));
+
   memcpy(p_self->board_name, board_name, BOARD_NAME_LENGTH);
   p_self->send_f = send_f;
   p_self->board_id = dps_board_id;
   p_self->slave_id= dps_can_id_slaves;
   p_self->master_id = dps_can_id_master;
-  struct c_vector_input_init vars =
-  {
-    .capacity = 2,
-    .ele_size = sizeof(struct VarInternal),
-    .free_fun = dummy_fun,
-    .print_fun = print_var,
-    .comp_fun = cmp_fun_var,
-  };
-
-  p_self->vars = c_vector_init(&vars);
-  if (!p_self->vars)
-  {
-    return EXIT_FAILURE;
-  }
-
   p_self->enable = 0;
-  return EXIT_SUCCESS;
+
+  return 0;
 }
 
 int8_t dps_slave_start(DpsSlave_h* const restrict self)
@@ -265,12 +259,12 @@ int8_t dps_slave_start(DpsSlave_h* const restrict self)
   struct DpsSlave_t* const restrict p_self = conv.clear;
   if (p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 
   p_self->enable= 1;
 
-  return EXIT_SUCCESS;
+  return 0;
 }
 
 int8_t dps_slave_disable(DpsSlave_h* const restrict self)
@@ -284,12 +278,12 @@ int8_t dps_slave_disable(DpsSlave_h* const restrict self)
 #endif /* ifdef DEBUG */
   if (!p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 
   p_self->enable = 0;
 
-  return EXIT_SUCCESS;
+  return 0;
 }
 
 int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
@@ -309,7 +303,7 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 #endif /* ifdef DEBUG */
   if (!p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 
 
@@ -354,12 +348,7 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
   }
 
 
-  if (!c_vector_push(&p_self->vars, &new_var))
-  {
-    return -1;
-  }
-
-  return 0;
+  return _push_new_var(p_self, &new_var);
 }
 
 // INFO: check if a can message is for the dps and if it's the case it executes
@@ -378,7 +367,7 @@ int8_t dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
 
   if (!p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
   if (mex->id == p_self->master_id)
   {
@@ -405,12 +394,9 @@ int8_t dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
   return -1;
 }
 
-int8_t dps_slave_destroy(DpsSlave_h* const restrict self)
+void dps_slave_destroy(DpsSlave_h* const restrict self)
 {
-  union DpsSlave_h_t_conv conv = {self};
-  struct DpsSlave_t* const restrict p_self = conv.clear;
-  c_vector_free(p_self->vars);
-  return 0;
+  memset(self, 0, sizeof(*self));
 }
 
 #ifdef DEBUG
@@ -425,7 +411,7 @@ int dps_get_id(const DpsSlave_h* const restrict self)
 
   if (!p_self->enable)
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 
   return p_self->board_id;
@@ -441,16 +427,16 @@ int dps_print_var(const DpsSlave_h* const restrict self)
 #endif /* ifdef DEBUG */
 
   if (p_self->enable) {
-    return EXIT_FAILURE;
+    return -1;
   }
 
-  struct VarInternal *var = NULL;
-  uint8_t len = c_vector_length(p_self->vars);
+  const struct VarInternal *var = NULL;
+  uint8_t len = p_self->vars_len;
   for (uint8_t i = 0; i < len; i++) {
-    var = c_vector_get_at_index(p_self->vars, i);
+    var = &p_self->vars[i];
     print_var(var);
   }
-  return EXIT_SUCCESS;
+  return 0;
 }
 #else
 int dps_get_id(const DpsSlave_h* const restrict self){while (1);}

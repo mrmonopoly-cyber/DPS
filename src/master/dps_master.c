@@ -278,7 +278,7 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
     BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
     if (board) {
       c_vector_clear(board->vars);
-      o.can_0x28b_DpsMasterMex.var_metadata_board_id= board_id;
+      o.can_0x28b_DpsMasterMex.var_name_board_id= board_id;
 
       mex.id = p_self->master_id;
       mex.dlc = pack_message(&o, CAN_ID_DPSMASTERMEX, &mex.full_word);

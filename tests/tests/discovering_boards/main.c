@@ -51,12 +51,12 @@ int main(void)
 
   if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, "excb_0", 0, 1, 2)<0)
   {
-    FAILED("init dps board1");
+    FAILED("init dps excb_0");
   }
 
-  if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, "excb_1", 1, 1, 2)<0)
+  if(dps_slave_init(&board_excluded_2.core.m_dps_slave, can_send_test, "excb_2", 1, 4, 2)<0)
   {
-    FAILED("init dps board1");
+    FAILED("init dps excb_2");
   }
 
   
@@ -67,12 +67,12 @@ int main(void)
 
   if(start_board(&board2.core)<0)
   {
-    FAILED("failed start board1");
+    FAILED("failed start board2");
   }
 
   if(start_board(&board3.core)<0)
   {
-    FAILED("failed start board1");
+    FAILED("failed start board3");
   }
 
   if(start_board(&board_excluded_1.core)<0)
@@ -82,7 +82,7 @@ int main(void)
 
   if(start_board(&board_excluded_2.core)<0)
   {
-    FAILED("failed start board1");
+    FAILED("failed start board2");
   }
 
 
