@@ -16,6 +16,8 @@ int main(void)
   NEW_BOARD()board1 ={0};
   NEW_BOARD()board2 ={0};
   NEW_BOARD()board3 ={0};
+  NEW_BOARD()board_excluded_1 ={0};
+  NEW_BOARD()board_excluded_2 ={0};
   MasterBoard_t master = {0};
   MasterBoard_t master_unsed = {0};
 
@@ -46,6 +48,17 @@ int main(void)
   {
     FAILED("init dps board3");
   }
+
+  if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, "excb_0", 0, 1, 2)<0)
+  {
+    FAILED("init dps board1");
+  }
+
+  if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, "excb_1", 1, 1, 2)<0)
+  {
+    FAILED("init dps board1");
+  }
+
   
   if(start_board(&board1.core)<0)
   {
@@ -61,6 +74,17 @@ int main(void)
   {
     FAILED("failed start board1");
   }
+
+  if(start_board(&board_excluded_1.core)<0)
+  {
+    FAILED("failed start board1");
+  }
+
+  if(start_board(&board_excluded_2.core)<0)
+  {
+    FAILED("failed start board1");
+  }
+
 
   if (start_master_board(&master)<0)
   {
@@ -101,6 +125,29 @@ int main(void)
     BOARD_SEARCH(1,"board1");
     BOARD_SEARCH(2,"board2");
     BOARD_SEARCH(3,"board3");
+    uint8_t found =0;
+    for (uint8_t i=0; i<boards->board_num; i++)
+    {
+      if (boards->boards[i].id == 0 && !strcmp(boards->boards[i].name, "excb0"))
+      {
+        found|=1;
+      }
+
+      if (boards->boards[i].id == 1 && !strcmp(boards->boards[i].name, "excb2"))
+      {
+        found|=2;
+      }
+    }
+    if (found & 1) {
+      FAILED("excluded board excb1 added");
+    }
+    if( found & 2){
+      FAILED("excluded board excb2 added");
+    }
+    if (!found)
+    {
+      PASSED("excluded board not added");
+    }
   }
 
   free(boards);
@@ -123,6 +170,8 @@ int main(void)
   stop_board(&board1.core);
   stop_board(&board2.core);
   stop_board(&board3.core);
+  stop_board(&board_excluded_1.core);
+  stop_board(&board_excluded_2.core);
   stop_master_board(&master);
   stop_master_board(&master_unsed);
 

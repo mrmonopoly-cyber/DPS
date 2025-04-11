@@ -122,8 +122,6 @@ int8_t stop_master_board(MasterBoard_t* const board)
   printf("stopping board: %ld\n",board->thread);
   board->running=0;
   thrd_join(board->thread,NULL);
-  printf("dps master destroying\n");
   dps_master_destroy(&board->m_dps_master);
-  printf("dps master destroying done\n");
   return 0;
 }
