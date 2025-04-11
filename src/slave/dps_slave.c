@@ -86,12 +86,12 @@ static void print_var(const void *ele)
   }
 }
 
-static inline uint8_t new_id(struct DpsSlave_t* const restrict self)
+static inline uint8_t _new_id(struct DpsSlave_t* const restrict self)
 {
   return self->obj_ids++;
 }
 
-static int8_t discover_board(const struct DpsSlave_t* const restrict self)
+static int8_t _discover_board(const struct DpsSlave_t* const restrict self)
 {
  DpsCanMessage mex;
  can_obj_dps_mesages_h_t o = 
@@ -106,7 +106,7 @@ static int8_t discover_board(const struct DpsSlave_t* const restrict self)
   return self->send_f(&mex);
 }
 
-static int8_t request_infos(struct DpsSlave_t* const restrict self,
+static int8_t _request_infos(struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict req_mex)
 {
   can_obj_dps_mesages_h_t o = 
@@ -117,11 +117,13 @@ static int8_t request_infos(struct DpsSlave_t* const restrict self,
   DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
 
+  printf("req processing req: mex board id: %d, real board: id: %d\n",req_mex->var_name_board_id,self->board_id);
   if (req_mex->var_name_board_id!= self->board_id)
   {
     return -1;
   }
 
+  printf("processing req: %s\n",self->board_name);
   for (uint8_t i=0; i<c_vector_length(self->vars); i++)
   {
     struct VarInternal* var = c_vector_get_at_index(self->vars,i);
@@ -129,6 +131,7 @@ static int8_t request_infos(struct DpsSlave_t* const restrict self,
     {
       o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
+      printf("sending info var: %s\n",var->var_name);
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
       self->send_f(&mex);
@@ -139,7 +142,7 @@ static int8_t request_infos(struct DpsSlave_t* const restrict self,
 }
 
 
-static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
+static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict req_value_mex)
 {
   can_obj_dps_mesages_h_t o = 
@@ -182,7 +185,7 @@ static int8_t request_var_value(const struct DpsSlave_t* const restrict self,
   return 0;
 }
 
-static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
+static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict update_value_mex)
 {
   DpsCanMessage mex;
@@ -210,8 +213,7 @@ static int8_t update_var_value(const struct DpsSlave_t* const restrict self,
 }
 
 // public
-int8_t
-dps_slave_init(DpsSlave_h* const restrict self,
+int8_t dps_slave_init(DpsSlave_h* const restrict self,
         can_send send_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
@@ -227,6 +229,11 @@ dps_slave_init(DpsSlave_h* const restrict self,
     return EXIT_FAILURE;
   }
 #endif /* ifdef DEBUG */
+
+  if (dps_can_id_slaves == dps_can_id_master)
+  {
+    return -1;
+  }
 
   memcpy(p_self->board_name, board_name, BOARD_NAME_LENGTH);
   p_self->send_f = send_f;
@@ -266,8 +273,7 @@ int8_t dps_slave_start(DpsSlave_h* const restrict self)
   return EXIT_SUCCESS;
 }
 
-int8_t
-dps_slave_disable(DpsSlave_h* const restrict self)
+int8_t dps_slave_disable(DpsSlave_h* const restrict self)
 {
   union DpsSlave_h_t_conv conv = {self};
   struct DpsSlave_t* const restrict p_self = conv.clear;
@@ -286,8 +292,7 @@ dps_slave_disable(DpsSlave_h* const restrict self)
   return EXIT_SUCCESS;
 }
 
-int8_t
-dps_monitor_primitive_var(DpsSlave_h* const restrict self,
+int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
         const enum DPS_PRIMITIVE_TYPES type,
         void* const p_data,
         post_update post_update_f,
@@ -309,10 +314,11 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 
 
   struct VarInternal new_var = {
-      .var_id = new_id(p_self),
+      .var_id = _new_id(p_self),
       .p_var = p_data,
       .post_update_fun = post_update_f,
   };
+  memcpy(new_var.var_name, name, VAR_NAME_LENGTH);
   switch (type)
   {
     case DPS_TYPES_UINT8_T:
@@ -347,20 +353,18 @@ dps_monitor_primitive_var(DpsSlave_h* const restrict self,
       return -1;
   }
 
-  memcpy(new_var.var_name, name, VAR_NAME_LENGTH);
 
   if (!c_vector_push(&p_self->vars, &new_var))
   {
-    return EXIT_FAILURE;
+    return -1;
   }
 
-  return EXIT_SUCCESS;
+  return 0;
 }
 
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
-int8_t
-dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
+int8_t dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
         const DpsCanMessage* const mex)
 {
   union DpsSlave_h_t_conv conv = {self};
@@ -385,13 +389,13 @@ dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
     switch (o.can_0x28b_DpsMasterMex.Mode)
     {
       case 0: //discover board
-        return discover_board(p_self);
+        return _discover_board(p_self);
       case 1: //request infos
-        return request_infos(p_self, &o.can_0x28b_DpsMasterMex);
+        return _request_infos(p_self, &o.can_0x28b_DpsMasterMex);
       case 2: //request var value
-        return request_var_value(p_self, &o.can_0x28b_DpsMasterMex);
+        return _request_var_value(p_self, &o.can_0x28b_DpsMasterMex);
       case 3: //update var value
-        return update_var_value(p_self, &o.can_0x28b_DpsMasterMex);
+        return _update_var_value(p_self, &o.can_0x28b_DpsMasterMex);
       default:
         return -2;
       break;
@@ -410,8 +414,7 @@ int8_t dps_slave_destroy(DpsSlave_h* const restrict self)
 }
 
 #ifdef DEBUG
-int
-dps_get_id(const DpsSlave_h* const restrict self)
+int dps_get_id(const DpsSlave_h* const restrict self)
 {
   union DpsSlave_h_t_conv_const conv = {self};
   const struct DpsSlave_t* const restrict p_self = conv.clear;

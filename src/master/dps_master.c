@@ -210,8 +210,7 @@ char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t)
 #endif /* ifdef DEBUG */
 
 // public
-int8_t
-dps_master_init(DpsMaster_h* const restrict self,
+int8_t dps_master_init(DpsMaster_h* const restrict self,
     const uint16_t master_id,
     const uint16_t slaves_id,
     const can_send send_f)
@@ -345,11 +344,9 @@ VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_
       }
     }
     list->var_num = len;
-
-    return 0;
   }
 
-  return NULL;
+  return list;
 }
 
 // INFO: fetch the current value of a variable in a board in the system
