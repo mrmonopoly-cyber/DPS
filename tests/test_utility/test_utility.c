@@ -76,6 +76,7 @@ int8_t start_board_full(Board_t* const board, const char* const can_interface)
     return -1;
   }
 
+  dps_slave_start(&board->m_dps_slave);
   board->running=1;
   printf("starting board\n");
   thrd_create(&board->thread, _board_loop_slave, board);
@@ -84,7 +85,6 @@ int8_t start_board_full(Board_t* const board, const char* const can_interface)
 
 int8_t start_board(Board_t* const board)
 {
-  dps_slave_start(&board->m_dps_slave);
   return start_board_full(board, CAN_INTERFACE);
 }
 

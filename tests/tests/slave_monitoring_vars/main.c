@@ -29,12 +29,14 @@ int main(void)
 
   DpsSlave_h slave;
   const uint16_t master_id = 16;
-  const uint16_t slaves_id = 16;
+  const uint16_t slaves_id = 18;
 
   if(dps_slave_init(&slave,can_send_test, "board 1",1, master_id, slaves_id)<0)
   {
     FAILED("slave init failed");
   }
+
+  dps_slave_start(&slave);
 
   TEST_EXPR(dps_monitor_primitive_var(&slave, DPS_TYPES_UINT8_T, &no_update_fun.u8_var, NULL, "u8 var no update fun")<0, "u8 var no update fun");
   TEST_EXPR(dps_monitor_primitive_var(&slave, DPS_TYPES_UINT16_T, &no_update_fun.u16_var, NULL, "u16 var no update fun")<0, "u16 var no update fun");
