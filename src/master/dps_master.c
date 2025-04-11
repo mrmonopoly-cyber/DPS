@@ -9,6 +9,8 @@
 
 // private
 
+#define VAR_ID_SIZE_BIT 4
+
 #define CHECK_INPUT(IN,err)                                                        \
   if (!IN)                                                                     \
     return err;
@@ -31,16 +33,18 @@ union DpsMaster_h_t_conv_const{
   const struct DpsMaster_t* const clear;
 };
 
+typedef struct{
+  VarRecord var_specification;
+  uint8_t var_id:VAR_ID_SIZE_BIT;
+}VarRecordInternal;
+
 typedef struct {
   uint8_t id;
   char board_name[BOARD_NAME_LENGTH];
-  c_vector_h* vars;
+  VarRecordInternal vars[2 << VAR_ID_SIZE_BIT];
+  uint8_t vars_length;
 }BoardRecordInternal;
 
-typedef struct{
-  VarRecord var_specification;
-  uint8_t var_id:4;
-}VarRecordInternal;
 
 #ifdef DEBUG
 char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
@@ -48,11 +52,6 @@ char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMast
 #endif /* ifdef DEBUG */
 
 //private
-
-static inline uint8_t new_id(struct DpsMaster_t* const restrict self)
-{
-  return  self->obj_ids++;;
-}
 
 #define CHECK_INIT(self, err)                                                           \
   if (!self->send_f || !self->board_vec)                                 \
@@ -64,15 +63,20 @@ static int found_board(const void *list_ele, const void *key) {
   return !(board->id == *id);
 }
 
-static int found_var(const void *list_ele, const void *key) {
-  const VarRecordInternal *var = list_ele;
-  const uint8_t *id = key;
-  return !(var->var_id == *id);
+static VarRecordInternal* _find_var(BoardRecordInternal* board, const uint8_t var_id)
+{
+  for (uint8_t i=0; i<board->vars_length; i++)
+  {
+    if (board->vars[i].var_id == var_id)
+    {
+      return &board->vars[i];
+    
+    }
+  }
+  return NULL;
 }
 
 static void _dummy_func_const(const void *ele __attribute__((__unused__))) {}
-
-static void _dummy_fun(void *ele __attribute__((__unused__))) {}
 
 static void _free_board(void* ele)
 {
@@ -91,7 +95,7 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
   DpsCanMessage mex={0};
   if (board)
   {
-    const VarRecordInternal *var = c_vector_find(board->vars, &var_id);
+    const VarRecordInternal *var = &board->vars[var_id];
     if (var)
     {
       o.can_0x28b_DpsMasterMex.var_metadata_board_id= board->id;
@@ -108,25 +112,15 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
 static int8_t _get_board_name(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_master)
 {
-  struct c_vector_input_init args =
-  {
-    .capacity = 10,
-    .comp_fun = found_var,
-    .ele_size = sizeof(VarRecordInternal),
-    .free_fun = _dummy_fun,
-    .print_fun = _dummy_func_const,
-  };
   BoardRecordInternal new_board =
   {
     .id = mex_master->board_id,
-    .vars = c_vector_init(&args),
   };
   memcpy(new_board.board_name, &mex_master->board_name, BOARD_NAME_LENGTH);
   return !!c_vector_push(&self->board_vec, &new_board);
 }
 
-static int8_t
-_get_var_name(struct DpsMaster_t* const restrict self,
+static int8_t _get_var_name(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_slave)
 {
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
@@ -139,10 +133,7 @@ _get_var_name(struct DpsMaster_t* const restrict self,
         .var_id = mex_slave->info_var_id,
       };
       memcpy(new_var.var_specification.name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
-      if(!c_vector_push(board->vars, &new_var))
-      {
-        return -2;
-      }
+      board->vars[board->vars_length++] = new_var;
       return 0;
     }
     memcpy(var->var_specification.name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
@@ -151,8 +142,7 @@ _get_var_name(struct DpsMaster_t* const restrict self,
   return -1;
 }
 
-static int8_t
-_get_var_metadata(struct DpsMaster_t* const restrict self,
+static int8_t _get_var_metadata(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_slave)
 {
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->value_var_id);
@@ -166,10 +156,7 @@ _get_var_metadata(struct DpsMaster_t* const restrict self,
         .var_specification.size = mex_slave->size,
         .var_specification.type = mex_slave->type,
       };
-      if(!c_vector_push(board->vars, &new_var))
-      {
-        return -2;
-      }
+      board->vars[board->vars_length++] = new_var;
       return 0;
     }
     var->var_specification.type = mex_slave->type;
@@ -179,8 +166,7 @@ _get_var_metadata(struct DpsMaster_t* const restrict self,
   return -1;
 }
 
-static int8_t
-_get_var_value(struct DpsMaster_t* const restrict self,
+static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_slave)
 {
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
@@ -193,10 +179,7 @@ _get_var_value(struct DpsMaster_t* const restrict self,
         .var_id = mex_slave->var_id,
       };
       memcpy(&new_var.var_specification.value, &mex_slave->value, sizeof(mex_slave->value));
-      if(!c_vector_push(board->vars, &new_var))
-      {
-        return -2;
-      }
+      board->vars[board->vars_length++] = new_var;
       return 0;
     }
     memcpy(&var->var_specification.value, &mex_slave->value, var->var_specification.size);
@@ -400,11 +383,11 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
   const struct DpsMaster_t* const restrict p_self = conv.clear;
   CHECK_INIT(p_self, -1);
 
-  const BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
+  BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
 
   if (board)
   {
-    VarRecordInternal *var = c_vector_find(board->vars, &var_i);
+    VarRecordInternal *var = _find_var(board, var_i);
     if (var)
     {
       *o_var = var->var_specification;
