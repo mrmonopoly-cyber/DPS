@@ -123,13 +123,11 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
   DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
 
-  printf("req processing req: mex board id: %d, real board: id: %d\n",req_mex->var_name_board_id,self->board_id);
   if (req_mex->var_name_board_id!= self->board_id)
   {
     return -1;
   }
 
-  printf("processing req: %s\n",self->board_name);
   for (uint8_t i=0; i<self->vars_len; i++)
   {
     struct VarInternal* var = &self->vars[i];
@@ -137,7 +135,6 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
     {
       o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
-      printf("sending info var: %s\n",var->var_name);
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
       self->send_f(&mex);

@@ -55,7 +55,7 @@ int main(void)
     {
       dps_master_request_info_board(&master.m_dps_master, boards->boards[i].id, REQ_VAR);
     }
-    sleep(10);
+    sleep(1);
     for (uint8_t i=0; i<boards->board_num; i++)
     {
       VarListInfo* vars = dps_master_list_vars(&master.m_dps_master, boards->boards[i].id);
