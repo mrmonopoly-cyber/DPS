@@ -51,12 +51,12 @@ char __assert_size_dps_slave[(sizeof(DpsSlave_h) == sizeof(struct DpsSlave_t))?1
 char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_t))?1:-1];
 #endif /* ifdef DEBUG */
 
-static void print_var(const void *ele)
+static void _print_var(const void *ele)
 {
   const struct VarInternal *var = ele;
   printf("var_id :%d,", var->var_id);
   printf("var_name :%s,", var->var_name);
-  printf("var_ptr :%d,", *(char *)var->p_var);
+  printf("var_ptr :%p,", var->p_var);
   printf("var_size :%d,", var->size);
   printf("var type: ");
   switch (var->type)
@@ -85,14 +85,16 @@ static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
 {
   uint32_t bit_map = self->var_bit_map;
   uint32_t cursor = 0;
-  while (bit_map & (1 >> cursor))
+  while (bit_map & (1u << cursor))
   {
-    cursor = cursor >> 1;
+    cursor++;
   }
 
-  if (cursor < sizeof(bit_map))
+  if ((1u<<cursor) ^ bit_map)
   {
     self->vars[cursor] = *new_var;
+    self->vars_len++;
+    self->var_bit_map |= (1u<<cursor);
   }
   return cursor;
 }
@@ -423,7 +425,8 @@ int dps_print_var(const DpsSlave_h* const restrict self)
   CHECK_INIT(p_self);
 #endif /* ifdef DEBUG */
 
-  if (p_self->enable) {
+  if (!p_self->enable)
+  {
     return -1;
   }
 
@@ -431,7 +434,7 @@ int dps_print_var(const DpsSlave_h* const restrict self)
   uint8_t len = p_self->vars_len;
   for (uint8_t i = 0; i < len; i++) {
     var = &p_self->vars[i];
-    print_var(var);
+    _print_var(var);
   }
   return 0;
 }

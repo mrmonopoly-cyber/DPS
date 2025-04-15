@@ -57,7 +57,7 @@ char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMast
   if (!self->send_f || !self->board_vec)                                 \
     return err;
 
-static int found_board(const void *list_ele, const void *key) {
+static int _found_board(const void *list_ele, const void *key) {
   const BoardRecordInternal *board = list_ele;
   const uint8_t *id = key;
   return !(board->id == *id);
@@ -77,14 +77,6 @@ static VarRecordInternal* _find_var(BoardRecordInternal* board, const uint8_t va
 }
 
 static void _dummy_func_const(const void *ele __attribute__((__unused__))) {}
-
-static void _free_board(void* ele)
-{
-  BoardRecordInternal* board = ele;
-  printf("free board %p\n",ele);
-  c_vector_free(board->vars);
-  return;
-}
 
 static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const restrict self,
     const BoardRecordInternal* const restrict board, const uint8_t var_id)
@@ -123,17 +115,17 @@ static int8_t _get_board_name(struct DpsMaster_t* const restrict self,
 static int8_t _get_var_name(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_slave)
 {
+  printf("recv new var name: %s\n",(char *)&mex_slave->var_name);
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
   if (board)
   {
-    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->info_var_id);
+    VarRecordInternal* var = _find_var(board, mex_slave->info_var_id);
     if (!var)
     {
-      VarRecordInternal new_var = {
-        .var_id = mex_slave->info_var_id,
-      };
-      memcpy(new_var.var_specification.name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
-      board->vars[board->vars_length++] = new_var;
+      VarRecordInternal* new_var = &board->vars[mex_slave->info_var_id];
+      new_var->var_id = mex_slave->info_var_id;
+      board->vars_length++;
+      memcpy(new_var->var_specification.name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
       return 0;
     }
     memcpy(var->var_specification.name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
@@ -148,7 +140,7 @@ static int8_t _get_var_metadata(struct DpsMaster_t* const restrict self,
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->value_var_id);
   if (board)
   {
-    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->value_var_id);
+    VarRecordInternal* var = _find_var(board, mex_slave->value_var_id);
     if (!var)
     {
       VarRecordInternal new_var = {
@@ -172,7 +164,7 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
   if (board)
   {
-    VarRecordInternal* var = c_vector_find(board->vars, &mex_slave->var_id);
+    VarRecordInternal* var = _find_var(board, mex_slave->var_id);
     if (!var)
     {
       VarRecordInternal new_var = {
@@ -190,6 +182,7 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
 
 #ifdef DEBUG
 char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
+char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 // public
@@ -212,9 +205,9 @@ int8_t dps_master_init(DpsMaster_h* const restrict self,
   struct c_vector_input_init args = {
     .capacity = 10,
     .ele_size = sizeof(BoardRecordInternal),
-    .free_fun = _free_board,
+    .free_fun = NULL,
     .print_fun = _dummy_func_const,
-    .comp_fun = found_board,
+    .comp_fun = _found_board,
   };
   p_self->board_vec = c_vector_init(&args);
 
@@ -259,8 +252,9 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
 
   if (data & REQ_VAR) {
     BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
-    if (board) {
-      c_vector_clear(board->vars);
+    if (board)
+    {
+      memset(board->vars, 0, sizeof(board->vars));
       o.can_0x28b_DpsMasterMex.var_name_board_id= board_id;
 
       mex.id = p_self->master_id;
@@ -313,15 +307,15 @@ VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_
   const struct DpsMaster_t* const restrict p_self = conv.clear;
   CHECK_INIT(p_self, NULL);
 
-  BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
+  BoardRecordInternal* const board = c_vector_find(p_self->board_vec, &board_id);
   VarListInfo *list = NULL;
   if (board)
   {
-    uint8_t len = c_vector_length(board->vars);
+    const uint8_t len = board->vars_length;
     list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
 
     for (uint8_t i = 0; i < len; i++) {
-      VarRecordInternal *var = c_vector_get_at_index(board->vars, i);
+      const VarRecordInternal* const var = &board->vars[i];
       if (var) {
         list->vars[i] = var->var_specification;
       }
@@ -361,7 +355,7 @@ int8_t dps_master_refresh_value_var_all(DpsMaster_h* const restrict self,
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
 
   if (board) {
-    for (uint8_t i = 0; i < c_vector_length(board->vars); i++)
+    for (uint8_t i = 0; i < board->vars_length; i++)
     {
       return _send_refresh_request_checked(p_self, board, i);
     }
@@ -422,7 +416,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   if (board)
   {
-    VarRecordInternal *var = c_vector_find(board->vars, &var_id);
+    VarRecordInternal *var = _find_var(board, var_id);
     if (var && value_size <= var->var_specification.size)
     {
       o.can_0x28b_DpsMasterMex.var_value_board_id = board->id;
@@ -513,9 +507,9 @@ int8_t dps_master_print_vars(DpsMaster_h* const restrict self)
   for (uint8_t i = 0; i < c_vector_length(p_self->board_vec); i++) {
     BoardRecordInternal *board = c_vector_get_at_index(p_self->board_vec, i);
     if (board) {
-      uint8_t vars = c_vector_length(board->vars);
+      const uint8_t vars = board->vars_length;
       for (uint8_t j = 0; j < vars; j++) {
-        VarRecordInternal *var = c_vector_get_at_index(board->vars, j);
+        VarRecordInternal *var = _find_var(board, j);
         if (var) {
           printf("board id: %d,", board->id);
           printf("var board: %s\n", board->board_name);
