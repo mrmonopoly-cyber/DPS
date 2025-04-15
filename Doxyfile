@@ -1,5 +1,6 @@
 PROJECT_NAME           = "Debug Peripheral System (DPS)"
 OUTPUT_DIRECTORY       = doc/doxygen/
+EXCLUDE_PATTERNS       = */tests/*
 EXTRACT_ALL            = YES
 HAVE_DOT               = YES
 CALL_GRAPH             = YES
