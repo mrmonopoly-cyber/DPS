@@ -13,7 +13,6 @@ struct VarInternal
   post_update post_update_fun;
   char var_name[VAR_NAME_LENGTH];
   uint8_t size;
-  uint8_t var_id : DATA_ID_SIZE_BIT;
   enum DATA_GENERIC_TYPE type: 2;
 };
 
@@ -24,7 +23,6 @@ struct DpsSlave_t{
   uint8_t vars_len;
   uint32_t var_bit_map;
   int8_t board_id;
-  uint8_t obj_ids;
   uint16_t master_id;
   uint16_t slave_id;
   uint8_t enable : 1;
@@ -51,10 +49,10 @@ char __assert_size_dps_slave[(sizeof(DpsSlave_h) == sizeof(struct DpsSlave_t))?1
 char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_t))?1:-1];
 #endif /* ifdef DEBUG */
 
-static void _print_var(const void *ele)
+static void _print_var(const void *ele, const uint8_t var_pos)
 {
   const struct VarInternal *var = ele;
-  printf("var_id :%d,", var->var_id);
+  printf("var_id :%d,",var_pos);
   printf("var_name :%s,", var->var_name);
   printf("var_ptr :%p,", var->p_var);
   printf("var_size :%d,", var->size);
@@ -75,11 +73,6 @@ static void _print_var(const void *ele)
   }
 }
 
-static inline uint8_t _new_id(struct DpsSlave_t* const restrict self)
-{
-  return self->obj_ids++;
-}
-
 static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
     const struct VarInternal* new_var)
 {
@@ -96,6 +89,11 @@ static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
     self->vars_len++;
     self->var_bit_map |= (1u<<cursor);
   }
+  else
+  {
+    return -1;
+  }
+
   return cursor;
 }
 
@@ -130,12 +128,12 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
     return -1;
   }
 
-  for (uint8_t i=0; i<self->vars_len; i++)
+  for (uint8_t i=0; i<sizeof(self->vars)/sizeof(self->vars[0]); i++)
   {
     struct VarInternal* var = &self->vars[i];
-    if (var)
+    if (var->p_var)
     {
-      o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
+      o.can_0x28a_DpsSlaveMex.info_var_id = i;
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
@@ -179,7 +177,7 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
           o.can_0x28a_DpsSlaveMex.size = 32;
           break;
       }
-      o.can_0x28a_DpsSlaveMex.var_id = var->var_id;
+      o.can_0x28a_DpsSlaveMex.var_id = i;
       o.can_0x28a_DpsSlaveMex.type = var->type;
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
@@ -203,7 +201,7 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
   for (uint8_t i=0; i<self->vars_len; i++)
   {
     const struct VarInternal* var = &self->vars[i];
-    if (var && var->var_id == update_value_mex->var_value_var_id)
+    if (var && i == update_value_mex->var_value_var_id)
     {
       memcpy(var->p_var, &update_value_mex->value, var->size);
       if (var->post_update_fun)
@@ -307,7 +305,6 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
 
 
   struct VarInternal new_var = {
-      .var_id = _new_id(p_self),
       .p_var = p_data,
       .post_update_fun = post_update_f,
   };
@@ -434,7 +431,7 @@ int dps_print_var(const DpsSlave_h* const restrict self)
   uint8_t len = p_self->vars_len;
   for (uint8_t i = 0; i < len; i++) {
     var = &p_self->vars[i];
-    _print_var(var);
+    _print_var(var,i);
   }
   return 0;
 }
