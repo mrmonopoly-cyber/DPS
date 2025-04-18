@@ -31,25 +31,22 @@ target_include_directories(lib_sources PRIVATE
 )
 
 target_compile_options(lib_sources PRIVATE
-    $<$<CONFIG:Debug>:-O0 -fsanitize=address,undefined -g>
-    $<$<CONFIG:Release>:-O2>
+    $<$<CONFIG:Debug>:-m32 -O0 -fsanitize=address,undefined -g>
+    $<$<CONFIG:Release>:-m32 -O2>
 )
-
-# Link the math library
-target_link_libraries(main PRIVATE m)
 
 # Link the `lib_sources` library to the main executable
 target_link_libraries(main PRIVATE lib_sources)
 
 # Set compile options based on build type
 target_compile_options(main PRIVATE
-    $<$<CONFIG:Debug>:-DDEBUG -Wall -Wextra -Werror -O0 -fsanitize=address,undefined -g>
-    $<$<CONFIG:Release>:-DDEBUG -Wall -Wextra -Werror -O2>
+    $<$<CONFIG:Debug>:-m32 -DDEBUG -Wall -Wextra -Werror -O0 -fsanitize=address,undefined -g>
+    $<$<CONFIG:Release>:-m32 -DDEBUG -Wall -Wextra -Werror -O2>
 )
 
 target_link_options(main PRIVATE
-    $<$<CONFIG:Debug>:-Wall -Wextra -Werror -O0 -fsanitize=address,undefined -g>
-    $<$<CONFIG:Release>:-Wall -Wextra -Werror -O2>
+    $<$<CONFIG:Debug>:-m32 -Wall -Wextra -Werror -O0 -fsanitize=address,undefined -g>
+    $<$<CONFIG:Release>:-m32 -Wall -Wextra -Werror -O2>
 )
 
 # Optional: Create custom targets for convenience
