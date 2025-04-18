@@ -8,10 +8,18 @@ extern "C" {
 #include <stdint.h>
 #include "../common/common.h"
 
+#if UINTPTR_MAX == 0xFFFFFFFF
+#define DPS_SLAVE_SIZE 540
+#define DPS_SLAVE_ALIGN 4
+#else
+#define DPS_SLAVE_SIZE 800
+#define DPS_SLAVE_ALIGN 8
+#endif
+
 typedef int8_t (*post_update) (const char* const var_name, const void* const var);
 
-typedef struct __attribute__((aligned(8))){
-    const uint8_t private_data[800];
+typedef struct __attribute__((aligned(DPS_SLAVE_ALIGN))){
+    const uint8_t private_data[DPS_SLAVE_SIZE];
 }DpsSlave_h;
 
 // INFO: create dps manager

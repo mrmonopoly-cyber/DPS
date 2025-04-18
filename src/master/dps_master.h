@@ -5,12 +5,19 @@
 extern "C" {
 #endif
 
-
 #include <stdint.h>
 #include "../common/common.h"
 
-typedef struct __attribute__((aligned(8))){
-    const uint8_t private_data[24];
+#if UINTPTR_MAX == 0xFFFFFFFF
+#define DPS_MASTER_SIZE 16
+#define DPS_MASTER_ALIGN 4
+#else
+#define DPS_MASTER_SIZE 24
+#define DPS_MASTER_ALIGN 8
+#endif
+
+typedef struct __attribute__((aligned(DPS_MASTER_ALIGN))){
+    const uint8_t private_data[DPS_MASTER_SIZE];
 }DpsMaster_h;
 
 typedef struct{
