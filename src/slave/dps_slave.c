@@ -117,7 +117,6 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
 {
   can_obj_dps_mesages_h_t o = 
   {
-    .can_0x28a_DpsSlaveMex.Mode = 1,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
   DpsCanMessage mex;
@@ -133,11 +132,24 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
     struct VarInternal* var = &self->vars[i];
     if (var->p_var)
     {
+      //send name infos
+      o.can_0x28a_DpsSlaveMex.Mode = 1;
       o.can_0x28a_DpsSlaveMex.info_var_id = i;
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
       self->send_f(&mex);
+
+      //send metadata infos
+      o.can_0x28a_DpsSlaveMex.Mode = 2;
+      o.can_0x28a_DpsSlaveMex.value_var_id= i;
+      o.can_0x28a_DpsSlaveMex.type = var->type;
+      o.can_0x28a_DpsSlaveMex.size = var->size;
+      memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
+      mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
+      mex.id = self->slave_id;
+      self->send_f(&mex);
+
     }
   }
 
@@ -313,31 +325,31 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
   {
     case DPS_TYPES_UINT8_T:
       new_var.type = DATA_UNSIGNED;
-      new_var.size = 1;
+      new_var.size = 0;
       break;
     case DPS_TYPES_UINT16_T:
       new_var.type = DATA_UNSIGNED;
-      new_var.size = 2;
+      new_var.size = 1;
       break;
     case DPS_TYPES_UINT32_T:
       new_var.type = DATA_UNSIGNED;
-      new_var.size = 4;
+      new_var.size = 2;
       break;
     case DPS_TYPES_INT8_T:
       new_var.type = DATA_SIGNED;
-      new_var.size = 1;
+      new_var.size = 0;
       break;
     case DPS_TYPES_INT16_T:
       new_var.type = DATA_SIGNED;
-      new_var.size = 2;
+      new_var.size = 1;
       break;
     case DPS_TYPES_INT32_T:
       new_var.type = DATA_SIGNED;
-      new_var.size = 4;
+      new_var.size = 2;
       break;
     case DPS_TYPES_FLOAT_T:
       new_var.type = DATA_FLOATED;
-      new_var.size = 4;
+      new_var.size = 2;
       break;
     default:
       return -1;

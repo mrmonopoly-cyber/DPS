@@ -510,14 +510,30 @@ int8_t dps_master_print_vars(DpsMaster_h* const restrict self)
           printf("var board: %s\n", board->board_name);
           printf("var id: %d,", i);
           printf("var name: %s,", var->var_specification.name);
-          printf("var size: %d bit,", var->var_specification.size);
-          printf("var type: ");
+          printf("var size: ");
           switch (var->var_specification.size)
           {
-            case DATA_SIGNED:
-              printf("DATA_SIGNED\n");
+            case 0:
+              printf("%d bit,", 8);
               break;
+            case 1:
+              printf("%d bit,", 16);
+              break;
+            case 2:
+              printf("%d bit,", 32);
+              break;
+            default:
+              printf("INVALID SIZE\n");
+              break;
+          }
+
+          printf("var type: ");
+          switch (var->var_specification.type)
+          {
             case DATA_UNSIGNED:
+              printf("DATA_UNSIGNED\n");
+              break;
+            case DATA_SIGNED:
               printf("DATA_UNSIGNED\n");
               break;
             case DATA_FLOATED:
