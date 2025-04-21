@@ -237,17 +237,15 @@ int8_t dps_slave_init(DpsSlave_h* const restrict self,
 {
   union DpsSlave_h_t_conv conv = {self};
   struct DpsSlave_t* const restrict p_self = conv.clear;
-#ifdef DEBUG
   CHECK_INPUT(self);
   if (p_self->send_f || p_self->enable)
   {
     return -1;
   }
-#endif /* ifdef DEBUG */
 
   if (dps_can_id_slaves == dps_can_id_master)
   {
-    return -1;
+    return -2;
   }
 
   memset(self, 0, sizeof(*self));
