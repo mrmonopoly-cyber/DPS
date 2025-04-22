@@ -379,12 +379,12 @@ static int pack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t *dat
 		i |= x;
 		break;
 	case 2:
-		/* var_metadata_board_id: start-bit 4, length 4, endianess intel, scaling 1, offset 0 */
-		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.var_metadata_board_id)) & 0xf;
+		/* var_refresh_board_id: start-bit 4, length 4, endianess intel, scaling 1, offset 0 */
+		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_board_id)) & 0xf;
 		x <<= 4; 
 		i |= x;
-		/* var_metadata_var_id: start-bit 8, length 4, endianess intel, scaling 1, offset 0 */
-		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.var_metadata_var_id)) & 0xf;
+		/* var_refresh_var_id: start-bit 8, length 4, endianess intel, scaling 1, offset 0 */
+		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_var_id)) & 0xf;
 		x <<= 8; 
 		i |= x;
 		break;
@@ -432,12 +432,12 @@ static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t da
 		o->can_0x28b_DpsMasterMex.var_name_board_id = x;
 		break;
 	case 2:
-		/* var_metadata_board_id: start-bit 4, length 4, endianess intel, scaling 1, offset 0 */
+		/* var_refresh_board_id: start-bit 4, length 4, endianess intel, scaling 1, offset 0 */
 		x = (i >> 4) & 0xf;
-		o->can_0x28b_DpsMasterMex.var_metadata_board_id = x;
-		/* var_metadata_var_id: start-bit 8, length 4, endianess intel, scaling 1, offset 0 */
+		o->can_0x28b_DpsMasterMex.var_refresh_board_id = x;
+		/* var_refresh_var_id: start-bit 8, length 4, endianess intel, scaling 1, offset 0 */
 		x = (i >> 8) & 0xf;
-		o->can_0x28b_DpsMasterMex.var_metadata_var_id = x;
+		o->can_0x28b_DpsMasterMex.var_refresh_var_id = x;
 		break;
 	case 3:
 		/* value: start-bit 16, length 32, endianess intel, scaling 1, offset 0 */
@@ -500,31 +500,31 @@ int encode_can_0x28b_var_name_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
 	return 0;
 }
 
-int decode_can_0x28b_var_metadata_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
+int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
 	assert(o);
 	assert(out);
-	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_metadata_board_id);
+	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_board_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_metadata_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
+int encode_can_0x28b_var_refresh_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
 	assert(o);
-	o->can_0x28b_DpsMasterMex.var_metadata_board_id = in;
+	o->can_0x28b_DpsMasterMex.var_refresh_board_id = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_metadata_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
+int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
 	assert(o);
 	assert(out);
-	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_metadata_var_id);
+	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_metadata_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
+int encode_can_0x28b_var_refresh_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
 	assert(o);
-	o->can_0x28b_DpsMasterMex.var_metadata_var_id = in;
+	o->can_0x28b_DpsMasterMex.var_refresh_var_id = in;
 	return 0;
 }
 
@@ -577,8 +577,8 @@ int print_can_0x28b_DpsMasterMex(const can_obj_dps_mesages_h_t *o, FILE *output)
 	r = print_helper(r, fprintf(output, "Mode = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.Mode)));
 	r = print_helper(r, fprintf(output, "reserved = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.reserved)));
 	r = print_helper(r, fprintf(output, "var_name_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_name_board_id)));
-	r = print_helper(r, fprintf(output, "var_metadata_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_metadata_board_id)));
-	r = print_helper(r, fprintf(output, "var_metadata_var_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_metadata_var_id)));
+	r = print_helper(r, fprintf(output, "var_refresh_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_refresh_board_id)));
+	r = print_helper(r, fprintf(output, "var_refresh_var_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_refresh_var_id)));
 	r = print_helper(r, fprintf(output, "value = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.value)));
 	r = print_helper(r, fprintf(output, "var_value_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_value_board_id)));
 	r = print_helper(r, fprintf(output, "var_value_var_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_value_var_id)));

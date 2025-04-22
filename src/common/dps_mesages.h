@@ -78,9 +78,9 @@ typedef PREPACK struct {
 	uint32_t value; /* scaling 1.0, offset 0.0, units slave var value */
 	uint8_t Mode; /* scaling 1.0, offset 0.0, units slave mex type */
 	uint8_t var_name_board_id; /* scaling 1.0, offset 0.0, units slave board id */
-	uint8_t var_metadata_board_id; /* scaling 1.0, offset 0.0, units slave board id */
+	uint8_t var_refresh_board_id; /* scaling 1.0, offset 0.0, units slave board id */
 	uint8_t var_value_board_id; /* scaling 1.0, offset 0.0, units slave board id */
-	uint8_t var_metadata_var_id; /* scaling 1.0, offset 0.0, units slave var id */
+	uint8_t var_refresh_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t var_value_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t reserved; /* scaling 1.0, offset 0.0, units none */
 } POSTPACK can_0x28b_DpsMasterMex_t;
@@ -133,12 +133,12 @@ int decode_can_0x28b_Mode(const can_obj_dps_mesages_h_t *o, uint8_t *out);
 int encode_can_0x28b_Mode(can_obj_dps_mesages_h_t *o, uint8_t in);
 int decode_can_0x28b_var_name_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
 int encode_can_0x28b_var_name_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_metadata_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_metadata_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_refresh_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
 int decode_can_0x28b_var_value_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
 int encode_can_0x28b_var_value_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_metadata_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_metadata_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_refresh_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
 int decode_can_0x28b_var_value_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
 int encode_can_0x28b_var_value_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
 int decode_can_0x28b_reserved(const can_obj_dps_mesages_h_t *o, uint8_t *out);

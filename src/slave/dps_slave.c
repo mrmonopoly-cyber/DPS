@@ -162,12 +162,12 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
 {
   can_obj_dps_mesages_h_t o = 
   {
-    .can_0x28a_DpsSlaveMex.Mode = 2,
+    .can_0x28a_DpsSlaveMex.Mode = 3,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
   };
   DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
-  if (req_value_mex->var_value_board_id!= self->board_id)
+  if (req_value_mex->var_refresh_board_id!= self->board_id)
   {
     return -1;
   }
@@ -177,20 +177,22 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
     const struct VarInternal* var = &self->vars[i];
     if (var)
     {
+      uint8_t size =0;
       switch (var->size)
       {
         case 0:
-          o.can_0x28a_DpsSlaveMex.size = 8;
+          size = 1;
           break;
         case 1:
-          o.can_0x28a_DpsSlaveMex.size = 16;
+          size = 2;
           break;
         case 2:
-          o.can_0x28a_DpsSlaveMex.size = 32;
+          size = 4;
           break;
       }
-      o.can_0x28a_DpsSlaveMex.var_id = i;
-      o.can_0x28a_DpsSlaveMex.type = var->type;
+      memcpy(&o.can_0x28a_DpsSlaveMex.value,
+          var->p_var, size);
+      o.can_0x28a_DpsSlaveMex.var_id= i;
       mex.dlc = pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
       self->send_f(&mex);
@@ -366,10 +368,8 @@ int8_t dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
   struct DpsSlave_t* const restrict p_self = conv.clear;
   can_obj_dps_mesages_h_t o;
 
-#ifdef DEBUG
   CHECK_INPUT(self);
   CHECK_INIT(p_self);
-#endif /* ifdef DEBUG */
 
   if (!p_self->enable)
   {

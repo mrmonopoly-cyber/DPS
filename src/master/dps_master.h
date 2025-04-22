@@ -95,7 +95,7 @@ dps_master_get_value_var(const DpsMaster_h* const restrict self,
     VarRecord *const restrict o_var);
 
 // INFO: send and update request for a variable of a board
-// if the size is do not fit can message or is greater than the size of the
+// if the size is do not fit can message or is greater than the ize of the
 // variable the message will not be sent and return EXIT_FAILURE
 int8_t
 dps_master_update_var(DpsMaster_h* const restrict self,

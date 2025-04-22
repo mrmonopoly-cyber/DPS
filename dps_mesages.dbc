@@ -51,8 +51,8 @@ BO_ 651 DpsMasterMex: 8 SLAVE
  SG_ Mode M : 0|4@1+ (1,0) [0|15] "slave mex type" VECTOR_XXX
  SG_ reserved m0 : 4|1@1+ (1,0) [0|0] "" VECTOR_XXX
  SG_ var_name_board_id m1 : 4|4@1+ (1,0) [0|15] "slave board id" VECTOR_XXX
- SG_ var_metadata_board_id m2 : 4|4@1+ (1,0) [0|15] "slave board id" VECTOR_XXX
- SG_ var_metadata_var_id m2 : 8|4@1+ (1,0) [0|15] "slave var id" VECTOR_XXX
+ SG_ var_refresh_board_id m2 : 4|4@1+ (1,0) [0|15] "slave board id" VECTOR_XXX
+ SG_ var_refresh_var_id m2 : 8|4@1+ (1,0) [0|15] "slave var id" VECTOR_XXX
  SG_ var_value_board_id m3 : 4|4@1+ (1,0) [0|15] "slave board id" VECTOR_XXX
  SG_ var_value_var_id m3 : 8|4@1+ (1,0) [0|15] "slave var id" VECTOR_XXX
  SG_ value m3 : 16|32@1+ (1,0) [0|0] "slave var value" VECTOR_XXX
