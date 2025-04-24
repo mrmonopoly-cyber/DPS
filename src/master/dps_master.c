@@ -357,7 +357,7 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
   CHECK_INPUT(self,-1);
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
-  CHECK_INIT(p_self, -1);
+  CHECK_INIT(p_self, -2);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
 
@@ -370,7 +370,7 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
       return 0;
     }
   }
-  return -1;
+  return -3;
 }
 
 // INFO: send and update request for a variable of a board
@@ -382,34 +382,55 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
     const void* const restrict value,
     const uint8_t value_size)
 {
-#ifdef DEBUG
-  // CHECK_INPUT(value,-1);
-  // CHECK_INPUT(value_size,-1);
-#endif /* ifdef DEBUG */
+  CHECK_INPUT(value,-1);
+  CHECK_INPUT(value_size,-2);
 
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
   can_obj_dps_mesages_h_t o = {
     .can_0x28b_DpsMasterMex.Mode = 3,
+    .can_0x28b_DpsMasterMex.var_value_board_id = board_id,
   };
   DpsCanMessage mex={0};
-  CHECK_INIT(p_self, -1);
+  CHECK_INIT(p_self, -3);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   if (board)
   {
     VarRecord *var = _find_var(board, var_id);
-    if (var && value_size <= var->size)
+    uint8_t size =0;
+    if (var)
     {
-      o.can_0x28b_DpsMasterMex.var_value_board_id = board->id;
-      o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
-      memcpy(&o.can_0x28b_DpsMasterMex.value, value, var->size);
-      mex.id = p_self->master_id;
-      mex.dlc = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
-      return p_self->send_f(&mex);
+      switch (var->size)
+      {
+        case 0:
+          size = 1;
+          break;
+        case 1:
+          size = 2;
+          break;
+        case 2:
+          size = 4;
+          break;
+        default:
+          return -4;
+
+      }
+      if (value_size <= size)
+      {
+        o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
+        memcpy(&o.can_0x28b_DpsMasterMex.value, value, size);
+        mex.id = p_self->master_id;
+        mex.dlc = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
+        return p_self->send_f(&mex);
+      }
+      else
+      {
+        return -5;
+      }
     }
   }
-  return -1;
+  return -6;
 }
 
 int8_t dps_master_check_mex_recv(DpsMaster_h* const restrict self,
@@ -484,50 +505,50 @@ int8_t dps_master_print_vars(DpsMaster_h* const restrict self)
   const union DpsMaster_h_t_conv_const conv = {self};
   const struct DpsMaster_t* const restrict p_self = conv.clear;
   CHECK_INIT(p_self, -1);
+
   for (uint8_t i = 0; i < c_vector_length(p_self->board_vec); i++) {
     BoardRecordInternal *board = c_vector_get_at_index(p_self->board_vec, i);
-    if (board) {
+    if (board)
+    {
       const uint8_t vars = board->vars_length;
       for (uint8_t j = 0; j < vars; j++) {
-        VarRecord *var = _find_var(board, j);
-        if (var) {
-          printf("board id: %d,", board->id);
-          printf("var board: %s\n", board->board_name);
-          printf("var id: %d,", i);
-          printf("var name: %s,", var->name);
-          printf("var size: ");
-          switch (var->size)
-          {
-            case 0:
-              printf("%d bit,", 8);
-              break;
-            case 1:
-              printf("%d bit,", 16);
-              break;
-            case 2:
-              printf("%d bit,", 32);
-              break;
-            default:
-              printf("INVALID SIZE\n");
-              break;
-          }
+        VarRecord *var = &board->vars[i];
+        printf("board id: %d,", board->id);
+        printf("var board: %s\n", board->board_name);
+        printf("var id: %d,", i);
+        printf("var name: %s,", var->name);
+        printf("var size: ");
+        switch (var->size)
+        {
+          case 0:
+            printf("%d bit,", 8);
+            break;
+          case 1:
+            printf("%d bit,", 16);
+            break;
+          case 2:
+            printf("%d bit,", 32);
+            break;
+          default:
+            printf("INVALID SIZE\n");
+            break;
+        }
 
-          printf("var type: ");
-          switch (var->type)
-          {
-            case DATA_UNSIGNED:
-              printf("DATA_UNSIGNED\n");
-              break;
-            case DATA_SIGNED:
-              printf("DATA_UNSIGNED\n");
-              break;
-            case DATA_FLOATED:
-              printf("DATA_FLOATED\n");
-              break;
-            default:
-              printf("INVALID TYPE\n");
-              break;
-          }
+        printf("var type: ");
+        switch (var->type)
+        {
+          case DATA_UNSIGNED:
+            printf("DATA_UNSIGNED\n");
+            break;
+          case DATA_SIGNED:
+            printf("DATA_UNSIGNED\n");
+            break;
+          case DATA_FLOATED:
+            printf("DATA_FLOATED\n");
+            break;
+          default:
+            printf("INVALID TYPE\n");
+            break;
         }
       }
     }

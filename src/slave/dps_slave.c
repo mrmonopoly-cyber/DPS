@@ -217,7 +217,22 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
     const struct VarInternal* var = &self->vars[i];
     if (var && i == update_value_mex->var_value_var_id)
     {
-      memcpy(var->p_var, &update_value_mex->value, var->size);
+      uint8_t size =0;
+      switch (var->size)
+      {
+        case 0:
+          size = 1;
+          break;
+        case 1:
+          size = 2;
+          break;
+        case 2:
+          size = 4;
+          break;
+        default:
+          return -2;
+      }
+      memcpy(var->p_var, &update_value_mex->value, size);
       if (var->post_update_fun)
       {
         var->post_update_fun(var->var_name, var->p_var);
@@ -226,7 +241,7 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
     }
   }
 
-  return -2;
+  return -3;
 }
 
 // public
