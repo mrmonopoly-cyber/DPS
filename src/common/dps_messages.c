@@ -9,7 +9,7 @@ please Email <mailto:hello.operator.co.uk@gmail.com>.
 
 */
 
-#include "dps_mesages.h"
+#include "dps_messages.h"
 #include <inttypes.h>
 #include <assert.h>
 

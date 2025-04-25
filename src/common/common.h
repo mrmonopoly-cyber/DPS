@@ -2,7 +2,7 @@
 #define __DPS_MESSAGES__
 
 #include <stdint.h>
-#include "dps_mesages.h"
+#include "dps_messages.h"
 
 enum DPS_LENGHT{
   BOARD_NAME_LENGTH  =7,
