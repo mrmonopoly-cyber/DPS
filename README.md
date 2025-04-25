@@ -47,8 +47,6 @@ DPS/
 └── dps.h                       # Root header file to inclue both the master and slave
 ```
 
-The build is intended for both PC simulation and embedded targets. You may need to adjust the `Makefile` or source files for specific targets.
-
 ## Documentation
 
 Full API documentation is generated using Doxygen.
