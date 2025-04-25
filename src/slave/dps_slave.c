@@ -235,7 +235,10 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
       memcpy(var->p_var, &update_value_mex->value, size);
       if (var->post_update_fun)
       {
-        var->post_update_fun(var->var_name, var->p_var);
+        if(var->post_update_fun(var->var_name, var->p_var)<0)
+        {
+          return -4;
+        }
       }
       return 0;
     }

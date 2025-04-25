@@ -1,78 +1,101 @@
 # Debug Peripheral System (DPS)
 
+![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
+![State](https://img.shields.io/badge/state-stable-green.svg)
+![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)
+
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
 - [Repository Structure](#repository-structure)
-- [Getting Started](#getting-started)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
 
 ## Overview
-The Debug Peripheral System (DPS) is a C-based project focused on facilitating the debugging of peripheral systems in a CAN network.
-The project is designed to be modular and extendable, allowing for easy integration and debugging of various peripheral components.
-It can work on personal computer as well as in embedded systems.
+
+**Debug Peripheral System (DPS)** is a lightweight, portable, and modular C-based system for monitoring and interacting with primitive variables over a CAN network.
+
+DPS follows a master-slave model and is designed for use in embedded environments, with stack-allocated object-oriented interfaces and no dynamic memory usage.
+
+Its goal is to simplify debugging and monitoring of systems across distributed nodes without requiring a debugger connection to each one.
 
 ## Features
-- **Modular Design**: Separate modules for master and slave components.
-- **Extensive Testing**: Includes a robust testing framework.
-- **Easy Integration**: Simplifies the process of integrating new peripherals for debugging.
+
+- 🏦 **Stack-allocated object interface** (no dynamic memory)
+- ⚡ **CAN-based communication** between master and slaves
+- 🔧 **Variable monitoring** with optional post-update callbacks
+- 📋 **Strict encapsulation** and portability across platforms
+- 🧻 **Debug-friendly** with variable name lookup and print functions
+- 📚 **Doxygen-based documentation**
 
 ## Repository Structure
-- **lib/**: Contains the core library files.
-- **tests/**: Includes test cases for validating the functionality.
-- **dps_common.h**: Common header file for shared definitions.
-- **dps_master.c / dps_master.h**: Source and header files for the master component.
-- **dps_slave.c / dps_slave.h**: Source and header files for the slave component.
-- **Makefile**: Build configuration file.
 
-## Getting Started
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/mrmonopoly-cyber/DPS.git
-   cd DPS
-   ```
+```
+DPS/
+├── lib/                        # external library
+├── src/                        # Core library source
+│   ├── master/dps_master.c/h   # Master-side implementation
+│   ├── slave/dps_slave.c/h     # Slave-side implementation
+│   ├── common/                 # Shared headers and message types
+├── tests/                      # Unit and integration tests
+├── docs/                       # Auto-generated Doxygen documentation
+└── License                     # project License
+└── Doxyfile                    # Doxyfile conf file
+└── dps_messages.dbc            # Dbc containining the messages used (the ids are not relevant)
+└── dps.h                       # Root header file to inclue both the master and slave
+```
 
-1. Build the project:
-    ```sh
-    make
-    ```
+The build is intended for both PC simulation and embedded targets. You may need to adjust the `Makefile` or source files for specific targets.
+
+## Documentation
+
+Full API documentation is generated using Doxygen.
+
+To generate the documentation locally:
+
+```sh
+doxygen Doxyfile
+```
+
+The output will be in the `docs/` directory.
 
 ## Contributing
-Contributions are welcome! Please follow these steps:
 
-1. **Fork the repository**:
-   - Go to the GitHub repository and click the "Fork" button.
+Contributions are welcome! To contribute:
 
-2. **Create a new branch**:
-   - Create a new branch for your feature or bugfix:
-     ```sh
-     git checkout -b your-feature-branch
-     ```
+1. Fork the repository and create a new feature branch:
 
-3. **Commit your changes**:
-   - Make your changes and commit them with a descriptive message:
-     ```sh
-     git add .
-     git commit -m "Description of your changes"
-     ```
+   ```sh
+   git checkout -b my-feature
+   ```
 
-4. **Push to your branch**:
-   - Push your changes to your forked repository:
-     ```sh
-     git push origin your-feature-branch
-     ```
+2. Make and commit your changes:
 
-5. **Create a pull request**:
-   - Go to the original repository and click "New Pull Request". Provide a detailed description of your changes and submit the pull request to the master branch.
+   ```sh
+   git commit -am "Add feature XYZ"
+   ```
 
-Please ensure your code adheres to the project's coding standards and passes all tests before submitting a pull request.
+3. Push the branch and open a pull request:
+
+   ```sh
+   git push origin my-feature
+   ```
+
+Please ensure all changes are documented and tested. Stick to the existing coding style and object-based design.
+
+## License
+
+This project is licensed under the GNU AGPLv3 License. See the LICENSE file for details.
 
 ## Contact
-For any questions, suggestions, or issues, please use one of the following methods:
 
-- **GitHub Issues**: Open an issue on the [GitHub repository](https://github.com/mrmonopoly-cyber/DPS/issues).
-- **Email**: Send an email to the project maintainer at [alberto.damo@proton.com](mailto:alberto.damo@proton.me).
+For issues, suggestions, or questions:
 
-We appreciate your feedback and contributions to improve the Debug Peripheral System.
+- 📧 Email: [alberto.damo@proton.me](mailto:alberto.damo@proton.me)
+- 🐞 GitHub Issues: [Submit an issue](https://github.com/mrmonopoly-cyber/DPS/issues)
+
+---
+
+**DPS** is maintained with care and minimalism in mind — contributions that respect the embedded nature of the project are highly appreciated.
