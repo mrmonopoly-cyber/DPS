@@ -13,11 +13,13 @@ extern "C" {
 #include "common/can_mex/object.h"
 #include "common/messages.h"
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char name[NAME_MAX_SIZE];
   void *var_ptr;
 } VariableInfoPrimitiveType;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char name[NAME_MAX_SIZE];
   uint8_t size;
@@ -26,6 +28,7 @@ typedef struct {
   void *var_ptr;
 } VariableInfoGericType;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char name[COMMAND_NAME_SIZE];
   CommandInfoMetadata metadata;
@@ -33,32 +36,47 @@ typedef struct {
 
 // INFO: create dps manager
 // send_f : function to send through CAN the data to the external controller
+__attribute__((deprecated("deprecated version")))
 int dps_init(can_send send_f, BoardName *board_name);
 
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_uint8_t(VariableInfoPrimitiveType *var_info);
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_uint16_t(VariableInfoPrimitiveType *var_info);
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_uint32_t(VariableInfoPrimitiveType *var_info);
+__attribute__((deprecated("deprecated version")))
 
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_int8_t(VariableInfoPrimitiveType *var_info);
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_int16_t(VariableInfoPrimitiveType *var_info);
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_int32_t(VariableInfoPrimitiveType *var_info);
 
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_float_t(VariableInfoPrimitiveType *var_info);
 
 // INFO: tell to dps to monitor a variable, if  the name given is too long it
 // will truncate it adding a terminator
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_var_general(VariableInfoGericType *var_info);
 
 // INFO: tell to dps a dps_command the board can receive
+__attribute__((deprecated("deprecated version")))
 int dps_monitor_command(CommandInfo *comm_name);
 
 // INFO: check if a can message is for the dps and if it's the case it executes
 // the message
+__attribute__((deprecated("deprecated version")))
 int dps_check_can_command_recv(CanMessage *mex);
 
 #ifdef DEBUG
+__attribute__((deprecated("deprecated version")))
 int dps_get_id();
+__attribute__((deprecated("deprecated version")))
 int dps_print_var();
+__attribute__((deprecated("deprecated version")))
 int dps_print_com();
 
 #endif // DEBUG
