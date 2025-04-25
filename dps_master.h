@@ -16,16 +16,19 @@ extern "C" {
 #include "lib/c_vector/c_vector.h"
 #include <stdint.h>
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char *name;
   uint8_t id;
 } board_info;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char name[NAME_MAX_SIZE];
   CommandInfoMetadata metadata;
 } com_info;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   char name[NAME_MAX_SIZE];
   VariableInfoMetadata metadata;
@@ -33,16 +36,19 @@ typedef struct {
   char value[NAME_MAX_SIZE];
 } var_record;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   uint8_t board_num;
   board_info boards[];
 } board_list_info;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   uint8_t board_num;
   var_record vars[];
 } var_list_info;
 
+__attribute__((deprecated("deprecated version")))
 typedef struct {
   uint8_t board_num;
   com_info coms[];
@@ -52,62 +58,78 @@ typedef struct {
 // send_f : function needed to send a can message
 // return EXIT_SUCCESS if success
 // EXIT_FAILURE if errors happens
+__attribute__((deprecated("deprecated version")))
 int dps_master_init(can_send send_f);
 
 // INFO: establish  connection between master and slaves
 // return EXIT_SUCCESS if success
 // EXIT_FAILURE if errors happens
+__attribute__((deprecated("deprecated version")))
 int dps_master_new_connection();
 
 enum REQUEST_INFO { REQ_VAR = (1 << 0), REQ_COM = (1 << 1) };
 // INFO: send a request info to a specific board fetching data based on argument
+__attribute__((deprecated("deprecated version")))
 int dps_master_request_info_board(uint8_t board_id, uint8_t data);
 
 // INFO: return a list of all the board known by the master with theirs id
+__attribute__((deprecated("deprecated version")))
 board_list_info *dps_master_list_board();
 
 // INFO: return a list of all the vars known by the master in a board
+__attribute__((deprecated("deprecated version")))
 int dps_master_list_vars(uint8_t board_id, var_list_info **o_list);
 
 // INFO: return a list of all the coms known by the master
+__attribute__((deprecated("deprecated version")))
 int dps_master_list_coms(com_list_info **o_list);
 
 // INFO: fetch the current value of a variable in a board in the system
+__attribute__((deprecated("deprecated version")))
 int dps_master_refresh_value_var(uint8_t board_id, uint8_t var_id);
 
 // INFO: fetch the current value of all variables in a board in the system
+__attribute__((deprecated("deprecated version")))
 int dps_master_refresh_value_var_all(uint8_t board_id);
 
 // INFO: put the current value of a variable in a board in the system and put in
 // in o_buffer
+__attribute__((deprecated("deprecated version")))
 int dps_master_get_value_var(uint8_t board_id, uint8_t var_i,
                              var_record *o_var);
 
 // INFO: send and update request for a variable of a board
 // if the size is do not fit can message or is greater than the size of the
 // variable the message will not be sent and return EXIT_FAILURE
+__attribute__((deprecated("deprecated version")))
 int dps_master_update_var(uint8_t board_id, uint8_t var_id, void *value,
                           uint8_t value_size);
 
 // INFO:: return the info about a command
+__attribute__((deprecated("deprecated version")))
 int dps_master_get_command_info(uint8_t command_id, com_info* o_com);
 
 // INFO: send a command with a payload
 // if value size is > then the bound of the command metadata or greater to CAN
 // payload buffer message is not sent. If value is NULL or value_size is 0
 // message is not sent
+__attribute__((deprecated("deprecated version")))
 int dps_master_send_command(uint16_t com_dps_id, void *value,
                             uint8_t value_size);
 
 // INFO: check if a message in input is for the library and operate if can
 // return EXIT_SUCCESS if the message belongs to the library
 // EXIT_FAILURE otherwise
+__attribute__((deprecated("deprecated version")))
 int dps_master_check_mex_recv(DPSCanMessage *mex);
 
 #ifdef DEBUG
 
+__attribute__((deprecated("deprecated version")))
 int dps_master_print_boards();
+__attribute__((deprecated("deprecated version")))
 int dps_master_print_coms();
+__attribute__((deprecated("deprecated version")))
 int dps_master_print_vars();
 
 #endif // __DEBUG__
