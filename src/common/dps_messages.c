@@ -11,7 +11,6 @@ please Email <mailto:hello.operator.co.uk@gmail.com>.
 
 #include "dps_messages.h"
 #include <inttypes.h>
-#include <assert.h>
 
 #define UNUSED(X) ((void)(X))
 
@@ -26,9 +25,7 @@ static inline int print_helper(int r, int print_return_value) {
 	return ((r >= 0) && (print_return_value >= 0)) ? r + print_return_value : -1;
 }
 
-static int pack_can_0x28a_DpsSlaveMex(can_obj_dps_mesages_h_t *o, uint64_t *data) {
-	assert(o);
-	assert(data);
+static int pack_can_0x28a_DpsSlaveMex(can_obj_dps_messages_h_t *o, uint64_t *data) {
 	register uint64_t x;
 	register uint64_t i = 0;
 	/* board_id: start-bit 0, length 4, endianess intel, scaling 1, offset 0 */
@@ -98,9 +95,7 @@ static int pack_can_0x28a_DpsSlaveMex(can_obj_dps_mesages_h_t *o, uint64_t *data
 	return 8;
 }
 
-static int unpack_can_0x28a_DpsSlaveMex(can_obj_dps_mesages_h_t *o, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
-	assert(o);
-	assert(dlc <= 8);
+static int unpack_can_0x28a_DpsSlaveMex(can_obj_dps_messages_h_t *o, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
 	register uint64_t x;
 	register uint64_t i = (data);
 	if (dlc < 8)
@@ -161,107 +156,84 @@ static int unpack_can_0x28a_DpsSlaveMex(can_obj_dps_mesages_h_t *o, uint64_t dat
 	return 8;
 }
 
-int decode_can_0x28a_board_name(const can_obj_dps_mesages_h_t *o, uint64_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_board_name(const can_obj_dps_messages_h_t *o, uint64_t *out) {
 	uint64_t rval = (uint64_t)(o->can_0x28a_DpsSlaveMex.board_name);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_board_name(can_obj_dps_mesages_h_t *o, uint64_t in) {
-	assert(o);
+int encode_can_0x28a_board_name(can_obj_dps_messages_h_t *o, uint64_t in) {
 	o->can_0x28a_DpsSlaveMex.board_name = in;
 	return 0;
 }
 
-int decode_can_0x28a_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.board_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_board_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.board_id = in;
 	return 0;
 }
 
-int decode_can_0x28a_Mode(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_Mode(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.Mode);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_Mode(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_Mode(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.Mode = in;
 	return 0;
 }
 
-int decode_can_0x28a_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.id = in;
 	return 0;
 }
 
-int decode_can_0x28a_var_name(const can_obj_dps_mesages_h_t *o, uint64_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_var_name(const can_obj_dps_messages_h_t *o, uint64_t *out) {
 	uint64_t rval = (uint64_t)(o->can_0x28a_DpsSlaveMex.var_name);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_var_name(can_obj_dps_mesages_h_t *o, uint64_t in) {
-	assert(o);
+int encode_can_0x28a_var_name(can_obj_dps_messages_h_t *o, uint64_t in) {
 	o->can_0x28a_DpsSlaveMex.var_name = in;
 	return 0;
 }
 
-int decode_can_0x28a_info_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_info_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.info_var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_info_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_info_var_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.info_var_id = in;
 	return 0;
 }
 
-int decode_can_0x28a_value_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.value_var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_value_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.value_var_id = in;
 	return 0;
 }
 
-int decode_can_0x28a_type(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_type(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.type);
 	if (rval <= 2) {
 		*out = rval;
@@ -272,8 +244,7 @@ int decode_can_0x28a_type(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
 	}
 }
 
-int encode_can_0x28a_type(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_type(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.type = 0;
 	if (in > 2)
 		return -1;
@@ -281,9 +252,7 @@ int encode_can_0x28a_type(can_obj_dps_mesages_h_t *o, uint8_t in) {
 	return 0;
 }
 
-int decode_can_0x28a_size(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_size(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.size);
 	if (rval <= 2) {
 		*out = rval;
@@ -294,8 +263,7 @@ int decode_can_0x28a_size(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
 	}
 }
 
-int encode_can_0x28a_size(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_size(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.size = 0;
 	if (in > 2)
 		return -1;
@@ -303,9 +271,7 @@ int encode_can_0x28a_size(can_obj_dps_mesages_h_t *o, uint8_t in) {
 	return 0;
 }
 
-int decode_can_0x28a_value(const can_obj_dps_mesages_h_t *o, uint32_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_value(const can_obj_dps_messages_h_t *o, uint32_t *out) {
 	uint32_t rval = (uint32_t)(o->can_0x28a_DpsSlaveMex.value);
 	if (rval <= 2) {
 		*out = rval;
@@ -316,8 +282,7 @@ int decode_can_0x28a_value(const can_obj_dps_mesages_h_t *o, uint32_t *out) {
 	}
 }
 
-int encode_can_0x28a_value(can_obj_dps_mesages_h_t *o, uint32_t in) {
-	assert(o);
+int encode_can_0x28a_value(can_obj_dps_messages_h_t *o, uint32_t in) {
 	o->can_0x28a_DpsSlaveMex.value = 0;
 	if (in > 2)
 		return -1;
@@ -325,23 +290,18 @@ int encode_can_0x28a_value(can_obj_dps_mesages_h_t *o, uint32_t in) {
 	return 0;
 }
 
-int decode_can_0x28a_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28a_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28a_DpsSlaveMex.var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28a_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28a_var_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28a_DpsSlaveMex.var_id = in;
 	return 0;
 }
 
-int print_can_0x28a_DpsSlaveMex(const can_obj_dps_mesages_h_t *o, FILE *output) {
-	assert(o);
-	assert(output);
+int print_can_0x28a_DpsSlaveMex(const can_obj_dps_messages_h_t *o, FILE *output) {
 	int r = 0;
 	r = print_helper(r, fprintf(output, "board_name = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.board_name)));
 	r = print_helper(r, fprintf(output, "board_id = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.board_id)));
@@ -357,9 +317,7 @@ int print_can_0x28a_DpsSlaveMex(const can_obj_dps_mesages_h_t *o, FILE *output) 
 	return r;
 }
 
-static int pack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t *data) {
-	assert(o);
-	assert(data);
+static int pack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t *data) {
 	register uint64_t x;
 	register uint64_t i = 0;
 	/* Mode: start-bit 0, length 4, endianess intel, scaling 1, offset 0 */
@@ -410,9 +368,7 @@ static int pack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t *dat
 	return 8;
 }
 
-static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
-	assert(o);
-	assert(dlc <= 8);
+static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
 	register uint64_t x;
 	register uint64_t i = (data);
 	if (dlc < 8)
@@ -458,121 +414,95 @@ static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_mesages_h_t *o, uint64_t da
 	return 8;
 }
 
-int decode_can_0x28b_Mode(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_Mode(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.Mode);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_Mode(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_Mode(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.Mode = in;
 	return 0;
 }
 
-int decode_can_0x28b_reserved(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_reserved(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.reserved);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_reserved(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_reserved(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.reserved = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_name_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_var_name_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_name_board_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_name_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_var_name_board_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.var_name_board_id = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_board_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_refresh_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_var_refresh_board_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.var_refresh_board_id = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_refresh_var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_refresh_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_var_refresh_var_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.var_refresh_var_id = in;
 	return 0;
 }
 
-int decode_can_0x28b_value(const can_obj_dps_mesages_h_t *o, uint32_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_value(const can_obj_dps_messages_h_t *o, uint32_t *out) {
 	uint32_t rval = (uint32_t)(o->can_0x28b_DpsMasterMex.value);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_value(can_obj_dps_mesages_h_t *o, uint32_t in) {
-	assert(o);
+int encode_can_0x28b_value(can_obj_dps_messages_h_t *o, uint32_t in) {
 	o->can_0x28b_DpsMasterMex.value = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_value_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_var_value_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_value_board_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_value_board_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_var_value_board_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.var_value_board_id = in;
 	return 0;
 }
 
-int decode_can_0x28b_var_value_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out) {
-	assert(o);
-	assert(out);
+int decode_can_0x28b_var_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out) {
 	uint8_t rval = (uint8_t)(o->can_0x28b_DpsMasterMex.var_value_var_id);
 	*out = rval;
 	return 0;
 }
 
-int encode_can_0x28b_var_value_var_id(can_obj_dps_mesages_h_t *o, uint8_t in) {
-	assert(o);
+int encode_can_0x28b_var_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in) {
 	o->can_0x28b_DpsMasterMex.var_value_var_id = in;
 	return 0;
 }
 
-int print_can_0x28b_DpsMasterMex(const can_obj_dps_mesages_h_t *o, FILE *output) {
-	assert(o);
-	assert(output);
+int print_can_0x28b_DpsMasterMex(const can_obj_dps_messages_h_t *o, FILE *output) {
 	int r = 0;
 	r = print_helper(r, fprintf(output, "Mode = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.Mode)));
 	r = print_helper(r, fprintf(output, "reserved = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.reserved)));
@@ -585,10 +515,7 @@ int print_can_0x28b_DpsMasterMex(const can_obj_dps_mesages_h_t *o, FILE *output)
 	return r;
 }
 
-int unpack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
-	assert(o);
-	assert(id < (1ul << 29)); /* 29-bit CAN ID is largest possible */
-	assert(dlc <= 8);         /* Maximum of 8 bytes in a CAN packet */
+int unpack_message(can_obj_dps_messages_h_t *o, const unsigned long id, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp) {
 	switch (id) {
 	case 0x28a: return unpack_can_0x28a_DpsSlaveMex(o, data, dlc, time_stamp);
 	case 0x28b: return unpack_can_0x28b_DpsMasterMex(o, data, dlc, time_stamp);
@@ -597,9 +524,7 @@ int unpack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t 
 	return -1; 
 }
 
-int pack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t *data) {
-	assert(o);
-	assert(id < (1ul << 29)); /* 29-bit CAN ID is largest possible */
+int pack_message(can_obj_dps_messages_h_t *o, const unsigned long id, uint64_t *data) {
 	switch (id) {
 	case 0x28a: return pack_can_0x28a_DpsSlaveMex(o, data);
 	case 0x28b: return pack_can_0x28b_DpsMasterMex(o, data);
@@ -609,7 +534,6 @@ int pack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t *d
 }
 
 int message_dlc(const unsigned long id) {
-	assert(id < (1ul << 29)); /* 29-bit CAN ID is largest possible */
 	switch (id) {
 	case 0x28a: return 8;
 	case 0x28b: return 8;
@@ -618,10 +542,7 @@ int message_dlc(const unsigned long id) {
 	return -1; 
 }
 
-int print_message(const can_obj_dps_mesages_h_t *o, const unsigned long id, FILE *output) {
-	assert(o);
-	assert(id < (1ul << 29)); /* 29-bit CAN ID is largest possible */
-	assert(output);
+int print_message(const can_obj_dps_messages_h_t *o, const unsigned long id, FILE *output) {
 	switch (id) {
 	case 0x28a: return print_can_0x28a_DpsSlaveMex(o, output);
 	case 0x28b: return print_can_0x28b_DpsMasterMex(o, output);

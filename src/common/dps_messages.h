@@ -10,8 +10,8 @@ please Email <mailto:hello.operator.co.uk@gmail.com>.
 
 */
 
-#ifndef DPS_MESAGES_H
-#define DPS_MESAGES_H
+#ifndef DPS_MESSAGES_H
+#define DPS_MESSAGES_H
 
 /* If the contents of this file have caused breaking changes for you, you could try using
    an older version of the generator. You can specify this on the command line with
@@ -96,53 +96,53 @@ typedef PREPACK struct {
 	unsigned can_0x28b_DpsMasterMex_rx : 1;
 	can_0x28a_DpsSlaveMex_t can_0x28a_DpsSlaveMex;
 	can_0x28b_DpsMasterMex_t can_0x28b_DpsMasterMex;
-} POSTPACK can_obj_dps_mesages_h_t;
+} POSTPACK can_obj_dps_messages_h_t;
 
-int unpack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp);
-int pack_message(can_obj_dps_mesages_h_t *o, const unsigned long id, uint64_t *data);
+int unpack_message(can_obj_dps_messages_h_t *o, const unsigned long id, uint64_t data, uint8_t dlc, dbcc_time_stamp_t time_stamp);
+int pack_message(can_obj_dps_messages_h_t *o, const unsigned long id, uint64_t *data);
 int message_dlc(const unsigned long id);
-int print_message(const can_obj_dps_mesages_h_t *o, const unsigned long id, FILE *output);
+int print_message(const can_obj_dps_messages_h_t *o, const unsigned long id, FILE *output);
 
-int decode_can_0x28a_board_name(const can_obj_dps_mesages_h_t *o, uint64_t *out);
-int encode_can_0x28a_board_name(can_obj_dps_mesages_h_t *o, uint64_t in);
-int decode_can_0x28a_var_name(const can_obj_dps_mesages_h_t *o, uint64_t *out);
-int encode_can_0x28a_var_name(can_obj_dps_mesages_h_t *o, uint64_t in);
-int decode_can_0x28a_value(const can_obj_dps_mesages_h_t *o, uint32_t *out);
-int encode_can_0x28a_value(can_obj_dps_mesages_h_t *o, uint32_t in);
-int decode_can_0x28a_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_Mode(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_Mode(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_info_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_info_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_value_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_value_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_type(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_type(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28a_size(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28a_size(can_obj_dps_mesages_h_t *o, uint8_t in);
+int decode_can_0x28a_board_name(const can_obj_dps_messages_h_t *o, uint64_t *out);
+int encode_can_0x28a_board_name(can_obj_dps_messages_h_t *o, uint64_t in);
+int decode_can_0x28a_var_name(const can_obj_dps_messages_h_t *o, uint64_t *out);
+int encode_can_0x28a_var_name(can_obj_dps_messages_h_t *o, uint64_t in);
+int decode_can_0x28a_value(const can_obj_dps_messages_h_t *o, uint32_t *out);
+int encode_can_0x28a_value(can_obj_dps_messages_h_t *o, uint32_t in);
+int decode_can_0x28a_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_board_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_Mode(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_Mode(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_info_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_info_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_type(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_type(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_size(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_size(can_obj_dps_messages_h_t *o, uint8_t in);
 
 
-int decode_can_0x28b_value(const can_obj_dps_mesages_h_t *o, uint32_t *out);
-int encode_can_0x28b_value(can_obj_dps_mesages_h_t *o, uint32_t in);
-int decode_can_0x28b_Mode(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_Mode(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_name_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_name_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_refresh_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_value_board_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_value_board_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_refresh_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_var_value_var_id(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_var_value_var_id(can_obj_dps_mesages_h_t *o, uint8_t in);
-int decode_can_0x28b_reserved(const can_obj_dps_mesages_h_t *o, uint8_t *out);
-int encode_can_0x28b_reserved(can_obj_dps_mesages_h_t *o, uint8_t in);
+int decode_can_0x28b_value(const can_obj_dps_messages_h_t *o, uint32_t *out);
+int encode_can_0x28b_value(can_obj_dps_messages_h_t *o, uint32_t in);
+int decode_can_0x28b_Mode(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_Mode(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_name_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_name_board_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_refresh_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_refresh_board_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_value_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_value_board_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_refresh_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_var_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_var_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_reserved(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_reserved(can_obj_dps_messages_h_t *o, uint8_t in);
 
 
 #ifdef __cplusplus
