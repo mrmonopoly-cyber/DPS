@@ -69,8 +69,6 @@ static VarRecord* _find_var(BoardRecordInternal* board, const uint8_t var_id)
   return NULL;
 }
 
-static void _dummy_func_const(const void *ele __attribute__((__unused__))) {}
-
 static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const restrict self,
     const BoardRecordInternal* const restrict board, const uint8_t var_id)
 {
@@ -191,7 +189,7 @@ int8_t dps_master_init(DpsMaster_h* const restrict self,
     .capacity = 10,
     .ele_size = sizeof(BoardRecordInternal),
     .free_fun = NULL,
-    .print_fun = _dummy_func_const,
+    .print_fun = NULL,
     .comp_fun = _found_board,
   };
   p_self->board_vec = c_vector_init(&args);
