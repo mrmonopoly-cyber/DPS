@@ -15,4 +15,4 @@ make
 
 cd -
 
-../../lib/dbcc/dbcc ../../dps_messages.dbc
+../../lib/dbcc/dbcc -s ../../dps_messages.dbc
