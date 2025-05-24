@@ -12,7 +12,7 @@ C_VECTOR_ROOT := $(dps_src_path)/lib/c_vector
 include $(C_VECTOR_ROOT)/Makefile 
 endif
 
-DEBUG_FLAGS = -Werror -O0 -DDEBUG -fsanitize=undefine,address -g
+DEBUG_FLAGS = -Werror -O0 -DDEBUG -fsanitize=undefined,address -g
 RELEASE_FLAGS = -O2 -Werror
 
 all: release
