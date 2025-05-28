@@ -7,6 +7,8 @@
 
 // private
 
+#define MAX_NUM_VARS 16
+
 struct VarInternal
 {
   void* p_var;
@@ -19,9 +21,9 @@ struct VarInternal
 struct DpsSlave_t{
   char board_name[BOARD_NAME_LENGTH];
   can_send send_f;
-  struct VarInternal vars[2 << 4];
+  struct VarInternal vars[MAX_NUM_VARS];
   uint8_t vars_len;
-  uint32_t var_bit_map;
+  uint8_t var_bit_map[MAX_NUM_VARS / 8];
   int8_t board_id;
   uint16_t master_id;
   uint16_t slave_id;
@@ -78,22 +80,31 @@ static void _print_var(const void *ele, const uint8_t var_pos)
 static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
     const struct VarInternal* new_var)
 {
-  uint32_t bit_map = self->var_bit_map;
+  uint8_t *bit_map = self->var_bit_map;
   uint32_t cursor = 0;
-  while (bit_map & (1u << cursor))
+  uint32_t quozient =0;
+  uint32_t rest=0;
+  while (bit_map[quozient] & (1u << rest) && cursor < MAX_NUM_VARS )
   {
     cursor++;
+    quozient = cursor/8;
+    rest = cursor%8;
   }
 
-  if ((1u<<cursor) ^ bit_map)
+  if (cursor >= MAX_NUM_VARS)
+  {
+    return -2;
+  }
+
+  if ((1u<<rest) ^ bit_map[quozient])
   {
     self->vars[cursor] = *new_var;
     self->vars_len++;
-    self->var_bit_map |= (1u<<cursor);
+    bit_map[quozient] |= (1u<<rest);
   }
   else
   {
-    return -1;
+    return -3;
   }
 
   return (int8_t) cursor;
