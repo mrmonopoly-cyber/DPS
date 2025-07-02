@@ -177,6 +177,7 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
   {
     .can_0x28a_DpsSlaveMex.Mode = 3,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
+    .can_0x28a_DpsSlaveMex.value = 0,
   };
   DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
@@ -190,21 +191,18 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
     const struct VarInternal* var = &self->vars[i];
     if (var)
     {
-      uint8_t size =0;
       switch (var->size)
       {
         case 0:
-          size = 1;
+          o.can_0x28a_DpsSlaveMex.value = *(uint8_t*) var->p_var;
           break;
         case 1:
-          size = 2;
+          o.can_0x28a_DpsSlaveMex.value = *(uint16_t*) var->p_var;
           break;
         case 2:
-          size = 4;
+          o.can_0x28a_DpsSlaveMex.value = *(uint32_t*) var->p_var;
           break;
       }
-      memcpy(&o.can_0x28a_DpsSlaveMex.value,
-          var->p_var, size);
       o.can_0x28a_DpsSlaveMex.var_id= i;
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
