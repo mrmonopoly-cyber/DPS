@@ -27,7 +27,10 @@ typedef struct{
 
 typedef struct{
   char name[VAR_NAME_LENGTH];
-  uint32_t value;
+  union{
+    uint32_t v_u32;
+    float v_float;
+  };
   uint8_t size;
   enum DATA_GENERIC_TYPE type:2;
 }VarRecord;
