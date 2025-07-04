@@ -156,7 +156,7 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
     VarRecord* var = _find_var(board, mex_slave->var_id);
     if (var)
     {
-      memcpy(&var->value, &mex_slave->value, sizeof(var->value));
+      memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
     }
     return 0;
   }

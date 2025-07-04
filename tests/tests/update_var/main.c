@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/cdefs.h>
 #include <threads.h>
 #include <unistd.h>
@@ -82,15 +83,31 @@ int main(void)
   dps_master_refresh_value_var(&master.m_dps_master, 1, 0);
   sleep(1);
 
-  VarRecord v_rec = {0};
-  if((err =dps_master_get_value_var(&master.m_dps_master, 1, 0, &v_rec))<0)
   {
-    FAILED("get value var after update failed");
-    printf("err code: %d\n",err);
+    VarRecord v_rec = {0};
+    if((err =dps_master_get_value_var(&master.m_dps_master, 1, 0, &v_rec))<0)
+    {
+      FAILED("get value var after update failed");
+      printf("err code: %d\n",err);
+    }
+
+    TEST_EXPR(v_rec.v_u32!= new_value, "test the update of the variable:");
+    printf("given: %d, expected %d\n",v_rec.v_u32,new_value);
   }
 
-  TEST_EXPR(v_rec.value != new_value, "test the update of the variable:");
-  printf("given: %d, expected %d\n",v_rec.value,new_value);
+  {
+    dps_master_refresh_value_var(&master.m_dps_master, 2, 0);
+    sleep(1);
+    VarRecord v_rec = {0};
+    if((err =dps_master_get_value_var(&master.m_dps_master, 2, 0, &v_rec))<0)
+    {
+      FAILED("get value var after update failed");
+      printf("err code: %d\n",err);
+    }
+
+    TEST_EXPR(v_rec.v_float!= 19.2f, "test the update of the variable:");
+    printf("given: %f, expected %f\n",v_rec.v_float,19.2f);
+  }
 
   printf("cleaning\n");
 

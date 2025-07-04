@@ -111,9 +111,9 @@ int main(void)
   VarRecord var_value = {0};
   TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 1, 0, &var_value)<0,
     "get value of board 1 var id 0: 2_v_b1");
-  TEST_EXPR(var_value.value != board1.u8_th,
+  TEST_EXPR(var_value.v_u32 != board1.u8_th,
       "board 1, u8_th: comparing recv value with expected one");
-  printf("given: %d, expected: %d\n",var_value.value,board1.u8_th);
+  printf("given: %d, expected: %d\n",var_value.v_u32,board1.u8_th);
   TEST_EXPR(memcmp(var_value.name, "u8_t", 5), "comparing name of var");
   printf("given %s, expected %s\n",var_value.name,"u8_t");
   TEST_EXPR(var_value.size!=0 || var_value.type != DATA_UNSIGNED, "comparing type var");
