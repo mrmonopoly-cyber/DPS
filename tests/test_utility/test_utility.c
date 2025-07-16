@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <threads.h>
+#include <unistd.h>
 
 int8_t can_send_test_full(const DpsCanMessage* const restrict self,
     const char* const can_interaface)
@@ -27,6 +28,11 @@ int8_t can_send_test_full(const DpsCanMessage* const restrict self,
 int8_t can_send_test(const DpsCanMessage* const restrict self)
 {
   return can_send_test_full(self, CAN_INTERFACE);
+}
+
+void wait_f(void)
+{
+  sleep(1);
 }
 
 static int _board_loop_slave(void* board)

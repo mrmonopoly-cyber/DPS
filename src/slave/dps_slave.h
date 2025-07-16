@@ -9,10 +9,10 @@ extern "C" {
 #include "../common/common.h"
 
 #if UINTPTR_MAX == 0xFFFFFFFF
-#define DPS_SLAVE_SIZE 280
+#define DPS_SLAVE_SIZE 284
 #define DPS_SLAVE_ALIGN 4
 #else
-#define DPS_SLAVE_SIZE 416
+#define DPS_SLAVE_SIZE 424
 #define DPS_SLAVE_ALIGN 8
 #endif
 
@@ -41,6 +41,7 @@ typedef struct __attribute__((aligned(DPS_SLAVE_ALIGN))){
  *
  * @param self Pointer to the DPS slave object.
  * @param send_f Function pointer for sending CAN messages.
+ * @param wait_f Function pointer for waiting after sending a mex.
  * @param board_name Null-terminated board name (must be BOARD_NAME_LENGTH chars or less).
  * @param dps_board_id Unique board ID (0-15).
  * @param dps_can_id_master CAN ID used by the master.
@@ -54,6 +55,7 @@ typedef struct __attribute__((aligned(DPS_SLAVE_ALIGN))){
 int8_t
 dps_slave_init(DpsSlave_h* const restrict self,
         const can_send send_f,
+        const wait_after_send wait_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
         const uint16_t dps_can_id_master,
