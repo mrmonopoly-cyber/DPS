@@ -24,9 +24,9 @@ int main(void)
   const uint16_t master_id = 12;
   const uint16_t slaves_id= 22;
 
-  dps_slave_init(&board1.core.m_dps_slave, can_send_test, "2_v_b1", 1, master_id, slaves_id);
-  dps_slave_init(&board2.core.m_dps_slave, can_send_test, "1_v_b1", 2, master_id, slaves_id);
-  dps_slave_init(&board3.core.m_dps_slave, can_send_test, "0_v_b3", 3, master_id, slaves_id);
+  dps_slave_init(&board1.core.m_dps_slave, can_send_test, wait_f, "2_v_b1", 1, master_id, slaves_id);
+  dps_slave_init(&board2.core.m_dps_slave, can_send_test, wait_f, "1_v_b1", 2, master_id, slaves_id);
+  dps_slave_init(&board3.core.m_dps_slave, can_send_test, wait_f, "0_v_b3", 3, master_id, slaves_id);
   dps_master_init(&master.m_dps_master, master_id, slaves_id, can_send_test);
 
   start_board(&board1.core);
@@ -47,7 +47,7 @@ int main(void)
       "board2 monitor vf_stw");
 
   dps_master_new_connection(&master.m_dps_master);
-  sleep(1);
+  sleep(2);
 
   BoardListInfo* boards = dps_master_list_board(&master.m_dps_master);
   if (boards && boards->board_num == 3)
@@ -56,7 +56,7 @@ int main(void)
     {
       dps_master_request_info_board(&master.m_dps_master, boards->boards[i].id, REQ_VAR);
     }
-    sleep(1);
+    sleep(3);
     for (uint8_t i=0; i<boards->board_num; i++)
     {
       VarListInfo* vars = dps_master_list_vars(&master.m_dps_master, boards->boards[i].id);
@@ -106,7 +106,7 @@ int main(void)
     printf("refreshed board: %s, with error: %d\n",boards->boards[i].name,err);
   }
 
-  sleep(1);
+  sleep(2);
 
   VarRecord var_value = {0};
   TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 1, 0, &var_value)<0,

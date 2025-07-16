@@ -21,6 +21,7 @@ struct VarInternal
 struct DpsSlave_t{
   char board_name[BOARD_NAME_LENGTH];
   can_send send_f;
+  wait_after_send wait_f;
   struct VarInternal vars[MAX_NUM_VARS];
   uint8_t vars_len;
   uint8_t var_bit_map[MAX_NUM_VARS / 8];
@@ -77,6 +78,18 @@ static void _print_var(const void *ele, const uint8_t var_pos)
 }
 #endif /* ifdef DEBUG */
 
+static inline int8_t _send_mex_and_wait(const struct DpsSlave_t* const restrict self,
+    const DpsCanMessage* const restrict mex)
+{
+  int8_t err=0;
+  err=self->send_f(mex);
+  if (self->wait_f)
+  {
+    self->wait_f();
+  }
+  return err;
+}
+
 static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
     const struct VarInternal* new_var)
 {
@@ -122,7 +135,7 @@ static int8_t _discover_board(const struct DpsSlave_t* const restrict self)
   mex.id = self->slave_id;
   mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
 
-  return self->send_f(&mex);
+  return _send_mex_and_wait(self, &mex);
 }
 
 static int8_t _request_infos(struct DpsSlave_t* const restrict self,
@@ -151,7 +164,7 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
-      self->send_f(&mex);
+      (void)_send_mex_and_wait(self, &mex);
 
       //send metadata infos
       o.can_0x28a_DpsSlaveMex.Mode = 2;
@@ -161,8 +174,7 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
       memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
-      self->send_f(&mex);
-
+      (void)_send_mex_and_wait(self, &mex);
     }
   }
 
@@ -206,7 +218,7 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
       o.can_0x28a_DpsSlaveMex.var_id= i;
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
-      self->send_f(&mex);
+      (void) _send_mex_and_wait(self, &mex);
     }
   }
 
@@ -261,6 +273,7 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
 // public
 int8_t dps_slave_init(DpsSlave_h* const restrict self,
         can_send send_f,
+        const wait_after_send wait_f,
         const char board_name[BOARD_NAME_LENGTH],
         const uint8_t dps_board_id,
         const uint16_t dps_can_id_master,
@@ -283,6 +296,7 @@ int8_t dps_slave_init(DpsSlave_h* const restrict self,
 
   memcpy(p_self->board_name, board_name, BOARD_NAME_LENGTH);
   p_self->send_f = send_f;
+  p_self->wait_f = wait_f;
   p_self->board_id = dps_board_id;
   p_self->slave_id= dps_can_id_slaves;
   p_self->master_id = dps_can_id_master;

@@ -34,27 +34,27 @@ int main(void)
     FAILED("init dps master failed");
   }
 
-  if(dps_slave_init(&board1.core.m_dps_slave, can_send_test, "board1", 1, master_id, slaves_id)<0)
+  if(dps_slave_init(&board1.core.m_dps_slave, can_send_test, wait_f, "board1", 1, master_id, slaves_id)<0)
   {
     FAILED("init dps board1");
   }
 
-  if(dps_slave_init(&board2.core.m_dps_slave, can_send_test, "board2", 2, master_id, slaves_id)<0)
+  if(dps_slave_init(&board2.core.m_dps_slave, can_send_test, wait_f, "board2", 2, master_id, slaves_id)<0)
   {
     FAILED("init dps board2");
   }
 
-  if(dps_slave_init(&board3.core.m_dps_slave, can_send_test, "board3", 3, master_id, slaves_id)<0)
+  if(dps_slave_init(&board3.core.m_dps_slave, can_send_test, wait_f, "board3", 3, master_id, slaves_id)<0)
   {
     FAILED("init dps board3");
   }
 
-  if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, "excb_0", 0, 1, 2)<0)
+  if(dps_slave_init(&board_excluded_1.core.m_dps_slave, can_send_test, wait_f, "excb_0", 0, 1, 2)<0)
   {
     FAILED("init dps excb_0");
   }
 
-  if(dps_slave_init(&board_excluded_2.core.m_dps_slave, can_send_test, "excb_2", 1, 4, 2)<0)
+  if(dps_slave_init(&board_excluded_2.core.m_dps_slave, can_send_test, wait_f, "excb_2", 1, 4, 2)<0)
   {
     FAILED("init dps excb_2");
   }

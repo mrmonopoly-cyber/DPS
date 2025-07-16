@@ -34,5 +34,6 @@ typedef struct{
 }DpsCanMessage;
 
 typedef int8_t (*can_send) (const DpsCanMessage* const restrict);
+typedef void(*wait_after_send) (void);
  
 #endif // !__DPS_MESSAGES__

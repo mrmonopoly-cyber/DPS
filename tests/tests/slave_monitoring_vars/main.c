@@ -40,7 +40,7 @@ int main(void)
   const uint16_t slaves_id = 18;
 
   int err =0;
-  if((err = dps_slave_init(&slave,can_send_test, "board 1",1, master_id, slaves_id))<0)
+  if((err = dps_slave_init(&slave,can_send_test, wait_f, "board 1",1, master_id, slaves_id))<0)
   {
     FAILED("slave init failed");
     printf("err: %d\n",err);

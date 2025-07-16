@@ -15,6 +15,8 @@ int8_t can_send_test_full(const DpsCanMessage* const restrict self,
 
 int8_t can_send_test(const DpsCanMessage* const restrict self);
 
+void wait_f(void);
+
 
 typedef struct {
   DpsSlave_h m_dps_slave;
