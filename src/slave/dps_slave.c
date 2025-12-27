@@ -378,6 +378,10 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
       new_var.type = DATA_UNSIGNED;
       new_var.size = 2;
       break;
+    case DPS_TYPES_UINT64_T:
+      new_var.type = DATA_UNSIGNED;
+      new_var.size = 3;
+      break;
     case DPS_TYPES_INT8_T:
       new_var.type = DATA_SIGNED;
       new_var.size = 0;
@@ -390,9 +394,17 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
       new_var.type = DATA_SIGNED;
       new_var.size = 2;
       break;
+    case DPS_TYPES_INT64_T:
+      new_var.type = DATA_SIGNED;
+      new_var.size = 3;
+      break;
     case DPS_TYPES_FLOAT_T:
       new_var.type = DATA_FLOATED;
       new_var.size = 2;
+      break;
+    case DPS_TYPES_DOUBLE_T:
+      new_var.type = DATA_FLOATED;
+      new_var.size = 3;
       break;
     default:
       return -1;
