@@ -29,8 +29,6 @@ int8_t can_send_test(const DpsCanMessage* const restrict self)
 {
   int8_t err = can_send_test_full(self, CAN_INTERFACE);
 
-  sleep(1);
-
   return err;
 }
 

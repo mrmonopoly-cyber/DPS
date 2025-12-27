@@ -14,8 +14,8 @@ int main(void)
   const uint16_t master_id = 0x128;
   const uint16_t slaves_id = 0x129;
 
-  TEST_EXPR(dps_master_init(&master, master_id, slaves_id, can_send_test), "master init");
-  TEST_EXPR(dps_master_init(&master, master_id, slaves_id, can_send_test) == -1, "master double init failed");
+  TEST_EXPR(dps_master_init(&master, master_id, slaves_id, can_send_test, wait_f), "master init");
+  TEST_EXPR(dps_master_init(&master, master_id, slaves_id, can_send_test, wait_f) == -1, "master double init failed");
 
   TEST_EXPR(dps_master_list_board(&master), "master info board empty");
   TEST_EXPR(dps_master_list_vars(&master,0), "master info vars empty");

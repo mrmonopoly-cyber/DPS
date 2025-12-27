@@ -6,6 +6,7 @@ dps_src_path := $(or $(DPS_ROOT), .)
 dps_master.c := $(dps_src_path)/src/master/dps_master.c
 dps_slave.c := $(dps_src_path)/src/slave/dps_slave.c
 dps_messages.c := $(dps_src_path)/src/common/dps_messages.c
+common.c := $(dps_src_path)/src/common/common.c
 
 ifndef $(C_VECTOR_ROOT)
 C_VECTOR_ROOT := $(dps_src_path)/lib/c_vector
@@ -24,22 +25,25 @@ release: C_FLAGS += $(RELEASE_FLAGS)
 release: static dynamic
 
 static_dps_master.o: $(dps_master.c)
-	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_master.c) $(dps_messages.c) -c 
+	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_master.c) $(dps_messages.c) $(common.c) -c 
 
 static_dps_slave.o: $(dps_slave.c)
-	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_slave.c) $(dps_messages.c)  -c 
+	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_slave.c) $(dps_messages.c) $(common.c) -c 
 
 dynamic_dps_master.so: $(dps_master.c)
-	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_master.c) $(dps_messages.c) -fPIC -shared -o dps_master.so
+	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_master.c) $(dps_messages.c) $(common.c) -fPIC -shared -o dps_master.so
 
 dynamic_dps_slave.so: $(dps_slave.c)
-	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_slave.c) $(dps_messages.c) -fPIC -shared -o dps_slave.so
+	$(CC) $(C_EXFLAGS) $(DEBUG) $(dps_slave.c) $(dps_messages.c) $(common.c) -fPIC -shared -o dps_slave.so
 
 static: static_dps_slave.o static_dps_master.o
 
 dynamic: dynamic_dps_slave.so dynamic_dps_master.so
 
 dps_clean:
+ifeq ($(wildcard common.o), common.o)
+	rm common.o
+endif
 ifeq ($(wildcard dps_slave.o), dps_slave.o)
 	rm dps_slave.o
 endif
@@ -55,5 +59,6 @@ endif
 ifeq ($(wildcard dps_master.so), dps_master.so)
 	rm dps_master.so
 endif
+
 
 clean: dps_clean

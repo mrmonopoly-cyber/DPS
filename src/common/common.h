@@ -38,5 +38,12 @@ typedef struct{
 
 typedef int8_t (*can_send) (const DpsCanMessage* const restrict);
 typedef void(*wait_after_send) (void);
+
+typedef struct{
+  can_send send_f;
+  wait_after_send wait_f;
+}DpsCommon;
+
+int8_t send_mex_and_wait(const DpsCommon* const restrict self, const DpsCanMessage* const restrict mex);
  
 #endif // !__DPS_MESSAGES__

@@ -24,12 +24,12 @@ int main(void)
   const uint16_t slaves_id = 0x128;
   const uint16_t master_id = 0x149;
 
-  if (dps_master_init(&master.m_dps_master, master_id, slaves_id, can_send_test)<0) 
+  if (dps_master_init(&master.m_dps_master, master_id, slaves_id, can_send_test, wait_f)<0) 
   {
     FAILED("init dps master failed");
   }
 
-  if (dps_master_init(&master_unsed.m_dps_master, master_id+1, slaves_id+1, can_send_test)<0) 
+  if (dps_master_init(&master_unsed.m_dps_master, master_id+1, slaves_id+1, can_send_test, wait_f)<0) 
   {
     FAILED("init dps master failed");
   }

@@ -78,6 +78,10 @@ static int pack_can_0x28a_DpsSlaveMex(can_obj_dps_messages_h_t *o, uint64_t *dat
 		i |= x;
 		break;
 	case 3:
+		/* half: start-bit 32, length 33, endianess intel, scaling 1, offset 0 */
+		x = ((uint64_t)(o->can_0x28a_DpsSlaveMex.half)) & 0x1ffffffff;
+		x <<= 32; 
+		i |= x;
 		/* value: start-bit 16, length 32, endianess intel, scaling 1, offset 0 */
 		x = ((uint32_t)(o->can_0x28a_DpsSlaveMex.value)) & 0xffffffff;
 		x <<= 16; 
@@ -141,6 +145,9 @@ static int unpack_can_0x28a_DpsSlaveMex(can_obj_dps_messages_h_t *o, uint64_t da
 		o->can_0x28a_DpsSlaveMex.size = x;
 		break;
 	case 3:
+		/* half: start-bit 32, length 33, endianess intel, scaling 1, offset 0 */
+		x = (i >> 32) & 0x1ffffffff;
+		o->can_0x28a_DpsSlaveMex.half = x;
 		/* value: start-bit 16, length 32, endianess intel, scaling 1, offset 0 */
 		x = (i >> 16) & 0xffffffff;
 		o->can_0x28a_DpsSlaveMex.value = x;
@@ -271,6 +278,25 @@ int encode_can_0x28a_size(can_obj_dps_messages_h_t *o, uint8_t in) {
 	return 0;
 }
 
+int decode_can_0x28a_half(const can_obj_dps_messages_h_t *o, uint64_t *out) {
+	uint64_t rval = (uint64_t)(o->can_0x28a_DpsSlaveMex.half);
+	if (rval <= 2) {
+		*out = rval;
+		return 0;
+	} else {
+		*out = (uint64_t)0;
+		return -1;
+	}
+}
+
+int encode_can_0x28a_half(can_obj_dps_messages_h_t *o, uint64_t in) {
+	o->can_0x28a_DpsSlaveMex.half = 0;
+	if (in > 2)
+		return -1;
+	o->can_0x28a_DpsSlaveMex.half = in;
+	return 0;
+}
+
 int decode_can_0x28a_value(const can_obj_dps_messages_h_t *o, uint32_t *out) {
 	uint32_t rval = (uint32_t)(o->can_0x28a_DpsSlaveMex.value);
 	if (rval <= 2) {
@@ -312,6 +338,7 @@ int print_can_0x28a_DpsSlaveMex(const can_obj_dps_messages_h_t *o, FILE *output)
 	r = print_helper(r, fprintf(output, "value_var_id = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.value_var_id)));
 	r = print_helper(r, fprintf(output, "type = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.type)));
 	r = print_helper(r, fprintf(output, "size = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.size)));
+	r = print_helper(r, fprintf(output, "half = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.half)));
 	r = print_helper(r, fprintf(output, "value = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.value)));
 	r = print_helper(r, fprintf(output, "var_id = (wire: %.0f)\n", (double)(o->can_0x28a_DpsSlaveMex.var_id)));
 	return r;
@@ -347,6 +374,10 @@ static int pack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t *da
 		i |= x;
 		break;
 	case 3:
+		/* half: start-bit 32, length 33, endianess intel, scaling 1, offset 0 */
+		x = ((uint64_t)(o->can_0x28b_DpsMasterMex.half)) & 0x1ffffffff;
+		x <<= 32; 
+		i |= x;
 		/* value: start-bit 16, length 32, endianess intel, scaling 1, offset 0 */
 		x = ((uint32_t)(o->can_0x28b_DpsMasterMex.value)) & 0xffffffff;
 		x <<= 16; 
@@ -396,6 +427,9 @@ static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t d
 		o->can_0x28b_DpsMasterMex.var_refresh_var_id = x;
 		break;
 	case 3:
+		/* half: start-bit 32, length 33, endianess intel, scaling 1, offset 0 */
+		x = (i >> 32) & 0x1ffffffff;
+		o->can_0x28b_DpsMasterMex.half = x;
 		/* value: start-bit 16, length 32, endianess intel, scaling 1, offset 0 */
 		x = (i >> 16) & 0xffffffff;
 		o->can_0x28b_DpsMasterMex.value = x;
@@ -469,6 +503,25 @@ int encode_can_0x28b_var_refresh_var_id(can_obj_dps_messages_h_t *o, uint8_t in)
 	return 0;
 }
 
+int decode_can_0x28b_half(const can_obj_dps_messages_h_t *o, uint64_t *out) {
+	uint64_t rval = (uint64_t)(o->can_0x28b_DpsMasterMex.half);
+	if (rval <= 2) {
+		*out = rval;
+		return 0;
+	} else {
+		*out = (uint64_t)0;
+		return -1;
+	}
+}
+
+int encode_can_0x28b_half(can_obj_dps_messages_h_t *o, uint64_t in) {
+	o->can_0x28b_DpsMasterMex.half = 0;
+	if (in > 2)
+		return -1;
+	o->can_0x28b_DpsMasterMex.half = in;
+	return 0;
+}
+
 int decode_can_0x28b_value(const can_obj_dps_messages_h_t *o, uint32_t *out) {
 	uint32_t rval = (uint32_t)(o->can_0x28b_DpsMasterMex.value);
 	*out = rval;
@@ -509,6 +562,7 @@ int print_can_0x28b_DpsMasterMex(const can_obj_dps_messages_h_t *o, FILE *output
 	r = print_helper(r, fprintf(output, "var_name_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_name_board_id)));
 	r = print_helper(r, fprintf(output, "var_refresh_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_refresh_board_id)));
 	r = print_helper(r, fprintf(output, "var_refresh_var_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_refresh_var_id)));
+	r = print_helper(r, fprintf(output, "half = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.half)));
 	r = print_helper(r, fprintf(output, "value = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.value)));
 	r = print_helper(r, fprintf(output, "var_value_board_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_value_board_id)));
 	r = print_helper(r, fprintf(output, "var_value_var_id = (wire: %.0f)\n", (double)(o->can_0x28b_DpsMasterMex.var_value_var_id)));

@@ -16,7 +16,7 @@
     return err;
 
 struct DpsMaster_t{
-  can_send send_f;
+  DpsCommon common;
   c_vector_h* board_vec;
   uint16_t master_id;
   uint16_t slaves_id;
@@ -50,8 +50,10 @@ char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMast
 
 //private
 
+#define _send_mex_and_wait(self, mex) send_mex_and_wait(&self->common, mex)
+
 #define CHECK_INIT(self, err)                                                           \
-  if (!self->send_f || !self->board_vec)                                 \
+  if (!self->common.send_f || !self->board_vec)                                 \
     return err;
 
 static int _found_board(const void *list_ele, const void *key) {
@@ -86,7 +88,7 @@ static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const rest
       mex.id = self->master_id;
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSMASTERMEX, &mex.full_word);
 
-      return self->send_f(&mex);
+      return _send_mex_and_wait(self, &mex);
     }
   }
   return -1;
@@ -156,32 +158,54 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
     VarRecord* var = _find_var(board, mex_slave->var_id);
     if (var)
     {
-      memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
+      switch (var->size)
+      {
+        case 3:
+          const uint32_t* const restrict p_data = &mex_slave->value;
+          switch (mex_slave->half)
+          {
+            case 0: //low
+              var->incomplete_value[0] = *p_data;
+              var->modified_low_half =1;
+              break;
+            case 1: //high
+              var->incomplete_value[1] = *p_data;
+              var->modified_high_half =1;
+              break;
+          }
+          if (var->modified_low_half && var->modified_high_half)
+          {
+            memcpy(&var->v_u64, var->incomplete_value, sizeof(var->v_u64));
+          }
+          break;
+        case 0:
+        case 1:
+        case 2:
+          memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
+          break;
+      }
     }
     return 0;
   }
   return -1;
 }
 
-#ifdef DEBUG
-char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
-char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
-#endif /* ifdef DEBUG */
-
 // public
 int8_t dps_master_init(DpsMaster_h* const restrict self,
     const uint16_t master_id,
     const uint16_t slaves_id,
-    const can_send send_f)
+    const can_send send_f,
+    const wait_after_send wait_f)
 {
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
-  if (p_self->board_vec || p_self->send_f) {
+  if (p_self->board_vec || p_self->common.send_f) {
     return EXIT_FAILURE;
   }
   CHECK_INPUT(send_f,-1);
 
-  p_self->send_f = send_f;
+  p_self->common.send_f = send_f;
+  p_self->common.wait_f = wait_f;
   p_self->master_id = master_id;
   p_self->slaves_id = slaves_id;
 
@@ -218,7 +242,7 @@ int8_t dps_master_new_connection(DpsMaster_h* const restrict self)
   mex.id = p_self->master_id;
   mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSMASTERMEX, &mex.full_word);
 
-  return p_self->send_f(&mex);
+  return _send_mex_and_wait(p_self, &mex);
 }
 
 // INFO: send a request info to a specific board fetching variables and commands
@@ -242,7 +266,7 @@ int8_t dps_master_request_info_board(DpsMaster_h* const restrict self,
 
       mex.id = p_self->master_id;
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSMASTERMEX, &mex.full_word);
-      p_self->send_f(&mex);
+      _send_mex_and_wait(p_self, &mex);
     }
   }
 
@@ -385,47 +409,56 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
 
   union DpsMaster_h_t_conv conv = {self};
   struct DpsMaster_t* const restrict p_self = conv.clear;
+
+  DpsCanMessage mex={0};
   can_obj_dps_messages_h_t o = {
     .can_0x28b_DpsMasterMex.Mode = 3,
     .can_0x28b_DpsMasterMex.var_value_board_id = board_id,
   };
-  DpsCanMessage mex={0};
+
   CHECK_INIT(p_self, -3);
 
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   if (board)
   {
     VarRecord *var = _find_var(board, var_id);
-    uint8_t size =0;
     if (var)
     {
-      switch (var->size)
-      {
-        case 0:
-          size = 1;
-          break;
-        case 1:
-          size = 2;
-          break;
-        case 2:
-          size = 4;
-          break;
-        default:
-          return -4;
-
-      }
+      const uint8_t size = (uint8_t) (1u << var->size);
+      const uint32_t* restrict const ptr_data = value;
       if (value_size <= size)
       {
-        o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
-        memcpy(&o.can_0x28b_DpsMasterMex.value, value, size);
-        mex.id = p_self->master_id;
-        mex.dlc = (uint8_t) pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
-        return p_self->send_f(&mex);
+#pragma GCC diagnostic push 
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+        switch (size)
+        {
+          case 8:
+            o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
+            o.can_0x28b_DpsMasterMex.half = 1; //high
+            memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[1] , sizeof(uint32_t));
+            mex.id = p_self->master_id;
+            mex.dlc = (uint8_t) pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
+
+            if(_send_mex_and_wait(p_self, &mex)<0)
+            {
+              return -99;
+            }
+          case 1:
+          case 2:
+          case 4:
+            o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
+            o.can_0x28b_DpsMasterMex.half = 0; //low
+            memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[0], size);
+            mex.id = p_self->master_id;
+            mex.dlc = (uint8_t) pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
+            return _send_mex_and_wait(p_self, &mex);
+
+          default:
+            return -4;
+        }
+#pragma GCC diagnostic pop
       }
-      else
-      {
-        return -5;
-      }
+      return -5;
     }
   }
   return -6;

@@ -9,10 +9,10 @@ extern "C" {
 #include "../common/common.h"
 
 #if UINTPTR_MAX == 0xFFFFFFFF
-#define DPS_MASTER_SIZE 16
+#define DPS_MASTER_SIZE 20
 #define DPS_MASTER_ALIGN 4
 #else
-#define DPS_MASTER_SIZE 24
+#define DPS_MASTER_SIZE 32
 #define DPS_MASTER_ALIGN 8
 #endif
 
@@ -41,6 +41,9 @@ typedef struct{
   };
   uint8_t size;
   enum DATA_GENERIC_TYPE type:2;
+  uint8_t modified_low_half: 1;
+  uint8_t modified_high_half: 1;
+  uint32_t incomplete_value[2];
 }VarRecord;
 
 typedef struct{
@@ -66,7 +69,8 @@ int8_t
 dps_master_init(DpsMaster_h* const restrict self,
     const uint16_t master_id,
     const uint16_t slaves_id,
-    const can_send send_f);
+    const can_send send_f,
+    const wait_after_send wait_f);
 
 // INFO: establish connection between master and slaves
 // return EXIT_SUCCESS if success
