@@ -160,8 +160,14 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
     {
       switch (var->size)
       {
+        case 0:
+        case 1:
+        case 2:
+          memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
+          break;
         case 3:
           const uint32_t* const restrict p_data = &mex_slave->value;
+
           switch (mex_slave->half)
           {
             case 0: //low
@@ -177,11 +183,6 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
           {
             memcpy(&var->v_u64, var->incomplete_value, sizeof(var->v_u64));
           }
-          break;
-        case 0:
-        case 1:
-        case 2:
-          memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
           break;
       }
     }
