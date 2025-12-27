@@ -9,10 +9,10 @@ extern "C" {
 #include "../common/common.h"
 
 #if UINTPTR_MAX == 0xFFFFFFFF
-#define DPS_SLAVE_SIZE 284
+#define DPS_SLAVE_SIZE 412
 #define DPS_SLAVE_ALIGN 4
 #else
-#define DPS_SLAVE_SIZE 424
+#define DPS_SLAVE_SIZE 552
 #define DPS_SLAVE_ALIGN 8
 #endif
 

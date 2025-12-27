@@ -16,6 +16,9 @@ struct VarInternal
   char var_name[VAR_NAME_LENGTH];
   uint8_t size;
   enum DATA_GENERIC_TYPE type: 2;
+  uint8_t modified_low_half: 1;
+  uint8_t modified_high_half: 1;
+  uint32_t incomplete_value[2];
 };
 
 struct DpsSlave_t{
@@ -224,7 +227,7 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
   return 0;
 }
 
-static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
+static int8_t _update_var_value(struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict update_value_mex)
 {
   DpsCanMessage mex;
@@ -236,27 +239,41 @@ static int8_t _update_var_value(const struct DpsSlave_t* const restrict self,
 
   for (uint8_t i=0; i<self->vars_len; i++)
   {
-    const struct VarInternal* var = &self->vars[i];
+    struct VarInternal* var = &self->vars[i];
     if (var && i == update_value_mex->var_value_var_id)
     {
-      uint8_t size =0;
-      switch (var->size)
+      uint8_t size = (uint8_t) (1u << var->size);
+      const void* src = &update_value_mex->value;
+      if (size==sizeof(uint64_t))
       {
-        case 0:
-          size = 1;
-          break;
-        case 1:
-          size = 2;
-          break;
-        case 2:
-          size = 4;
-          break;
-        default:
-          return -2;
+        switch (update_value_mex->Mode)
+        {
+          case 3: //low
+            memcpy(&var->incomplete_value[0], &update_value_mex->value, sizeof(var->incomplete_value[0]));
+            var->modified_low_half=1;
+            break;
+          case 4: //high
+            memcpy(&var->incomplete_value[1], &update_value_mex->value, sizeof(var->incomplete_value[0]));
+            var->modified_high_half=1;
+            break;
+          default:
+            return -99;
+        }
+        if (var->modified_low_half && var->modified_high_half)
+        {
+          src = var->incomplete_value;
+        }
+        else
+        {
+          return 0; //INFO: still waiting the other half
+        }
       }
-      memcpy(var->p_var, &update_value_mex->value, size);
+
+      memcpy(var->p_var, src, size);
       if (var->post_update_fun)
       {
+        var->modified_low_half=0;
+        var->modified_high_half=0;
         if(var->post_update_fun(var->var_name, var->p_var)<0)
         {
           return -4;
@@ -443,7 +460,8 @@ int8_t dps_slave_check_can_command_recv(DpsSlave_h* const restrict self,
         return _request_infos(p_self, &o.can_0x28b_DpsMasterMex);
       case 2: //request var value
         return _request_var_value(p_self, &o.can_0x28b_DpsMasterMex);
-      case 3: //update var value
+      case 3: //update var value 64 bit low -- update var value 64 bit low
+      case 4:
         return _update_var_value(p_self, &o.can_0x28b_DpsMasterMex);
       default:
         return -2;
