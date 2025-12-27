@@ -25,7 +25,7 @@ struct DpsSlave_t{
   struct VarInternal vars[MAX_NUM_VARS];
   uint8_t vars_len;
   uint8_t var_bit_map[MAX_NUM_VARS / 8];
-  int8_t board_id;
+  uint8_t board_id;
   uint16_t master_id;
   uint16_t slave_id;
   uint8_t enable : 1;
