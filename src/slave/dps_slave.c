@@ -171,7 +171,6 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
       o.can_0x28a_DpsSlaveMex.value_var_id= i;
       o.can_0x28a_DpsSlaveMex.type = var->type;
       o.can_0x28a_DpsSlaveMex.size = var->size;
-      memcpy(&o.can_0x28a_DpsSlaveMex.var_name, var->var_name, VAR_NAME_LENGTH);
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
       (void)_send_mex_and_wait(self, &mex);

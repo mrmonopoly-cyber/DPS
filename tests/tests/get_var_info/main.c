@@ -17,8 +17,17 @@ int main(void)
       uint8_t u8_th;
       int32_t s32_user;
       )board1 ={.u8_th = 12, .s32_user = 55};
-  NEW_BOARD(float f_stw;)board2 ={.f_stw = 19.2f};
-  NEW_BOARD()board3 ={0};
+
+  NEW_BOARD(
+      float f_stw;
+      )board2 ={.f_stw = 19.2f};
+
+  NEW_BOARD(
+      uint64_t u64;
+      int64_t i64;
+      double f64;
+      )board3 ={.u64 = 12, .i64= -200, .f64 = -3.14};
+
   MasterBoard_t master = {0};
 
   const uint16_t master_id = 12;
@@ -34,6 +43,7 @@ int main(void)
   start_board(&board3.core);
   start_master_board(&master);
 
+  //BOARD 1
   TEST_EXPR(
       dps_monitor_primitive_var(&board1.core.m_dps_slave, DPS_TYPES_UINT8_T, &board1.u8_th, NULL, "u8_th")<0,
       "board1 monitor u8_th");
@@ -42,9 +52,15 @@ int main(void)
       dps_monitor_primitive_var(&board1.core.m_dps_slave, DPS_TYPES_INT32_T, &board1.s32_user, NULL, "s32_user")<0,
       "board1 monitor s32_user");
 
+  //BOARD 2
   TEST_EXPR(
       dps_monitor_primitive_var(&board2.core.m_dps_slave, DPS_TYPES_FLOAT_T, &board2.f_stw, NULL, "vf_stw")<0,
       "board2 monitor vf_stw");
+
+  //BOARD 3
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_UINT64_T, &board3.u64, NULL, "u64th")<0,"board3 monitor u64t");
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_INT64_T, &board3.i64, NULL, "i64th")<0,"board3 monitor i64t");
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_DOUBLE_T, &board3.f64, NULL, "f64th")<0,"board3 monitor f64t");
 
   dps_master_new_connection(&master.m_dps_master);
   sleep(2);
@@ -56,7 +72,7 @@ int main(void)
     {
       dps_master_request_info_board(&master.m_dps_master, boards->boards[i].id, REQ_VAR);
     }
-    sleep(3);
+    sleep(5);
     for (uint8_t i=0; i<boards->board_num; i++)
     {
       VarListInfo* vars = dps_master_list_vars(&master.m_dps_master, boards->boards[i].id);
@@ -74,7 +90,7 @@ int main(void)
           }
           break;
         case 3:
-          TEST_EXPR(vars, "board3 # of vars == 0");
+          TEST_EXPR(!vars, "board3 # of vars == 3");
           if (vars) {
             printf("vars num: %d\n",vars->var_num);
           }
@@ -109,15 +125,68 @@ int main(void)
   sleep(2);
 
   VarRecord var_value = {0};
-  TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 1, 0, &var_value)<0,
-    "get value of board 1 var id 0: 2_v_b1");
-  TEST_EXPR(var_value.v_u32 != board1.u8_th,
-      "board 1, u8_th: comparing recv value with expected one");
+  //board 1
+  TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 1, 0, &var_value)<0, "get value of board 1 var id 0: 2_v_b1");
+
+  TEST_EXPR(var_value.v_u32 != board1.u8_th, "board 1, u8_th: comparing recv value with expected one");
   printf("given: %d, expected: %d\n",var_value.v_u32,board1.u8_th);
+
   TEST_EXPR(memcmp(var_value.name, "u8_t", 5), "comparing name of var");
   printf("given %s, expected %s\n",var_value.name,"u8_t");
+
   TEST_EXPR(var_value.size!=0 || var_value.type != DATA_UNSIGNED, "comparing type var");
 
+
+  //board 2
+
+  //board 3
+  memset(&var_value, 0, sizeof(var_value));
+
+  TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 3, 0, &var_value)<0, "get value of board 3 var id 0: u64t");
+
+  TEST_EXPR(
+      var_value.size != 3 ||
+      var_value.type != DATA_UNSIGNED ||
+      strncmp(var_value.name, "u64t", strlen("u64t"))
+      , "checking metadata of board3: u64t");
+  printf("given name: %s, expected name: %s\n", var_value.name, "u64t");
+  printf("given size: %d, expected size: %d\n", var_value.size, 3);
+  printf("given type: %d, expected type: %d\n", var_value.type, DATA_UNSIGNED);
+
+  TEST_EXPR(var_value.v_u64 != board3.u64, "board 3, u64: comparing recv value with expected one");
+  printf("given: %ld, expected: %ld\n",var_value.v_u64,board3.u64);
+
+  memset(&var_value, 0, sizeof(var_value));
+  TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 3, 1, &var_value)<0, "get value of board 3 var id 1: i64t");
+  
+  TEST_EXPR(
+      var_value.size != 3 ||
+      var_value.type != DATA_SIGNED ||
+      strncmp(var_value.name, "i64t", strlen("i64t"))
+      , "checking metadata of board3: i64");
+  printf("given name: %s, expected name: %s\n", var_value.name, "i64t");
+  printf("given size: %d, expected size: %d\n", var_value.size, 3);
+  printf("given type: %d, expected type: %d\n", var_value.type, DATA_SIGNED);
+
+  TEST_EXPR(var_value.v_i64 != board3.i64, "board 3, i64: comparing recv value with expected one");
+  printf("given: %ld, expected: %ld\n",var_value.v_i64,board3.i64);
+
+  memset(&var_value, 0, sizeof(var_value));
+  TEST_EXPR(dps_master_get_value_var(&master.m_dps_master, 3, 2, &var_value)<0, "get value of board 3 var id 2: f64t");
+
+  TEST_EXPR(
+      var_value.size != 3 ||
+      var_value.type != DATA_FLOATED ||
+      strncmp(var_value.name, "f64t", strlen("f64t"))
+      , "checking metadata of board3: f64t");
+  printf("given name: %s, expected name: %s\n", var_value.name, "f64t");
+  printf("given size: %d, expected size: %d\n", var_value.size, 3);
+  printf("given type: %d, expected type: %d\n", var_value.type, DATA_FLOATED);
+
+  TEST_EXPR(var_value.v_f64 != board3.f64, "board 3, f64: comparing recv value with expected one");
+  printf("given: %lf, expected: %lf\n",var_value.v_f64,board3.f64);
+
+  
   if (boards)
   {
     free(boards);

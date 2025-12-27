@@ -28,8 +28,16 @@ typedef struct{
 typedef struct{
   char name[VAR_NAME_LENGTH];
   union{
+    uint8_t v_u8;
+    uint16_t v_u16;
     uint32_t v_u32;
-    float v_float;
+    uint64_t v_u64;
+    int8_t v_i8;
+    int16_t v_i16;
+    int32_t v_i32;
+    int64_t v_i64;
+    float v_f32;
+    double v_f64;
   };
   uint8_t size;
   enum DATA_GENERIC_TYPE type:2;

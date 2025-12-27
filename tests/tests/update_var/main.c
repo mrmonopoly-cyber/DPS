@@ -104,8 +104,8 @@ int main(void)
       printf("err code: %d\n",err);
     }
 
-    TEST_EXPR(v_rec.v_float!= 19.2f, "test the update of the variable:");
-    printf("given: %f, expected %f\n",v_rec.v_float,19.2f);
+    TEST_EXPR(v_rec.v_f32!= 19.2f, "test the update of the variable:");
+    printf("given: %f, expected %f\n",v_rec.v_f32,19.2f);
   }
 
   printf("cleaning\n");
