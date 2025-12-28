@@ -62,13 +62,13 @@ static int _found_board(const void *list_ele, const void *key) {
   return !(board->id == *id);
 }
 
-static VarRecord* _find_var(BoardRecordInternal* board, const uint8_t var_id)
+static VarRecord* _get_var(BoardRecordInternal* board, const uint8_t var_id)
 {
-  if(var_id<board->vars_length)
+  if(var_id>=board->vars_length)
   {
-    return &board->vars[var_id];
+    board->vars_length++;
   }
-  return NULL;
+  return &board->vars[var_id];
 }
 
 static int8_t _send_refresh_request_checked(const struct DpsMaster_t* const restrict self,
@@ -111,14 +111,7 @@ static int8_t _get_var_name(struct DpsMaster_t* const restrict self,
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
   if (board)
   {
-    VarRecord* var = _find_var(board, mex_slave->info_var_id);
-    if (!var)
-    {
-      VarRecord* new_var = &board->vars[mex_slave->info_var_id];
-      board->vars_length++;
-      memcpy(new_var->name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
-      return 0;
-    }
+    VarRecord* var = _get_var(board, mex_slave->info_var_id);
     memcpy(var->name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
     return 0;
   }
@@ -131,17 +124,7 @@ static int8_t _get_var_metadata(struct DpsMaster_t* const restrict self,
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
   if (board)
   {
-    VarRecord* var = _find_var(board, mex_slave->value_var_id);
-    if (!var)
-    {
-      VarRecord new_var = {
-        .size = mex_slave->size,
-        .type = mex_slave->type,
-      };
-      board->vars[mex_slave->value_var_id] = new_var;
-      board->vars_length++;
-      return 0;
-    }
+    VarRecord* var = _get_var(board, mex_slave->value_var_id);
     var->type = mex_slave->type;
     var->size = mex_slave->size;
     return 0;
@@ -155,7 +138,7 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
   if (board)
   {
-    VarRecord* var = _find_var(board, mex_slave->var_id);
+    VarRecord* var = _get_var(board, mex_slave->var_id);
     if (var)
     {
       switch (var->size)
@@ -320,7 +303,7 @@ VarListInfo* dps_master_list_vars(DpsMaster_h* const restrict self, const uint8_
   if (board && board->vars_length)
   {
     const uint8_t len = board->vars_length;
-    list = calloc(len, sizeof(*list) + (len * sizeof(*((*list).vars))));
+    list = calloc(1, sizeof(*list) + (len * sizeof(*((*list).vars))));
 
     for (uint8_t i = 0; i < len; i++) {
       const VarRecord* const var = &board->vars[i];
@@ -386,7 +369,7 @@ int8_t dps_master_get_value_var(const DpsMaster_h* const restrict self,
 
   if (board)
   {
-    VarRecord *var = _find_var(board, var_i);
+    VarRecord *var = _get_var(board, var_i);
     if (var)
     {
       *o_var = *var;
@@ -422,7 +405,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
   if (board)
   {
-    VarRecord *var = _find_var(board, var_id);
+    VarRecord *var = _get_var(board, var_id);
     if (var)
     {
       const uint8_t size = (uint8_t) (1u << var->size);
@@ -545,27 +528,11 @@ int8_t dps_master_print_vars(DpsMaster_h* const restrict self)
       const uint8_t vars = board->vars_length;
       for (uint8_t j = 0; j < vars; j++) {
         VarRecord *var = &board->vars[i];
-        printf("board id: %d,", board->id);
-        printf("var board: %s\n", board->board_name);
+        printf("board id: %d, ", board->id);
+        printf("board name: %s, ", board->board_name);
         printf("var id: %d,", i);
         printf("var name: %s,", var->name);
-        printf("var size: ");
-        switch (var->size)
-        {
-          case 0:
-            printf("%d bit,", 8);
-            break;
-          case 1:
-            printf("%d bit,", 16);
-            break;
-          case 2:
-            printf("%d bit,", 32);
-            break;
-          default:
-            printf("INVALID SIZE\n");
-            break;
-        }
-
+        printf("var size: %d, ", 1 << var->size);
         printf("var type: ");
         switch (var->type)
         {
