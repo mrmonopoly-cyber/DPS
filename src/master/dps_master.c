@@ -112,7 +112,7 @@ static int8_t _get_var_name(struct DpsMaster_t* const restrict self,
   if (board)
   {
     VarRecord* var = _get_var(board, mex_slave->info_var_id);
-    memcpy(var->name, &mex_slave->var_name, sizeof(VAR_NAME_LENGTH));
+    memcpy(var->name, &mex_slave->var_name, VAR_NAME_LENGTH);
     return 0;
   }
   return -1;
