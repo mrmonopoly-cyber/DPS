@@ -62,7 +62,6 @@ typedef enum {
 typedef PREPACK struct {
 	uint64_t board_name; /* scaling 1.0, offset 0.0, units slave board name */
 	uint64_t var_name; /* scaling 1.0, offset 0.0, units slave var name */
-	uint64_t half; /* scaling 1.0, offset 0.0, units value half */
 	uint32_t value; /* scaling 1.0, offset 0.0, units slave var value */
 	uint8_t board_id; /* scaling 1.0, offset 0.0, units slave board id */
 	uint8_t Mode; /* scaling 1.0, offset 0.0, units slave mex type */
@@ -72,10 +71,10 @@ typedef PREPACK struct {
 	uint8_t var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t type; /* scaling 1.0, offset 0.0, units slave var type */
 	uint8_t size; /* scaling 1.0, offset 0.0, units slave var size */
+	uint8_t half; /* scaling 1.0, offset 0.0, units value half */
 } POSTPACK can_0x28a_DpsSlaveMex_t;
 
 typedef PREPACK struct {
-	uint64_t half; /* scaling 1.0, offset 0.0, units value half */
 	uint32_t value; /* scaling 1.0, offset 0.0, units slave var value */
 	uint8_t Mode; /* scaling 1.0, offset 0.0, units slave mex type */
 	uint8_t var_name_board_id; /* scaling 1.0, offset 0.0, units slave board id */
@@ -84,6 +83,7 @@ typedef PREPACK struct {
 	uint8_t var_refresh_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t var_value_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t reserved; /* scaling 1.0, offset 0.0, units none */
+	uint8_t half; /* scaling 1.0, offset 0.0, units value half */
 } POSTPACK can_0x28b_DpsMasterMex_t;
 
 typedef PREPACK struct {
@@ -108,8 +108,6 @@ int decode_can_0x28a_board_name(const can_obj_dps_messages_h_t *o, uint64_t *out
 int encode_can_0x28a_board_name(can_obj_dps_messages_h_t *o, uint64_t in);
 int decode_can_0x28a_var_name(const can_obj_dps_messages_h_t *o, uint64_t *out);
 int encode_can_0x28a_var_name(can_obj_dps_messages_h_t *o, uint64_t in);
-int decode_can_0x28a_half(const can_obj_dps_messages_h_t *o, uint64_t *out);
-int encode_can_0x28a_half(can_obj_dps_messages_h_t *o, uint64_t in);
 int decode_can_0x28a_value(const can_obj_dps_messages_h_t *o, uint32_t *out);
 int encode_can_0x28a_value(can_obj_dps_messages_h_t *o, uint32_t in);
 int decode_can_0x28a_board_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
@@ -128,10 +126,10 @@ int decode_can_0x28a_type(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28a_type(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28a_size(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28a_size(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_half(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_half(can_obj_dps_messages_h_t *o, uint8_t in);
 
 
-int decode_can_0x28b_half(const can_obj_dps_messages_h_t *o, uint64_t *out);
-int encode_can_0x28b_half(can_obj_dps_messages_h_t *o, uint64_t in);
 int decode_can_0x28b_value(const can_obj_dps_messages_h_t *o, uint32_t *out);
 int encode_can_0x28b_value(can_obj_dps_messages_h_t *o, uint32_t in);
 int decode_can_0x28b_Mode(const can_obj_dps_messages_h_t *o, uint8_t *out);
@@ -148,6 +146,8 @@ int decode_can_0x28b_var_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t
 int encode_can_0x28b_var_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28b_reserved(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28b_reserved(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_half(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_half(can_obj_dps_messages_h_t *o, uint8_t in);
 
 
 #ifdef __cplusplus

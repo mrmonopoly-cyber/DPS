@@ -45,7 +45,7 @@ typedef struct {
 
 #ifdef DEBUG
 char __assert_size_dps_master[(sizeof(DpsMaster_h) == sizeof(struct DpsMaster_t))?1:-1];
-char __assert_align_dps_master[(_Alignof(DpsMaster_h) == _Alignof(struct DpsMaster_t))?1:-1];
+char __assert_align_dps_master[(__alignof(DpsMaster_h) == __alignof(struct DpsMaster_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 //private
@@ -136,6 +136,8 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
     const can_0x28a_DpsSlaveMex_t* const restrict mex_slave)
 {
   BoardRecordInternal* board = c_vector_find(self->board_vec, &mex_slave->board_id);
+  const void* const restrict p_data = &mex_slave->value;
+
   if (board)
   {
     VarRecord* var = _get_var(board, mex_slave->var_id);
@@ -146,19 +148,18 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
         case 0:
         case 1:
         case 2:
-          memcpy(&var->v_u32, &mex_slave->value, sizeof(var->v_u32));
+          memcpy(&var->v_u32, p_data, sizeof(var->v_u32));
           break;
         case 3:
-          const uint32_t* const restrict p_data = &mex_slave->value;
 
           switch (mex_slave->half)
           {
             case 0: //low
-              var->incomplete_value[0] = *p_data;
+              memcpy(&var->incomplete_value[0], p_data, sizeof(uint32_t));
               var->modified_low_half =1;
               break;
             case 1: //high
-              var->incomplete_value[1] = *p_data;
+              memcpy(&var->incomplete_value[1], p_data, sizeof(uint32_t));
               var->modified_high_half =1;
               break;
           }
@@ -342,15 +343,17 @@ int8_t dps_master_refresh_value_var_all(DpsMaster_h* const restrict self,
   struct DpsMaster_t* const restrict p_self = conv.clear;
   CHECK_INIT(p_self, -2);
   BoardRecordInternal *board = c_vector_find(p_self->board_vec, &board_id);
+  int8_t err=0;
 
   if (board)
   {
     for (uint8_t i = 0; i < board->vars_length; i++)
     {
-      return _send_refresh_request_checked(p_self, board, i);
+      int8_t temp_err = _send_refresh_request_checked(p_self, board, i);
+      err = temp_err<0 ? temp_err : err;
     }
   }
-  return 0;
+  return err;
 }
 
 // INFO: fetch the current value of a variable in a board in the system and put

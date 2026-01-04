@@ -96,18 +96,21 @@ int main(void)
   {
     for (uint8_t i=0; i<boards->board_num; i++)
     {
-      if((err =dps_master_request_info_board(&master.m_dps_master,boards->boards[i].id,REQ_VAR))<0)
+      const uint8_t board_id = boards->boards[i].id;
+      printf("refresing info about board: %d\n",board_id);
+      if((err =dps_master_request_info_board(&master.m_dps_master, board_id, REQ_VAR))<0)
       {
         FAILED("failed refresh of board.");
         printf("board :%s, err code: %d\n",boards->boards[i].name,err);
       }
     }
-    free(boards);
     sleep(6);
   }
 
-  for(BoardIndex board_id= Board_1; board_id < __MAX__BOARD; board_id++ )
+  for(uint8_t i= 0; i< boards->board_num; i++ )
   {
+    const uint8_t board_id = boards->boards[i].id;
+    printf("refresing values about board: %d\n",board_id);
     dps_master_refresh_value_var_all(&master.m_dps_master, (uint8_t)board_id);
     sleep(5);
   }
@@ -158,6 +161,11 @@ int main(void)
   TEST_EXPR(records[5].v_f64 != board3.f64, "check: board 3, f64");
   printf("expected: %lf, given: %lf\n", board3.f64, records[5].v_f64);
 
+  if (boards)
+  {
+    free(boards);
+    boards=NULL;
+  }
 
   //INFO: cleaning
   stop_board(&board1.core);

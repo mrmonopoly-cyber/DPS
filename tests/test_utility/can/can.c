@@ -16,7 +16,7 @@ union DpsCanInterface_h_t_conv{
 
 #ifdef DEBUG
 char __assert_size_dps_can[(sizeof(DpsCanInterface_h)==sizeof(struct DpsCanInterface_t))?1:-1];
-char __assert_align_dps_can[(_Alignof(DpsCanInterface_h)==_Alignof(struct DpsCanInterface_t))?1:-1];
+char __assert_align_dps_can[(__alignof(DpsCanInterface_h)==__alignof(struct DpsCanInterface_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 //public

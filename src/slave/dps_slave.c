@@ -51,7 +51,7 @@ union DpsSlave_h_t_conv_const
 
 #ifdef DEBUG
 char __assert_size_dps_slave[(sizeof(DpsSlave_h) == sizeof(struct DpsSlave_t))?1:-1];
-char __assert_align_dps_slave[(_Alignof(DpsSlave_h) == _Alignof(struct DpsSlave_t))?1:-1];
+char __assert_align_dps_slave[(__alignof(DpsSlave_h) == __alignof(struct DpsSlave_t))?1:-1];
 #endif /* ifdef DEBUG */
 
 #ifdef DEBUG
@@ -192,25 +192,12 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
   for (uint8_t i=0; i<self->vars_len; i++)
   {
     const struct VarInternal* var = &self->vars[i];
+    o.can_0x28a_DpsSlaveMex.var_id= i;
+
     if (var)
     {
       const uint32_t* const restrict p_data= var->p_var;
 
-      o.can_0x28a_DpsSlaveMex.var_id= i;
-      if (var->size > 2)
-      {
-        o.can_0x28a_DpsSlaveMex.half=1;
-        o.can_0x28a_DpsSlaveMex.value = p_data[1];
-
-        mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
-        mex.id = self->slave_id;
-        if(_send_mex_and_wait(self, &mex)<0)
-        {
-          return -99;
-        }
-      }
-
-      o.can_0x28a_DpsSlaveMex.half=0;
       switch (var->size)
       {
         case 0:
@@ -225,9 +212,23 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
           break;
       }
 
+      o.can_0x28a_DpsSlaveMex.half=0;
       mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
       mex.id = self->slave_id;
-      return _send_mex_and_wait(self, &mex);
+      if(_send_mex_and_wait(self, &mex)<0)
+      {
+        continue;
+      }
+
+      if (var->size > 2)
+      {
+        o.can_0x28a_DpsSlaveMex.half=1;
+        o.can_0x28a_DpsSlaveMex.value = p_data[1];
+
+        mex.dlc = (uint8_t) pack_message(&o, CAN_ID_DPSSLAVEMEX, &mex.full_word);
+        mex.id = self->slave_id;
+        (void)_send_mex_and_wait(self, &mex);
+      }
     }
   }
 
@@ -379,7 +380,7 @@ int8_t dps_monitor_primitive_var(DpsSlave_h* const restrict self,
   if (!p_self->enable)
   {
     return -1;
-  }
+  };
 
 
   struct VarInternal new_var = {

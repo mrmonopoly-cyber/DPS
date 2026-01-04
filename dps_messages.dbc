@@ -46,7 +46,7 @@ BO_ 650 DpsSlaveMex: 8 SLAVE
  SG_ size m2 : 14|2@1+ (1,0) [0|2] "slave var size" VECTOR_XXX
  SG_ var_id m3 : 8|4@1+ (1,0) [0|15] "slave var id" VECTOR_XXX
  SG_ value m3 : 16|32@1+ (1,0) [0|2] "slave var value" VECTOR_XXX
- SG_ half m3 : 32|33@1+ (1,0) [0|2] "value half" VECTOR_XXX
+ SG_ half m3 : 48|1@1+ (1,0) [0|2] "value half" VECTOR_XXX
 
 BO_ 651 DpsMasterMex: 8 SLAVE
  SG_ Mode M : 0|4@1+ (1,0) [0|15] "slave mex type" VECTOR_XXX
@@ -57,7 +57,7 @@ BO_ 651 DpsMasterMex: 8 SLAVE
  SG_ var_value_board_id m3 : 4|4@1+ (1,0) [0|15] "slave board id" VECTOR_XXX
  SG_ var_value_var_id m3 : 8|4@1+ (1,0) [0|15] "slave var id" VECTOR_XXX
  SG_ value m3 : 16|32@1+ (1,0) [0|0] "slave var value" VECTOR_XXX
- SG_ half m3 : 32|33@1+ (1,0) [0|2] "value half" VECTOR_XXX
+ SG_ half m3 : 48|1@1+ (1,0) [0|2] "value half" VECTOR_XXX
 
 VAL_ 650 Mode 0 "BoardName" 1 "VarName" 2 "VarMetadata" 3 "VarValue"
 VAL_ 651 Mode 0 "Discover Boards" 1 "Request Infos Board" 2 "Req var value" 3 "Update var value"
