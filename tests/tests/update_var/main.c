@@ -10,24 +10,91 @@
 #include <threads.h>
 #include <unistd.h>
 
+typedef enum{
+  Board_1 = 1,
+  Board_2 = 2,
+  Board_3 = 3,
+  
+  __BOARD_COUNT
+}BoardIndex;
+
+#define FOR_ALL_BOARDS(board_index) \
+  for(BoardIndex board_index = Board_1; board_index < __BOARD_COUNT; board_index++)
+
+static NEW_BOARD(
+    uint8_t u8_th;
+    int32_t s32_user;
+    )board1 ={.u8_th = 12, .s32_user = 55};
+
+static NEW_BOARD(float f_stw;)board2 ={.f_stw = 19.2f};
+
+static NEW_BOARD(
+    uint64_t u64;
+    int64_t i64;
+    double f64;
+    )board3 ={.u64 = 3, .i64=-2, .f64 = -6.7,};
+
+static MasterBoard_t master = {0};
+
+
+int _update_var(const BoardIndex board_id, const uint8_t var_id, const void* const raw_value,
+    const uint8_t size)
+{
+  int err=0;
+
+  if((err=dps_master_update_var(&master.m_dps_master, (uint8_t)board_id, var_id, raw_value, size))<0)
+  {
+    FAILED("sending update req with err:");
+    printf("%d\n",err);
+    return -1;
+  }
+
+  sleep(2);
+
+  return dps_master_refresh_value_var(&master.m_dps_master, (uint8_t) board_id, var_id);
+}
+
+static void _print_boards_infos(const BoardIndex board)
+{
+  switch (board)
+  {
+    case Board_1:
+      break;
+      printf("Board: %d, var: %d, value: %d\n", Board_1, 0, board1.u8_th);
+      printf("Board: %d, var: %d, value: %d\n", Board_1, 1, board1.s32_user);
+      break;
+    case Board_2:
+      printf("Board: %d, var: %d, value: %f\n", Board_2, 0, board2.f_stw);
+      break;
+    case Board_3:
+      printf("Board: %d, var: %d, value: %ld\n", Board_3, 0, board3.u64);
+      printf("Board: %d, var: %d, value: %ld\n", Board_3, 1, board3.i64);
+      printf("Board: %d, var: %d, value: %lf\n", Board_3, 2, board3.f64);
+      break;
+    case __BOARD_COUNT:
+      break;
+    }
+}
+
 int main(void)
 {
   int err =0;
-  NEW_BOARD(
-      uint8_t u8_th;
-      int32_t s32_user;
-      )board1 ={.u8_th = 12, .s32_user = 55};
-  NEW_BOARD(float f_stw;)board2 ={.f_stw = 19.2f};
-  NEW_BOARD()board3 ={0};
-  MasterBoard_t master = {0};
-
-
   const uint16_t master_id = 12;
   const uint16_t slaves_id= 22;
 
-  dps_slave_init(&board1.core.m_dps_slave, can_send_test, wait_f, "2_v_b1", 1, master_id, slaves_id);
-  dps_slave_init(&board2.core.m_dps_slave, can_send_test, wait_f, "1_v_b1", 2, master_id, slaves_id);
-  dps_slave_init(&board3.core.m_dps_slave, can_send_test, wait_f, "0_v_b3", 3, master_id, slaves_id);
+  FOR_ALL_BOARDS(board)
+  {
+    _print_boards_infos(board);
+  }
+
+
+  #define fast_dps_slave_init(board, name, id)\
+    dps_slave_init(&board.core.m_dps_slave, can_send_test, wait_f, name, id, master_id, slaves_id);
+
+
+  fast_dps_slave_init(board1, "2_v_b1", Board_1);
+  fast_dps_slave_init(board2, "1_v_b1", Board_2);
+  fast_dps_slave_init(board3, "0_v_b3", Board_3);
   dps_master_init(&master.m_dps_master, master_id, slaves_id, can_send_test, wait_f);
 
   start_board(&board1.core);
@@ -35,6 +102,7 @@ int main(void)
   start_board(&board3.core);
   start_master_board(&master);
 
+  //INFO: BOARD 1
   TEST_EXPR(
       dps_monitor_primitive_var(&board1.core.m_dps_slave, DPS_TYPES_UINT8_T, &board1.u8_th, NULL, "u8_th")<0,
       "board1 monitor u8_th");
@@ -43,9 +111,20 @@ int main(void)
       dps_monitor_primitive_var(&board1.core.m_dps_slave, DPS_TYPES_INT32_T, &board1.s32_user, NULL, "s32_user")<0,
       "board1 monitor s32_user");
 
+  //INFO: BOARD 2
   TEST_EXPR(
       dps_monitor_primitive_var(&board2.core.m_dps_slave, DPS_TYPES_FLOAT_T, &board2.f_stw, NULL, "vf_stw")<0,
       "board2 monitor vf_stw");
+
+  //INFO: BOARD 3
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_UINT64_T, &board3.u64, NULL, "u64th")<0,
+      "board3 monitor u64t");
+
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_INT64_T, &board3.i64, NULL, "i64th")<0,
+      "board3 monitor i64t");
+
+  TEST_EXPR(dps_monitor_primitive_var(&board3.core.m_dps_slave, DPS_TYPES_DOUBLE_T, &board3.f64, NULL, "f64th")<0,
+      "board3 monitor f64t");
 
   dps_master_new_connection(&master.m_dps_master);
   sleep(2);
@@ -60,9 +139,9 @@ int main(void)
         FAILED("failed refresh of board.");
         printf("board :%s, err code: %d\n",boards->boards[i].name,err);
       }
+      sleep(5);
     }
     free(boards);
-    sleep(3);
   }
   else
   {
@@ -70,42 +149,44 @@ int main(void)
   }
   sleep(3);
 
-  if((err = dps_master_print_vars(&master.m_dps_master))<0)
-  {
-    FAILED("print vars failed: ");
-    printf("err code: %d\n",err);
+  #define TEST_UPDATE(VAR_TYPE, VAR_VALUE, BOARD, VAR_ID, OVAR, FMT)\
+  {\
+    const VAR_TYPE VAR_NAME = VAR_VALUE;\
+    if(_update_var(BOARD, VAR_ID, &VAR_NAME, sizeof(VAR_NAME))<0)\
+    {\
+      FAILED("send update to "#BOARD " var " #VAR_ID);\
+    }\
+    else\
+    {\
+      PASSED("send update to "#BOARD " var "#VAR_ID);\
+    }\
+    sleep(2);\
+    printf("values: current: "#FMT"expected: "#FMT"\n", OVAR, VAR_NAME);\
+    if (OVAR != VAR_NAME)\
+    {\
+      FAILED("update to "#BOARD " var "#VAR_ID);\
+    }\
+    else\
+    {\
+      PASSED("update to "#BOARD " var "#VAR_ID);\
+    }\
   }
-  const uint8_t new_value = 99;
-  dps_master_update_var(&master.m_dps_master, 1, 0, &new_value, sizeof(new_value));
-  sleep(3);
 
-  dps_master_refresh_value_var(&master.m_dps_master, 1, 0);
-  sleep(3);
+  //INFO: Board 1
+  TEST_UPDATE(uint8_t, 99, Board_1, 0, board1.u8_th, "%d");
+  TEST_UPDATE(int32_t, -49, Board_1, 1, board1.s32_user, "%d");
 
+  // //INFO: Board 2
+  TEST_UPDATE(float, -29.5, Board_2, 0, board2.f_stw, "%f");
+
+  // //INFO: Board 3
+  TEST_UPDATE(uint64_t, 99887766, Board_3, 0, board3.u64, "%lu");
+  TEST_UPDATE(int64_t, -11223344, Board_3, 1, board3.i64, "%ld");
+  TEST_UPDATE(double, -4455.8866, Board_3, 2, board3.f64, "%lf");
+
+  FOR_ALL_BOARDS(board)
   {
-    VarRecord v_rec = {0};
-    if((err =dps_master_get_value_var(&master.m_dps_master, 1, 0, &v_rec))<0)
-    {
-      FAILED("get value var after update failed");
-      printf("err code: %d\n",err);
-    }
-
-    TEST_EXPR(v_rec.v_u32!= new_value, "test the update of the variable:");
-    printf("given: %d, expected %d\n",v_rec.v_u32,new_value);
-  }
-
-  {
-    dps_master_refresh_value_var(&master.m_dps_master, 2, 0);
-    sleep(2);
-    VarRecord v_rec = {0};
-    if((err =dps_master_get_value_var(&master.m_dps_master, 2, 0, &v_rec))<0)
-    {
-      FAILED("get value var after update failed");
-      printf("err code: %d\n",err);
-    }
-
-    TEST_EXPR(v_rec.v_f32!= 19.2f, "test the update of the variable:");
-    printf("given: %f, expected %f\n",v_rec.v_f32,19.2f);
+    _print_boards_infos(board);
   }
 
   printf("cleaning\n");
