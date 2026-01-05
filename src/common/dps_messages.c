@@ -378,9 +378,9 @@ static int pack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t *da
 		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.var_value_var_id)) & 0xf;
 		x <<= 8; 
 		i |= x;
-		/* half: start-bit 48, length 1, endianess intel, scaling 1, offset 0 */
+		/* half: start-bit 12, length 1, endianess intel, scaling 1, offset 0 */
 		x = ((uint8_t)(o->can_0x28b_DpsMasterMex.half)) & 0x1;
-		x <<= 48; 
+		x <<= 12; 
 		i |= x;
 		break;
 	default:
@@ -428,8 +428,8 @@ static int unpack_can_0x28b_DpsMasterMex(can_obj_dps_messages_h_t *o, uint64_t d
 		/* var_value_var_id: start-bit 8, length 4, endianess intel, scaling 1, offset 0 */
 		x = (i >> 8) & 0xf;
 		o->can_0x28b_DpsMasterMex.var_value_var_id = x;
-		/* half: start-bit 48, length 1, endianess intel, scaling 1, offset 0 */
-		x = (i >> 48) & 0x1;
+		/* half: start-bit 12, length 1, endianess intel, scaling 1, offset 0 */
+		x = (i >> 12) & 0x1;
 		o->can_0x28b_DpsMasterMex.half = x;
 		break;
 	default:

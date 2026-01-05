@@ -398,9 +398,12 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
   struct DpsMaster_t* const restrict p_self = conv.clear;
 
   DpsCanMessage mex={0};
-  can_obj_dps_messages_h_t o = {
-    .can_0x28b_DpsMasterMex.Mode = 3,
-    .can_0x28b_DpsMasterMex.var_value_board_id = board_id,
+  can_obj_dps_messages_h_t o ={
+    .can_0x28b_DpsMasterMex = {
+      .Mode = 3,
+      .var_value_board_id = board_id,
+      .var_value_var_id = var_id,
+    },
   };
 
   CHECK_INIT(p_self, -3);
@@ -415,35 +418,64 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
       const uint32_t* restrict const ptr_data = value;
       if (value_size <= size)
       {
-#pragma GCC diagnostic push 
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+        int err =0;
+
+
         switch (size)
         {
           case 8:
-            o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
-            o.can_0x28b_DpsMasterMex.half = 1; //high
-            memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[1] , sizeof(uint32_t));
+            memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[0] , sizeof(ptr_data[0]));
+            o.can_0x28b_DpsMasterMex.half = 0; //low
             mex.id = p_self->master_id;
-            mex.dlc = (uint8_t) pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
+            err = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
 
+            if (err <0 )
+            {
+              return (int8_t) -(70 + err);
+            }
+
+            mex.dlc = (uint8_t) err;
             if(_send_mex_and_wait(p_self, &mex)<0)
             {
               return -99;
             }
+
+            memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[1] , sizeof(ptr_data[0]));
+            o.can_0x28b_DpsMasterMex.half = 1; //high
+            mex.id = p_self->master_id;
+            err = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
+
+            if (err <0 )
+            {
+              return (int8_t) -(70 + err);
+            }
+
+            mex.dlc = (uint8_t) err;
+            return _send_mex_and_wait(p_self, &mex);
+
+            break;
           case 1:
           case 2:
           case 4:
             o.can_0x28b_DpsMasterMex.var_value_var_id = var_id;
+            o.can_0x28b_DpsMasterMex.var_value_board_id = board_id;
+            o.can_0x28b_DpsMasterMex.Mode = 3;
             o.can_0x28b_DpsMasterMex.half = 0; //low
             memcpy(&o.can_0x28b_DpsMasterMex.value, &ptr_data[0], size);
             mex.id = p_self->master_id;
-            mex.dlc = (uint8_t) pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
-            return _send_mex_and_wait(p_self, &mex);
+            err = pack_message(&o,  CAN_ID_DPSMASTERMEX, &mex.full_word);
 
+            if (err <0 )
+            {
+              return (int8_t) -(70 + err);
+            }
+
+            mex.dlc = (uint8_t) err;
+            return _send_mex_and_wait(p_self, &mex);
+            break;
           default:
             return -4;
         }
-#pragma GCC diagnostic pop
       }
       return -5;
     }
