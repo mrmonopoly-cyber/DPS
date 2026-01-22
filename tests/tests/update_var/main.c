@@ -176,13 +176,18 @@ int main(void)
   TEST_UPDATE(uint8_t, 99, Board_1, 0, board1.u8_th, "%d");
   TEST_UPDATE(int32_t, -49, Board_1, 1, board1.s32_user, "%d");
 
-  // //INFO: Board 2
+  //INFO: Board 2
   TEST_UPDATE(float, -29.5, Board_2, 0, board2.f_stw, "%f");
 
-  // //INFO: Board 3
+  //INFO: Board 3
   TEST_UPDATE(uint64_t, 99887766, Board_3, 0, board3.u64, "%lu");
   TEST_UPDATE(int64_t, -11223344, Board_3, 1, board3.i64, "%ld");
   TEST_UPDATE(double, -4455.8866, Board_3, 2, board3.f64, "%lf");
+
+  //INFO: Board 3 second time
+  TEST_UPDATE(uint64_t, 66778899, Board_3, 0, board3.u64, "%lu");
+  TEST_UPDATE(int64_t, -44332211, Board_3, 1, board3.i64, "%ld");
+  TEST_UPDATE(double, -6688.5544, Board_3, 2, board3.f64, "%lf");
 
   FOR_ALL_BOARDS(board)
   {

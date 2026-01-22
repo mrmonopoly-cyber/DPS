@@ -69,6 +69,7 @@ typedef PREPACK struct {
 	uint8_t info_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t value_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t var_id; /* scaling 1.0, offset 0.0, units slave var id */
+	uint8_t term; /* scaling 1.0, offset 0.0, units value half */
 	uint8_t type; /* scaling 1.0, offset 0.0, units slave var type */
 	uint8_t size; /* scaling 1.0, offset 0.0, units slave var size */
 	uint8_t half; /* scaling 1.0, offset 0.0, units value half */
@@ -82,6 +83,7 @@ typedef PREPACK struct {
 	uint8_t var_value_board_id; /* scaling 1.0, offset 0.0, units slave board id */
 	uint8_t var_refresh_var_id; /* scaling 1.0, offset 0.0, units slave var id */
 	uint8_t var_value_var_id; /* scaling 1.0, offset 0.0, units slave var id */
+	uint8_t term; /* scaling 1.0, offset 0.0, units value half */
 	uint8_t reserved; /* scaling 1.0, offset 0.0, units none */
 	uint8_t half; /* scaling 1.0, offset 0.0, units value half */
 } POSTPACK can_0x28b_DpsMasterMex_t;
@@ -122,6 +124,8 @@ int decode_can_0x28a_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *ou
 int encode_can_0x28a_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28a_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28a_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28a_term(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28a_term(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28a_type(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28a_type(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28a_size(const can_obj_dps_messages_h_t *o, uint8_t *out);
@@ -144,6 +148,8 @@ int decode_can_0x28b_var_refresh_var_id(const can_obj_dps_messages_h_t *o, uint8
 int encode_can_0x28b_var_refresh_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28b_var_value_var_id(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28b_var_value_var_id(can_obj_dps_messages_h_t *o, uint8_t in);
+int decode_can_0x28b_term(const can_obj_dps_messages_h_t *o, uint8_t *out);
+int encode_can_0x28b_term(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28b_reserved(const can_obj_dps_messages_h_t *o, uint8_t *out);
 int encode_can_0x28b_reserved(can_obj_dps_messages_h_t *o, uint8_t in);
 int decode_can_0x28b_half(const can_obj_dps_messages_h_t *o, uint8_t *out);

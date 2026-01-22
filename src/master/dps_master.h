@@ -43,6 +43,7 @@ typedef struct{
   enum DATA_GENERIC_TYPE type:2;
   uint8_t modified_low_half: 1;
   uint8_t modified_high_half: 1;
+  uint8_t term: TERM_BIT_SIZE;
   uint32_t incomplete_value[2];
 }VarRecord;
 

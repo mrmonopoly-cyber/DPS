@@ -18,6 +18,7 @@ struct VarInternal
   enum DATA_GENERIC_TYPE type: 2;
   uint8_t modified_low_half: 1;
   uint8_t modified_high_half: 1;
+  uint8_t term: TERM_BIT_SIZE;
   uint32_t incomplete_value[2];
 };
 
@@ -31,6 +32,7 @@ struct DpsSlave_t{
   uint16_t master_id;
   uint16_t slave_id;
   uint8_t enable : 1;
+  uint8_t term: TERM_BIT_SIZE;
 };
 
 
@@ -81,6 +83,13 @@ static void _print_var(const void *ele, const uint8_t var_pos)
 #endif /* ifdef DEBUG */
 
 #define _send_mex_and_wait(self, mex) send_mex_and_wait(&self->common, mex)
+
+static uint8_t _pre_inc_term(struct DpsSlave_t* const self)
+{
+  const uint8_t old_term = self->term;
+  self->term = (old_term+ 1) % (2<<TERM_BIT_SIZE);
+  return old_term;
+}
 
 static inline int8_t _push_new_var(struct DpsSlave_t* const restrict self,
     const struct VarInternal* new_var)
@@ -173,7 +182,7 @@ static int8_t _request_infos(struct DpsSlave_t* const restrict self,
 }
 
 
-static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
+static int8_t _request_var_value(struct DpsSlave_t* const restrict self,
     const can_0x28b_DpsMasterMex_t* const restrict req_value_mex)
 {
   can_obj_dps_messages_h_t o = 
@@ -181,6 +190,7 @@ static int8_t _request_var_value(const struct DpsSlave_t* const restrict self,
     .can_0x28a_DpsSlaveMex.Mode = 3,
     .can_0x28a_DpsSlaveMex.board_id = self->board_id,
     .can_0x28a_DpsSlaveMex.value = 0,
+    .can_0x28a_DpsSlaveMex.term= _pre_inc_term(self),
   };
   DpsCanMessage mex;
   memset(&mex, 0, sizeof(mex));
@@ -254,26 +264,45 @@ static int8_t _update_var_value(struct DpsSlave_t* const restrict self,
       const void* src = &update_value_mex->value;
       if (size==sizeof(uint64_t))
       {
-        switch (update_value_mex->half)
+
+        if (
+            update_value_mex->term == var->term 
+            ||
+            (!var->modified_low_half && !var->modified_high_half)
+           )
         {
-          case 0: //low
-            memcpy(&var->incomplete_value[0], &update_value_mex->value, sizeof(var->incomplete_value[0]));
-            var->modified_low_half=1;
-            break;
-          case 1: //high
-            memcpy(&var->incomplete_value[1], &update_value_mex->value, sizeof(var->incomplete_value[0]));
-            var->modified_high_half=1;
-            break;
-          default:
-            return -99;
-        }
-        if (var->modified_low_half && var->modified_high_half)
-        {
-          src = var->incomplete_value;
+          var->term = update_value_mex->term;
+          switch (update_value_mex->half)
+          {
+            case 0: //low
+              memcpy(&var->incomplete_value[0], &update_value_mex->value, sizeof(var->incomplete_value[0]));
+              var->modified_low_half=1;
+              break;
+            case 1: //high
+              memcpy(&var->incomplete_value[1], &update_value_mex->value, sizeof(var->incomplete_value[0]));
+              var->modified_high_half=1;
+              break;
+            default:
+              return -99;
+          }
+          if (var->modified_low_half && var->modified_high_half)
+          {
+            var->modified_low_half =0;
+            var->modified_high_half =0;
+            src = var->incomplete_value;
+          }
+          else
+          {
+            return 0; //INFO: still waiting the other half
+          }
         }
         else
         {
-          return 0; //INFO: still waiting the other half
+            var->incomplete_value[0] = 0;
+            var->incomplete_value[1] = 0;
+            var->modified_low_half =0;
+            var->modified_high_half =0;
+            return -8;
         }
       }
 

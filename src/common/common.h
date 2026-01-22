@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "dps_messages.h"
 
+#define TERM_BIT_SIZE 3
+
 enum DPS_LENGHT{
   BOARD_NAME_LENGTH  =7,
   VAR_NAME_LENGTH = 6,

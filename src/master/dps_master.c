@@ -21,6 +21,7 @@ struct DpsMaster_t{
   uint16_t master_id;
   uint16_t slaves_id;
   uint8_t obj_ids:4;
+  uint8_t term: TERM_BIT_SIZE;
 };
 
 union DpsMaster_h_t_conv{
@@ -32,8 +33,6 @@ union DpsMaster_h_t_conv_const{
   const DpsMaster_h* const hidden;
   const struct DpsMaster_t* const clear;
 };
-
-  VarRecord var_specification;
 
 typedef struct {
   uint8_t id;
@@ -55,6 +54,13 @@ char __assert_align_dps_master[(__alignof(DpsMaster_h) == __alignof(struct DpsMa
 #define CHECK_INIT(self, err)                                                           \
   if (!self->common.send_f || !self->board_vec)                                 \
     return err;
+
+static uint8_t _pre_inc_term(struct DpsMaster_t* const self)
+{
+  const uint8_t old_term = self->term;
+  self->term = (old_term+ 1) % (2<<TERM_BIT_SIZE);
+  return old_term;
+}
 
 static int _found_board(const void *list_ele, const void *key) {
   const BoardRecordInternal *board = list_ele;
@@ -152,21 +158,40 @@ static int8_t _get_var_value(struct DpsMaster_t* const restrict self,
           break;
         case 3:
 
-          switch (mex_slave->half)
+          if (
+              mex_slave->term == var->term 
+              ||
+              (!var->modified_low_half && !var->modified_high_half)
+             )
           {
-            case 0: //low
-              memcpy(&var->incomplete_value[0], p_data, sizeof(uint32_t));
-              var->modified_low_half =1;
-              break;
-            case 1: //high
-              memcpy(&var->incomplete_value[1], p_data, sizeof(uint32_t));
-              var->modified_high_half =1;
-              break;
+            var->term = mex_slave->term;
+            switch (mex_slave->half)
+            {
+              case 0: //low
+                memcpy(&var->incomplete_value[0], p_data, sizeof(uint32_t));
+                var->modified_low_half =1;
+                break;
+              case 1: //high
+                memcpy(&var->incomplete_value[1], p_data, sizeof(uint32_t));
+                var->modified_high_half =1;
+                break;
+            }
+            if (var->modified_low_half && var->modified_high_half)
+            {
+              memcpy(&var->v_u64, var->incomplete_value, sizeof(var->v_u64));
+              var->modified_low_half =0;
+              var->modified_high_half =0;
+            }
           }
-          if (var->modified_low_half && var->modified_high_half)
+          else
           {
-            memcpy(&var->v_u64, var->incomplete_value, sizeof(var->v_u64));
+            var->incomplete_value[0] = 0;
+            var->incomplete_value[1] = 0;
+            var->modified_low_half =0;
+            var->modified_high_half =0;
+            return -8;
           }
+
           break;
       }
     }
@@ -404,6 +429,7 @@ int8_t dps_master_update_var(DpsMaster_h* const restrict self,
       .Mode = 3,
       .var_value_board_id = board_id,
       .var_value_var_id = var_id,
+      .term = _pre_inc_term(p_self),
     },
   };
 
