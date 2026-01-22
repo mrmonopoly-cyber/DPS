@@ -273,12 +273,13 @@ BoardListInfo* dps_master_list_board(const DpsMaster_h* const restrict self)
     return NULL;
   }
 
-  BoardListInfo *res = calloc(1, sizeof(BoardListInfo) + (sizeof(BoardInfo) * len));
+  BoardListInfo* const res = calloc(1, sizeof(BoardListInfo) + (sizeof(BoardInfo) * len));
   res->board_num = len;
 
   for (uint8_t i = 0; i < len; i++) {
     BoardRecordInternal *board = c_vector_get_at_index(p_self->board_vec, i);
-    if (!board) {
+    if (!board)
+    {
       free(res);
       return NULL;
     }
